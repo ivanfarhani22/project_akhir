@@ -70,7 +70,18 @@ class ProfileController extends Controller
 
     public function dataSiswa()
     {
-        $currentYear = date('Y') . '/' . (date('Y') + 1);
+        // Tahun ajaran dimulai dari Juli
+        // Jika bulan >= 7 (Juli-Desember): tahun ini / tahun depan
+        // Jika bulan < 7 (Januari-Juni): tahun lalu / tahun ini
+        $year = date('Y');
+        $month = date('n');
+        
+        if ($month >= 7) {
+            $currentYear = $year . '/' . ($year + 1);
+        } else {
+            $currentYear = ($year - 1) . '/' . $year;
+        }
+        
         $studentData = StudentData::currentYear()->get();
         $summary = StudentData::getSummary($currentYear);
         
@@ -79,7 +90,16 @@ class ProfileController extends Controller
 
     public function persebaranSiswa()
     {
-        $currentYear = date('Y') . '/' . (date('Y') + 1);
+        // Tahun ajaran dimulai dari Juli
+        $year = date('Y');
+        $month = date('n');
+        
+        if ($month >= 7) {
+            $currentYear = $year . '/' . ($year + 1);
+        } else {
+            $currentYear = ($year - 1) . '/' . $year;
+        }
+        
         $distributions = StudentDistribution::currentYear()->orderBy('student_count', 'desc')->get();
         
         return view('public.profile.persebaran-siswa', compact('distributions', 'currentYear'));

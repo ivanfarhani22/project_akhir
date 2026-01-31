@@ -57,7 +57,7 @@
                         </div>
                         
                         <div class="prose prose-gray max-w-none">
-                            {!! $news->content !!}
+                            {!! clean($news->content, 'content') !!}
                         </div>
                         
                         <!-- Share -->

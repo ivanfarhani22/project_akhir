@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="space-y-6">
-    <div class="flex justify-between items-center">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h2 class="text-xl font-semibold text-gray-800">Kelola Data Siswa</h2>
         <a href="{{ route('admin.student-data.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -14,6 +14,64 @@
             Tambah Data Siswa
         </a>
     </div>
+    
+    <!-- Filter Tahun Ajaran -->
+    <div class="bg-white rounded-xl shadow-sm p-4">
+        <form method="GET" action="{{ route('admin.student-data.index') }}" class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Tahun Ajaran:</label>
+            </div>
+            <div class="relative w-full sm:w-auto">
+                <select name="academic_year" onchange="this.form.submit()" 
+                        class="w-full sm:w-56 appearance-none pl-4 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 font-medium focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:bg-white transition-all cursor-pointer hover:border-gray-300">
+                    <option value="all" {{ $selectedYear === 'all' ? 'selected' : '' }}>📅 Semua Tahun</option>
+                    @foreach($academicYears as $year)
+                        <option value="{{ $year }}" {{ $selectedYear === $year ? 'selected' : '' }}>
+                            {{ $year === $currentAcademicYear ? '🟢 ' : '📁 ' }}{{ $year }}{{ $year === $currentAcademicYear ? ' (Aktif)' : '' }}
+                        </option>
+                    @endforeach
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
+            </div>
+            @if($selectedYear !== 'all' && $selectedYear !== $currentAcademicYear)
+                <!-- <a href="{{ route('admin.student-data.index') }}" class="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-primary-600 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Tahun Aktif
+                </a> -->
+            @endif
+        </form>
+    </div>
+    
+    <!-- Statistik -->
+    @if($stats)
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-blue-50 rounded-xl p-4">
+            <p class="text-sm text-blue-600 font-medium">Total Laki-laki{{ $selectedYear === 'all' ? ' (Keseluruhan)' : '' }}</p>
+            <p class="text-2xl font-bold text-blue-700">{{ number_format($stats['total_male']) }}</p>
+        </div>
+        <div class="bg-pink-50 rounded-xl p-4">
+            <p class="text-sm text-pink-600 font-medium">Total Perempuan{{ $selectedYear === 'all' ? ' (Keseluruhan)' : '' }}</p>
+            <p class="text-2xl font-bold text-pink-700">{{ number_format($stats['total_female']) }}</p>
+        </div>
+        <div class="bg-green-50 rounded-xl p-4">
+            <p class="text-sm text-green-600 font-medium">Total Siswa{{ $selectedYear === 'all' ? ' (Keseluruhan)' : '' }}</p>
+            <p class="text-2xl font-bold text-green-700">{{ number_format($stats['total_students']) }}</p>
+        </div>
+        <div class="bg-purple-50 rounded-xl p-4">
+            <p class="text-sm text-purple-600 font-medium">Total Rombel{{ $selectedYear === 'all' ? ' (Keseluruhan)' : '' }}</p>
+            <p class="text-2xl font-bold text-purple-700">{{ number_format($stats['total_rombel']) }}</p>
+        </div>
+    </div>
+    @endif
     
     @if(session('success'))
     <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
@@ -34,42 +92,124 @@
                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            @if($selectedYear === 'all')
+                {{-- Mode Semua Tahun: Grouped by Academic Year with Expandable Rows --}}
                 @forelse($studentData as $data)
-                <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $data->academic_year }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $data->class_name }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $data->male_count }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $data->female_count }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $data->total_students }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $data->study_groups }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div class="flex justify-end space-x-2">
-                            <a href="{{ route('admin.student-data.edit', $data) }}" class="inline-flex items-center px-3 py-1.5 bg-yellow-500 text-white text-sm rounded-lg hover:bg-yellow-600 transition-colors">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                <tbody x-data="{ expanded: false }" class="bg-white divide-y divide-gray-200 border-b border-gray-200">
+                    {{-- Parent Row - Tahun Ajaran --}}
+                    <tr class="hover:bg-gray-50 cursor-pointer" @click="expanded = !expanded">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div class="inline-flex items-center gap-2">
+                                <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-90': expanded }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                 </svg>
-                                Edit
-                            </a>
-                            <form action="{{ route('admin.student-data.destroy', $data) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                    Hapus
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
+                                <span>{{ $data->academic_year }}</span>
+                                @if($data->academic_year === $currentAcademicYear)
+                                    <span class="px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">Aktif</span>
+                                @endif
+                                <span class="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">{{ $data->class_count }} kelas</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Semua Kelas</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($data->total_male) }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($data->total_female) }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ number_format($data->total_students) }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($data->total_rombel) }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <span class="text-gray-400 text-xs">Klik untuk detail</span>
+                        </td>
+                    </tr>
+                    {{-- Child Rows - Detail per Kelas --}}
+                    @if(isset($yearDetails[$data->academic_year]))
+                        @foreach($yearDetails[$data->academic_year] as $detail)
+                        <tr x-show="expanded" x-cloak class="bg-gray-50/50">
+                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 pl-12">
+                                {{ $detail->academic_year }}
+                            </td>
+                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">Kelas {{ $detail->class_name }}</td>
+                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700">{{ number_format($detail->male_count) }}</td>
+                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700">{{ number_format($detail->female_count) }}</td>
+                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700">{{ number_format($detail->total_students) }}</td>
+                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700">{{ $detail->study_groups }}</td>
+                            <td class="px-6 py-3 whitespace-nowrap text-right text-sm font-medium" @click.stop>
+                                <div class="flex justify-end space-x-2">
+                                    <a href="{{ route('admin.student-data.edit', $detail->id) }}" class="inline-flex items-center px-3 py-1.5 bg-yellow-500 text-white text-sm rounded-lg hover:bg-yellow-600 transition-colors">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                        Edit
+                                    </a>
+                                    <form action="{{ route('admin.student-data.destroy', $detail->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    @endif
+                </tbody>
                 @empty
-                <tr>
-                    <td colspan="7" class="px-6 py-4 text-center text-gray-500">Belum ada data siswa</td>
-                </tr>
+                <tbody class="bg-white">
+                    <tr>
+                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                            Belum ada data siswa
+                        </td>
+                    </tr>
+                </tbody>
                 @endforelse
-            </tbody>
+            @else
+                {{-- Mode Tahun Tertentu: Normal View --}}
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @forelse($studentData as $data)
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ $data->academic_year }}
+                            @if($data->academic_year === $currentAcademicYear)
+                                <span class="ml-1 px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">Aktif</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Kelas {{ $data->class_name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($data->male_count) }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($data->female_count) }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ number_format($data->total_students) }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $data->study_groups }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div class="flex justify-end space-x-2">
+                                <a href="{{ route('admin.student-data.edit', $data->id) }}" class="inline-flex items-center px-3 py-1.5 bg-yellow-500 text-white text-sm rounded-lg hover:bg-yellow-600 transition-colors">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                    Edit
+                                </a>
+                                <form action="{{ route('admin.student-data.destroy', $data->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                        Hapus
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                            Belum ada data siswa untuk tahun ajaran {{ $selectedYear }}
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            @endif
         </table>
     </div>
     

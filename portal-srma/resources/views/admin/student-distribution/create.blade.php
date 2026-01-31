@@ -15,8 +15,28 @@
             
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Tahun Ajaran <span class="text-red-500">*</span></label>
-                <input type="text" name="academic_year" value="{{ old('academic_year', date('Y').'/'.(date('Y')+1)) }}" required placeholder="contoh: 2024/2025"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                @php
+                    $year = date('Y');
+                    $month = date('n');
+                    $currentAcademicYear = $month >= 7 ? $year . '/' . ($year + 1) : ($year - 1) . '/' . $year;
+                    
+                    // Generate 5 tahun terakhir + 1 tahun ke depan
+                    $startYear = $year - 4;
+                    $academicYears = [];
+                    for ($i = $startYear; $i <= $year + 1; $i++) {
+                        $academicYears[] = $i . '/' . ($i + 1);
+                    }
+                    $academicYears = array_reverse($academicYears);
+                @endphp
+                <select name="academic_year" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('academic_year') border-red-500 @enderror">
+                    <option value="">-- Pilih Tahun Ajaran --</option>
+                    @foreach($academicYears as $academicYear)
+                        <option value="{{ $academicYear }}" {{ old('academic_year', $currentAcademicYear) === $academicYear ? 'selected' : '' }}>
+                            {{ $academicYear }}{{ $academicYear === $currentAcademicYear ? ' (Aktif)' : '' }}
+                        </option>
+                    @endforeach
+                </select>
                 @error('academic_year')
                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror

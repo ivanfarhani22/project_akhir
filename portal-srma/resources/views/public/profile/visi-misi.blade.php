@@ -43,7 +43,7 @@
                     </div>
                     <div class="prose prose-gray max-w-none">
                         @if($visi)
-                            {!! $visi !!}
+                            {!! clean($visi, 'simple') !!}
                         @else
                             <div class="bg-gray-50 rounded-lg p-6 text-center">
                                 <p class="text-gray-500">Konten akan disesuaikan dengan PPT resmi sekolah.</p>
