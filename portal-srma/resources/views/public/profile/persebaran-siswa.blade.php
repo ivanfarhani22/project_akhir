@@ -62,9 +62,26 @@
                 <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 md:p-8">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
                         <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Persebaran Siswa Berdasarkan Wilayah</h2>
-                        <span class="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-xs sm:text-sm font-medium w-fit">
-                            Tahun Ajaran {{ $currentYear }}
-                        </span>
+                        
+                        <!-- Filter Tahun Ajaran -->
+                        <form method="GET" action="{{ route('profil.persebaran-siswa') }}" class="flex items-center gap-2">
+                            <label for="academic_year" class="text-sm text-gray-600 whitespace-nowrap">Tahun Ajaran:</label>
+                            <div class="relative">
+                                <select name="academic_year" id="academic_year" onchange="this.form.submit()" 
+                                        class="appearance-none pl-3 pr-8 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 font-medium focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:bg-white transition-all cursor-pointer hover:border-gray-300">
+                                    @foreach($academicYears as $year)
+                                        <option value="{{ $year }}" {{ $selectedYear === $year ? 'selected' : '' }}>
+                                            {{ $year }}{{ $year === $currentYear ? ' (Aktif)' : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                     
                     @if($distributions->count() > 0)
@@ -137,7 +154,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
                             </svg>
-                            <p class="text-gray-500">Data persebaran siswa untuk tahun ajaran ini belum tersedia.</p>
+                            <p class="text-gray-500">Data persebaran siswa untuk tahun ajaran {{ $selectedYear }} belum tersedia.</p>
                         </div>
                     @endif
                 </div>

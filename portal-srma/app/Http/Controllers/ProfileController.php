@@ -68,7 +68,7 @@ class ProfileController extends Controller
         return view('public.profile.tenaga-kependidikan', compact('staff'));
     }
 
-    public function dataSiswa()
+    public function dataSiswa(Request $request)
     {
         // Tahun ajaran dimulai dari Juli
         // Jika bulan >= 7 (Juli-Desember): tahun ini / tahun depan
@@ -82,13 +82,27 @@ class ProfileController extends Controller
             $currentYear = ($year - 1) . '/' . $year;
         }
         
-        $studentData = StudentData::currentYear()->get();
-        $summary = StudentData::getSummary($currentYear);
+        // Ambil semua tahun ajaran yang tersedia
+        $academicYears = StudentData::select('academic_year')
+            ->distinct()
+            ->orderBy('academic_year', 'desc')
+            ->pluck('academic_year');
         
-        return view('public.profile.data-siswa', compact('studentData', 'summary', 'currentYear'));
+        // Filter berdasarkan tahun ajaran (default: tahun aktif)
+        $selectedYear = $request->get('academic_year', $currentYear);
+        
+        // Jika tahun yang dipilih tidak ada di database, gunakan tahun aktif
+        if (!$academicYears->contains($selectedYear)) {
+            $selectedYear = $currentYear;
+        }
+        
+        $studentData = StudentData::where('academic_year', $selectedYear)->orderBy('class_name')->get();
+        $summary = StudentData::getSummary($selectedYear);
+        
+        return view('public.profile.data-siswa', compact('studentData', 'summary', 'currentYear', 'academicYears', 'selectedYear'));
     }
 
-    public function persebaranSiswa()
+    public function persebaranSiswa(Request $request)
     {
         // Tahun ajaran dimulai dari Juli
         $year = date('Y');
@@ -100,9 +114,25 @@ class ProfileController extends Controller
             $currentYear = ($year - 1) . '/' . $year;
         }
         
-        $distributions = StudentDistribution::currentYear()->orderBy('student_count', 'desc')->get();
+        // Ambil semua tahun ajaran yang tersedia
+        $academicYears = StudentDistribution::select('academic_year')
+            ->distinct()
+            ->orderBy('academic_year', 'desc')
+            ->pluck('academic_year');
         
-        return view('public.profile.persebaran-siswa', compact('distributions', 'currentYear'));
+        // Filter berdasarkan tahun ajaran (default: tahun aktif)
+        $selectedYear = $request->get('academic_year', $currentYear);
+        
+        // Jika tahun yang dipilih tidak ada di database, gunakan tahun aktif
+        if (!$academicYears->contains($selectedYear)) {
+            $selectedYear = $currentYear;
+        }
+        
+        $distributions = StudentDistribution::where('academic_year', $selectedYear)
+            ->orderBy('student_count', 'desc')
+            ->get();
+        
+        return view('public.profile.persebaran-siswa', compact('distributions', 'currentYear', 'academicYears', 'selectedYear'));
     }
 
     public function dataSekolah()

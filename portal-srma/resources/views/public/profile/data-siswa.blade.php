@@ -33,9 +33,26 @@
                 <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 md:p-8">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
                         <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Data Siswa</h2>
-                        <span class="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-xs sm:text-sm font-medium w-fit">
-                            Tahun Ajaran {{ $currentYear }}
-                        </span>
+                        
+                        <!-- Filter Tahun Ajaran -->
+                        <form method="GET" action="{{ route('profil.data-siswa') }}" class="flex items-center gap-2">
+                            <label for="academic_year" class="text-sm text-gray-600 whitespace-nowrap">Tahun Ajaran:</label>
+                            <div class="relative">
+                                <select name="academic_year" id="academic_year" onchange="this.form.submit()" 
+                                        class="appearance-none pl-3 pr-8 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 font-medium focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:bg-white transition-all cursor-pointer hover:border-gray-300">
+                                    @foreach($academicYears as $year)
+                                        <option value="{{ $year }}" {{ $selectedYear === $year ? 'selected' : '' }}>
+                                            {{ $year }}{{ $year === $currentYear ? ' (Aktif)' : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                     
                     @if($studentData->count() > 0)
@@ -108,7 +125,7 @@
                             <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                             </svg>
-                            <p class="text-gray-500">Data siswa untuk tahun ajaran ini belum tersedia.</p>
+                            <p class="text-gray-500">Data siswa untuk tahun ajaran {{ $selectedYear }} belum tersedia.</p>
                         </div>
                     @endif
                 </div>

@@ -340,9 +340,9 @@
                                 <p class="text-sm font-medium text-white truncate">{{ auth()->user()->name }}</p>
                                 <p class="text-xs text-gray-400 truncate">Administrator</p>
                             </div>
-                            <form action="{{ route('admin.logout') }}" method="POST" class="ml-2">
+                            <form action="{{ route('admin.logout') }}" method="POST" class="ml-2" id="logoutFormDesktop">
                                 @csrf
-                                <button type="submit" class="p-1.5 text-red-400 hover:text-white hover:bg-red-700 rounded-lg transition-colors" title="Logout">
+                                <button type="button" @click="$dispatch('open-logout-modal')" class="p-1.5 text-red-400 hover:text-white hover:bg-red-700 rounded-lg transition-colors" title="Logout">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                                     </svg>
@@ -363,9 +363,9 @@
                             <p class="text-xs text-gray-400 truncate">Administrator</p>
                         </div>
                     </div>
-                    <form action="{{ route('admin.logout') }}" method="POST" class="ml-3 flex-shrink-0">
+                    <form action="{{ route('admin.logout') }}" method="POST" class="ml-3 flex-shrink-0" id="logoutFormMobile">
                         @csrf
-                        <button type="submit" class="flex items-center px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-gray-700 rounded-lg transition-colors">
+                        <button type="button" @click="$dispatch('open-logout-modal')" class="flex items-center px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-gray-700 rounded-lg transition-colors">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                             </svg>
@@ -461,6 +461,67 @@
            class="block px-3 py-2 text-sm transition-colors {{ request()->routeIs('admin.student-distribution.*') ? 'bg-primary-600 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
             Persebaran Siswa
         </a>
+    </div>
+    
+    <!-- Logout Confirmation Modal -->
+    <div x-data="{ open: false }" 
+         @open-logout-modal.window="open = true"
+         @keydown.escape.window="open = false">
+        
+        <!-- Backdrop -->
+        <div x-show="open" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50"
+             @click="open = false"
+             x-cloak>
+        </div>
+        
+        <!-- Modal -->
+        <div x-show="open"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="fixed inset-0 z-50 flex items-center justify-center p-4"
+             x-cloak>
+            <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6" @click.stop>
+                <!-- Icon -->
+                <div class="mx-auto w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                </div>
+                
+                <!-- Content -->
+                <div class="text-center mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Konfirmasi Logout</h3>
+                    <p class="text-sm text-gray-500">Apakah Anda yakin ingin keluar dari sistem?</p>
+                </div>
+                
+                <!-- Actions -->
+                <div class="flex gap-3">
+                    <button type="button" 
+                            @click="open = false"
+                            class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">
+                        Batal
+                    </button>
+                    <form action="{{ route('admin.logout') }}" method="POST" class="flex-1">
+                        @csrf
+                        <button type="submit" 
+                                class="w-full px-4 py-2.5 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors">
+                            Ya, Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
     
     @stack('scripts')
