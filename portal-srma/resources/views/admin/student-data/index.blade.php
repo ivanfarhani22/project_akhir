@@ -41,12 +41,6 @@
                 </div>
             </div>
             @if($selectedYear !== 'all' && $selectedYear !== $currentAcademicYear)
-                <!-- <a href="{{ route('admin.student-data.index') }}" class="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-primary-600 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                    </svg>
-                    Tahun Aktif
-                </a> -->
             @endif
         </form>
     </div>
@@ -80,137 +74,142 @@
     @endif
     
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tahun Ajaran</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Laki-laki</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Perempuan</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rombel</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                </tr>
-            </thead>
-            @if($selectedYear === 'all')
-                {{-- Mode Semua Tahun: Grouped by Academic Year with Expandable Rows --}}
-                @forelse($studentData as $data)
-                <tbody x-data="{ expanded: false }" class="bg-white divide-y divide-gray-200 border-b border-gray-200">
-                    {{-- Parent Row - Tahun Ajaran --}}
-                    <tr class="hover:bg-gray-50 cursor-pointer" @click="expanded = !expanded">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            <div class="inline-flex items-center gap-2">
-                                <svg class="w-4 h-4 transition-transform duration-200" :class="{ 'rotate-90': expanded }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                </svg>
-                                <span>{{ $data->academic_year }}</span>
-                                @if($data->academic_year === $currentAcademicYear)
-                                    <span class="px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">Aktif</span>
-                                @endif
-                                <span class="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">{{ $data->class_count }} kelas</span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Semua Kelas</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($data->total_male) }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($data->total_female) }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ number_format($data->total_students) }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($data->total_rombel) }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <span class="text-gray-400 text-xs">Klik untuk detail</span>
-                        </td>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Tahun Ajaran</th>
+                        <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Kelas</th>
+                        <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">L</th>
+                        <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">P</th>
+                        <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Total</th>
+                        <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Rombel</th>
+                        <th class="px-4 md:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Aksi</th>
                     </tr>
-                    {{-- Child Rows - Detail per Kelas --}}
-                    @if(isset($yearDetails[$data->academic_year]))
-                        @foreach($yearDetails[$data->academic_year] as $detail)
-                        <tr x-show="expanded" x-cloak class="bg-gray-50/50">
-                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500 pl-12">
-                                {{ $detail->academic_year }}
+                </thead>
+                @if($selectedYear === 'all')
+                    {{-- Mode Semua Tahun: Grouped by Academic Year with Expandable Rows --}}
+                    @forelse($studentData as $data)
+                    <tbody x-data="{ expanded: false }" class="bg-white divide-y divide-gray-200 border-b border-gray-200">
+                        {{-- Parent Row - Tahun Ajaran --}}
+                        <tr class="hover:bg-gray-50 cursor-pointer" @click="expanded = !expanded">
+                            <td class="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <div class="inline-flex items-center gap-1 md:gap-2">
+                                    <svg class="w-4 h-4 transition-transform duration-200 flex-shrink-0" :class="{ 'rotate-90': expanded }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                    <span class="truncate max-w-[80px] md:max-w-none">{{ $data->academic_year }}</span>
+                                    @if($data->academic_year === $currentAcademicYear)
+                                        <span class="hidden md:inline px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">Aktif</span>
+                                    @endif
+                                    <span class="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">{{ $data->class_count }}</span>
+                                </div>
                             </td>
-                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">Kelas {{ $detail->class_name }}</td>
-                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700">{{ number_format($detail->male_count) }}</td>
-                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700">{{ number_format($detail->female_count) }}</td>
-                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700">{{ number_format($detail->total_students) }}</td>
-                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700">{{ $detail->study_groups }}</td>
-                            <td class="px-6 py-3 whitespace-nowrap text-right text-sm font-medium" @click.stop>
-                                <div class="flex justify-end space-x-2">
-                                    <a href="{{ route('admin.student-data.edit', $detail->id) }}" class="inline-flex items-center px-3 py-1.5 bg-yellow-500 text-white text-sm rounded-lg hover:bg-yellow-600 transition-colors">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <td class="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">Semua</td>
+                            <td class="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($data->total_male) }}</td>
+                            <td class="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($data->total_female) }}</td>
+                            <td class="px-4 md:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ number_format($data->total_students) }}</td>
+                            <td class="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($data->total_rombel) }}</td>
+                            <td class="px-4 md:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <span class="text-gray-400 text-xs hidden md:inline">Klik untuk detail</span>
+                                <svg class="w-4 h-4 text-gray-400 md:hidden inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </td>
+                        </tr>
+                        {{-- Child Rows - Detail per Kelas --}}
+                        @if(isset($yearDetails[$data->academic_year]))
+                            @foreach($yearDetails[$data->academic_year] as $detail)
+                            <tr x-show="expanded" x-cloak class="bg-gray-50/50">
+                                <td class="px-4 md:px-6 py-3 whitespace-nowrap text-sm text-gray-500 pl-8 md:pl-12">
+                                    {{ $detail->academic_year }}
+                                </td>
+                                <td class="px-4 md:px-6 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">{{ $detail->class_name }}</td>
+                                <td class="px-4 md:px-6 py-3 whitespace-nowrap text-sm text-gray-700">{{ number_format($detail->male_count) }}</td>
+                                <td class="px-4 md:px-6 py-3 whitespace-nowrap text-sm text-gray-700">{{ number_format($detail->female_count) }}</td>
+                                <td class="px-4 md:px-6 py-3 whitespace-nowrap text-sm text-gray-700">{{ number_format($detail->total_students) }}</td>
+                                <td class="px-4 md:px-6 py-3 whitespace-nowrap text-sm text-gray-700">{{ $detail->study_groups }}</td>
+                                <td class="px-4 md:px-6 py-3 whitespace-nowrap text-right text-sm font-medium" @click.stop>
+                                    <div class="flex justify-end space-x-1 md:space-x-2">
+                                        <a href="{{ route('admin.student-data.edit', $detail->id) }}" class="inline-flex items-center px-2 md:px-3 py-1.5 bg-yellow-500 text-white text-xs md:text-sm rounded-lg hover:bg-yellow-600 transition-colors">
+                                            <svg class="w-4 h-4 md:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            </svg>
+                                            <span class="hidden md:inline">Edit</span>
+                                        </a>
+                                        <form action="{{ route('admin.student-data.destroy', $detail->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="inline-flex items-center px-2 md:px-3 py-1.5 bg-red-500 text-white text-xs md:text-sm rounded-lg hover:bg-red-600 transition-colors">
+                                                <svg class="w-4 h-4 md:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                                <span class="hidden md:inline">Hapus</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        @endif
+                    </tbody>
+                    @empty
+                    <tbody class="bg-white">
+                        <tr>
+                            <td colspan="7" class="px-4 md:px-6 py-4 text-center text-gray-500">
+                                Belum ada data siswa
+                            </td>
+                        </tr>
+                    </tbody>
+                    @endforelse
+                @else
+                    {{-- Mode Tahun Tertentu: Normal View --}}
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse($studentData as $data)
+                        <tr>
+                            <td class="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <span class="truncate max-w-[80px] md:max-w-none inline-block">{{ $data->academic_year }}</span>
+                                @if($data->academic_year === $currentAcademicYear)
+                                    <span class="hidden md:inline ml-1 px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">Aktif</span>
+                                @endif
+                            </td>
+                            <td class="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $data->class_name }}</td>
+                            <td class="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($data->male_count) }}</td>
+                            <td class="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($data->female_count) }}</td>
+                            <td class="px-4 md:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ number_format($data->total_students) }}</td>
+                            <td class="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $data->study_groups }}</td>
+                            <td class="px-4 md:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex justify-end space-x-1 md:space-x-2">
+                                    <a href="{{ route('admin.student-data.edit', $data->id) }}" class="inline-flex items-center px-2 md:px-3 py-1.5 bg-yellow-500 text-white text-xs md:text-sm rounded-lg hover:bg-yellow-600 transition-colors">
+                                        <svg class="w-4 h-4 md:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                         </svg>
-                                        Edit
+                                        <span class="hidden md:inline">Edit</span>
                                     </a>
-                                    <form action="{{ route('admin.student-data.destroy', $detail->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                    <form action="{{ route('admin.student-data.destroy', $data->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <button type="submit" class="inline-flex items-center px-2 md:px-3 py-1.5 bg-red-500 text-white text-xs md:text-sm rounded-lg hover:bg-red-600 transition-colors">
+                                            <svg class="w-4 h-4 md:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                             </svg>
-                                            Hapus
+                                            <span class="hidden md:inline">Hapus</span>
                                         </button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
-                        @endforeach
-                    @endif
-                </tbody>
-                @empty
-                <tbody class="bg-white">
-                    <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">
-                            Belum ada data siswa
-                        </td>
-                    </tr>
-                </tbody>
-                @endforelse
-            @else
-                {{-- Mode Tahun Tertentu: Normal View --}}
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($studentData as $data)
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ $data->academic_year }}
-                            @if($data->academic_year === $currentAcademicYear)
-                                <span class="ml-1 px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">Aktif</span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Kelas {{ $data->class_name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($data->male_count) }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ number_format($data->female_count) }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ number_format($data->total_students) }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $data->study_groups }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex justify-end space-x-2">
-                                <a href="{{ route('admin.student-data.edit', $data->id) }}" class="inline-flex items-center px-3 py-1.5 bg-yellow-500 text-white text-sm rounded-lg hover:bg-yellow-600 transition-colors">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                    </svg>
-                                    Edit
-                                </a>
-                                <form action="{{ route('admin.student-data.destroy', $data->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                        Hapus
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">
-                            Belum ada data siswa untuk tahun ajaran {{ $selectedYear }}
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            @endif
-        </table>
+                        @empty
+                        <tr>
+                            <td colspan="7" class="px-4 md:px-6 py-4 text-center text-gray-500">
+                                Belum ada data siswa untuk tahun ajaran {{ $selectedYear }}
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                @endif
+            </table>
+        </div>
     </div>
     
     <div class="mt-4">
