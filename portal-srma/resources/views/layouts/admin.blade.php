@@ -113,6 +113,18 @@
         .btn-primary:hover { background-color: #b91c1c !important; }
         .bg-primary-600 { background-color: #dc2626 !important; }
         .bg-primary-600:hover, .hover\:bg-primary-700:hover { background-color: #b91c1c !important; }
+        
+        /* Animated dots for loading */
+        .dots-loading::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
     </style>
     
     @stack('styles')
@@ -464,9 +476,9 @@
     </div>
     
     <!-- Logout Confirmation Modal -->
-    <div x-data="{ open: false }" 
+    <div x-data="{ open: false, loggingOut: false }" 
          @open-logout-modal.window="open = true"
-         @keydown.escape.window="open = false">
+         @keydown.escape.window="if(!loggingOut) open = false">
         
         <!-- Backdrop -->
         <div x-show="open" 
@@ -477,7 +489,7 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
              class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50"
-             @click="open = false"
+             @click="if(!loggingOut) open = false"
              x-cloak>
         </div>
         
@@ -509,14 +521,19 @@
                 <div class="flex gap-3">
                     <button type="button" 
                             @click="open = false"
-                            class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">
+                            :disabled="loggingOut"
+                            class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                         Batal
                     </button>
-                    <form action="{{ route('admin.logout') }}" method="POST" class="flex-1">
+                    <form action="{{ route('admin.logout') }}" method="POST" class="flex-1" @submit="loggingOut = true">
                         @csrf
                         <button type="submit" 
-                                class="w-full px-4 py-2.5 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors">
-                            Ya, Logout
+                                :disabled="loggingOut"
+                                class="w-full px-4 py-2.5 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors disabled:opacity-75 disabled:cursor-wait">
+                            <span x-show="!loggingOut">Ya, Logout</span>
+                            <span x-show="loggingOut" class="flex items-center justify-center">
+                                Logging out<span class="dots-loading"></span>
+                            </span>
                         </button>
                     </form>
                 </div>

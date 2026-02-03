@@ -38,6 +38,15 @@
     
     <style>
         body { font-family: 'Inter', sans-serif; }
+        [x-cloak] { display: none !important; }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
@@ -63,7 +72,7 @@
                 </div>
                 @endif
                 
-                <form action="{{ route('admin.login') }}" method="POST">
+                <form action="{{ route('admin.login') }}" method="POST" id="loginForm" x-data="{ loading: false }" @submit.prevent="loading = true; document.getElementById('loginForm').submit();">
                     @csrf
                     
                     <div class="mb-5">
@@ -75,7 +84,8 @@
                                 </svg>
                             </div>
                             <input type="email" name="email" id="email" value="{{ old('email') }}" required autofocus
-                                   class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                                   :disabled="loading"
+                                   class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                                    placeholder="admin@example.com">
                         </div>
                     </div>
@@ -89,27 +99,36 @@
                                 </svg>
                             </div>
                             <input :type="show ? 'text' : 'password'" name="password" id="password" required
-                                   class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                                   :disabled="loading"
+                                   class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                                    placeholder="••••••••">
                         </div>
                     </div>
                     
                     <div class="flex items-center justify-between mb-6">
                         <label class="flex items-center">
-                            <input type="checkbox" name="remember" class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                            <span class="ml-2 text-sm text-gray-600">Ingat saya</span>
+                            <input type="checkbox" name="remember" :disabled="loading" class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 disabled:cursor-not-allowed">
+                            <span class="ml-2 text-sm text-gray-600">Remember me</span>
                         </label>
                     </div>
                     
                     <button type="submit" 
-                            class="w-full bg-gray-800 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors shadow-md">
-                        Masuk
+                            :disabled="loading"
+                            class="w-full bg-gray-800 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors shadow-md disabled:bg-gray-600 disabled:cursor-wait">
+                        <span x-show="!loading">Login</span>
+                        <span x-show="loading" x-cloak class="flex items-center justify-center gap-2">
+                            <svg class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Logging in...
+                        </span>
                     </button>
                 </form>
                 
                 <div class="mt-6 text-center">
                     <a href="{{ route('home') }}" class="text-sm text-gray-500 hover:text-primary-600">
-                        ← Kembali ke Beranda
+                        ← Back to Home
                     </a>
                 </div>
             </div>
