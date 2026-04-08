@@ -1,3 +1,88 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    /* Dark mode overrides for all elements */
+    html.dark {
+        color-scheme: dark;
+    }
+
+    html.dark body {
+        @apply bg-gray-950 text-gray-100;
+    }
+
+    html.dark .bg-white {
+        @apply bg-gray-900 !important;
+    }
+
+    html.dark .bg-gray-50 {
+        @apply bg-gray-800 !important;
+    }
+
+    html.dark .bg-gray-100 {
+        @apply bg-gray-800 !important;
+    }
+
+    html.dark .bg-gray-200 {
+        @apply bg-gray-700 !important;
+    }
+
+    html.dark .border-gray-100,
+    html.dark .border-gray-200 {
+        @apply border-gray-700 !important;
+    }
+
+    html.dark .text-gray-900 {
+        @apply text-gray-100 !important;
+    }
+
+    html.dark .text-gray-700 {
+        @apply text-gray-300 !important;
+    }
+
+    html.dark .text-gray-600 {
+        @apply text-gray-400 !important;
+    }
+
+    html.dark .text-gray-500 {
+        @apply text-gray-500 !important;
+    }
+
+    html.dark .hover\:bg-gray-50:hover {
+        @apply bg-gray-800 !important;
+    }
+
+    html.dark .hover\:bg-gray-100:hover {
+        @apply bg-gray-800 !important;
+    }
+
+    html.dark .hover\:shadow-md:hover {
+        @apply shadow-lg !important;
+    }
+
+    html.dark .shadow-sm {
+        @apply shadow-md !important;
+    }
+
+    html.dark .divide-gray-200 {
+        @apply divide-gray-700 !important;
+    }
+
+    html.dark input,
+    html.dark textarea,
+    html.dark select {
+        @apply bg-gray-800 text-gray-100 border-gray-600 !important;
+    }
+
+    html.dark input::placeholder,
+    html.dark textarea::placeholder {
+        @apply text-gray-500 !important;
+    }
+
+    html.dark input:focus,
+    html.dark textarea:focus,
+    html.dark select:focus {
+        @apply border-blue-500 !important;
+    }
+}

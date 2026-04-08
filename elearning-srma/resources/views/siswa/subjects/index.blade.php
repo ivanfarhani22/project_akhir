@@ -4,48 +4,45 @@
 @section('icon', 'fas fa-book')
 
 @section('content')
-    <div style="margin-bottom: 30px;">
-        <h1 class="page-title">
-            <i class="fas fa-book"></i>
+    <!-- PAGE HEADER -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3 mb-2">
+            <i class="fas fa-book text-amber-500"></i>
             Mata Pelajaran
         </h1>
-        <p class="page-description">Daftar mata pelajaran yang Anda pelajari</p>
+        <p class="text-gray-600 text-sm">Daftar mata pelajaran yang Anda pelajari</p>
     </div>
 
     @if($classes->count() > 0)
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             @foreach($classes as $class)
-                <div class="card">
-                    <div class="card-header">
-                        <div>
-                            <h3 style="font-size: 18px; font-weight: 600; color: var(--secondary); margin-bottom: 5px;">
-                                {{ $class->subject->name }}
-                            </h3>
-                            <p style="color: #999; font-size: 14px;">{{ $class->name }}</p>
-                        </div>
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <h3 class="text-lg font-bold text-gray-900 mb-1">{{ $class->subject->name }}</h3>
+                        <p class="text-gray-600 text-sm">{{ $class->name }}</p>
                     </div>
                     
-                    <div class="card-body">
+                    <div class="p-6 space-y-4">
                         <!-- Guru -->
-                        <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border);">
-                            <p style="color: #999; font-size: 12px; margin-bottom: 4px; text-transform: uppercase;">Pengajar</p>
-                            <p style="color: var(--secondary); font-weight: 600;">{{ $class->teacher->name }}</p>
+                        <div class="pb-4 border-b border-gray-200">
+                            <p class="text-gray-500 text-xs font-semibold mb-1 uppercase">Pengajar</p>
+                            <p class="text-gray-900 font-medium">{{ $class->teacher->name }}</p>
                         </div>
 
                         <!-- Deskripsi -->
                         @if($class->description)
-                            <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border);">
-                                <p style="color: #999; font-size: 12px; margin-bottom: 4px; text-transform: uppercase;">Deskripsi</p>
-                                <p style="color: #666; font-size: 13px;">{{ Str::limit($class->description, 100) }}</p>
+                            <div class="pb-4 border-b border-gray-200">
+                                <p class="text-gray-500 text-xs font-semibold mb-1 uppercase">Deskripsi</p>
+                                <p class="text-gray-700 text-sm">{{ Str::limit($class->description, 100) }}</p>
                             </div>
                         @endif
 
                         <!-- Jadwal -->
-                        <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border);">
-                            <p style="color: #999; font-size: 12px; margin-bottom: 8px; text-transform: uppercase;">Jadwal</p>
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <i class="fas fa-calendar" style="color: var(--primary);"></i>
-                                <span style="color: #666; font-size: 13px;">
+                        <div class="pb-4 border-b border-gray-200">
+                            <p class="text-gray-500 text-xs font-semibold mb-2 uppercase">Jadwal</p>
+                            <div class="flex items-center gap-2 text-gray-700 text-sm">
+                                <i class="fas fa-calendar text-blue-500"></i>
+                                <span>
                                     @if($class->schedules && $class->schedules->count() > 0)
                                         @php $schedule = $class->schedules->first(); @endphp
                                         {{ ucfirst($schedule->day_of_week) }}
@@ -63,27 +60,27 @@
                         </div>
 
                         <!-- Statistik -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border);">
+                        <div class="grid grid-cols-2 gap-3 pb-4 border-b border-gray-200">
                             @php
                                 $materials = $class->materials->count();
                                 $assignments = $class->assignments->count();
                             @endphp
-                            <div style="text-align: center;">
-                                <p style="color: #999; font-size: 12px; margin-bottom: 4px;">Materi</p>
-                                <p style="font-size: 20px; font-weight: 700; color: var(--primary);">{{ $materials }}</p>
+                            <div class="text-center">
+                                <p class="text-gray-600 text-xs font-medium mb-1">Materi</p>
+                                <p class="text-2xl font-bold text-blue-600">{{ $materials }}</p>
                             </div>
-                            <div style="text-align: center;">
-                                <p style="color: #999; font-size: 12px; margin-bottom: 4px;">Tugas</p>
-                                <p style="font-size: 20px; font-weight: 700; color: #f39c12;">{{ $assignments }}</p>
+                            <div class="text-center">
+                                <p class="text-gray-600 text-xs font-medium mb-1">Tugas</p>
+                                <p class="text-2xl font-bold text-amber-600">{{ $assignments }}</p>
                             </div>
                         </div>
 
                         <!-- Action Buttons -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <a href="{{ route('siswa.subjects.show', $class->id) }}" class="btn btn-primary btn-sm" style="justify-content: center;">
+                        <div class="grid grid-cols-2 gap-2">
+                            <a href="{{ route('siswa.subjects.show', $class->id) }}" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-3 rounded-lg text-sm transition text-center inline-flex items-center justify-center gap-1">
                                 <i class="fas fa-eye"></i> Detail
                             </a>
-                            <a href="{{ route('siswa.assignments.index') }}?class={{ $class->id }}" class="btn btn-secondary btn-sm" style="justify-content: center;">
+                            <a href="{{ route('siswa.assignments.index') }}?class={{ $class->id }}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-3 rounded-lg text-sm transition text-center inline-flex items-center justify-center gap-1">
                                 <i class="fas fa-tasks"></i> Tugas
                             </a>
                         </div>
@@ -92,12 +89,10 @@
             @endforeach
         </div>
     @else
-        <div class="card">
-            <div class="card-body" style="text-align: center; padding: 60px 20px;">
-                <i class="fas fa-inbox" style="font-size: 64px; color: #ddd; margin-bottom: 20px; display: block;"></i>
-                <p style="color: #999; font-size: 16px; margin-bottom: 20px;">Anda belum terdaftar di mata pelajaran apapun</p>
-                <p style="color: #666; font-size: 14px;">Hubungi administrator untuk mendaftar ke mata pelajaran</p>
-            </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-12 text-center">
+            <i class="fas fa-inbox text-gray-300 text-5xl mb-4 block"></i>
+            <p class="text-gray-600 text-base mb-3">Anda belum terdaftar di mata pelajaran apapun</p>
+            <p class="text-gray-500 text-sm">Hubungi administrator untuk mendaftar ke mata pelajaran</p>
         </div>
     @endif
 @endsection

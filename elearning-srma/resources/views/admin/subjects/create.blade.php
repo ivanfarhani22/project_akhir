@@ -6,21 +6,21 @@
 @section('content')
     <!-- Header -->
     <div class="mb-8">
-        <p class="text-gray-500 text-sm mb-2">Manajemen Mata Pelajaran</p>
-        <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
+        <p class="text-gray-500 text-xs sm:text-sm mb-2">Manajemen Mata Pelajaran</p>
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-3">
             <i class="fas fa-plus-circle text-red-500"></i>
             Tambah Mata Pelajaran Baru
         </h1>
-        <p class="text-gray-500 text-sm mt-2">Buat mata pelajaran baru dengan kode unik</p>
+        <p class="text-gray-500 text-xs sm:text-sm mt-2">Buat mata pelajaran baru dengan kode unik</p>
     </div>
 
     <!-- Error Alert -->
     @if ($errors->any())
-        <div class="bg-red-100 border-l-4 border-red-500 p-4 mb-6 rounded">
+        <div class="bg-red-100 border-l-4 border-red-500 p-3 sm:p-4 mb-6 rounded">
             <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
             <div>
-                <strong class="text-red-900">Terjadi kesalahan:</strong>
-                <div class="text-red-800 text-sm mt-1">
+                <strong class="text-red-900 text-xs sm:text-sm">Terjadi kesalahan:</strong>
+                <div class="text-red-800 text-xs mt-1">
                     @foreach ($errors->all() as $error)
                         <div>{{ $error }}</div>
                     @endforeach
@@ -31,20 +31,20 @@
 
     <div class="max-w-2xl">
         <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                <h2 class="text-lg font-bold text-gray-900 flex items-center gap-3">
+            <div class="bg-gray-50 px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+                <h2 class="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-3">
                     <i class="fas fa-book text-red-500"></i>
                     Form Tambah Mata Pelajaran
                 </h2>
             </div>
 
-            <div class="p-6">
+            <div class="p-3 sm:p-6">
                 <form method="POST" action="{{ route('admin.subjects.store') }}" class="space-y-6">
                     @csrf
 
                     <!-- Nama Mata Pelajaran -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-900 mb-2">
+                        <label class="block text-xs sm:text-sm font-semibold text-gray-900 mb-2">
                             Nama Mata Pelajaran <span class="text-red-500">*</span>
                         </label>
                         <input 
@@ -53,7 +53,7 @@
                             id="name" 
                             value="{{ old('name') }}" 
                             placeholder="Misal: Matematika, Bahasa Inggris"
-                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition"
+                            class="w-full px-3 sm:px-4 py-2 border-2 border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-red-500 transition"
                             required
                         >
                         <small class="text-gray-500 text-xs mt-2 block">Gunakan nama lengkap mata pelajaran</small>
@@ -61,7 +61,7 @@
 
                     <!-- Kode Mata Pelajaran -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-900 mb-2">
+                        <label class="block text-xs sm:text-sm font-semibold text-gray-900 mb-2">
                             Kode Mata Pelajaran <span class="text-red-500">*</span>
                         </label>
                         <input 
@@ -71,7 +71,7 @@
                             value="{{ old('code') }}" 
                             placeholder="Misal: MAT, IPA, BIN"
                             maxlength="10"
-                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition uppercase"
+                            class="w-full px-3 sm:px-4 py-2 border-2 border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-red-500 transition uppercase"
                             required
                         >
                         <small class="text-gray-500 text-xs mt-2 block">Singkatan unik untuk identifikasi (maksimal 10 karakter)</small>
@@ -79,7 +79,7 @@
 
                     <!-- Deskripsi -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-900 mb-2">
+                        <label class="block text-xs sm:text-sm font-semibold text-gray-900 mb-2">
                             Deskripsi (Opsional)
                         </label>
                         <textarea 
@@ -87,21 +87,21 @@
                             id="description"
                             rows="4"
                             placeholder="Deskripsi singkat tentang mata pelajaran ini..."
-                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition resize-vertical"
+                            class="w-full px-3 sm:px-4 py-2 border-2 border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-red-500 transition resize-vertical"
                         >{{ old('description') }}</textarea>
                     </div>
 
                     <!-- Buttons -->
-                    <div class="flex gap-3 pt-4">
+                    <div class="flex flex-col sm:flex-row gap-3 pt-4">
                         <button 
                             type="submit" 
-                            class="flex-1 inline-flex items-center justify-center gap-2 bg-red-500 text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition"
+                            class="flex-1 inline-flex items-center justify-center gap-2 bg-red-500 text-white px-3 sm:px-6 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-red-600 transition"
                         >
-                            <i class="fas fa-save"></i> Simpan Mata Pelajaran
+                            <i class="fas fa-save"></i> <span class="hidden sm:inline">Simpan Mata Pelajaran</span><span class="sm:hidden">Simpan</span>
                         </button>
                         <a 
                             href="{{ route('admin.subjects.index') }}" 
-                            class="flex-1 inline-flex items-center justify-center gap-2 bg-gray-300 text-gray-900 px-6 py-2 rounded-lg font-semibold text-sm hover:bg-gray-400 transition"
+                            class="flex-1 inline-flex items-center justify-center gap-2 bg-gray-300 text-gray-900 px-3 sm:px-6 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-gray-400 transition"
                         >
                             <i class="fas fa-arrow-left"></i> Batal
                         </a>

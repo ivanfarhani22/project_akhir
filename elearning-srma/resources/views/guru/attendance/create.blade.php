@@ -4,125 +4,86 @@
 @section('icon', 'fas fa-clipboard-list')
 
 @section('content')
-<style>
-    .form-group { margin-bottom: 20px; }
-    .form-group label { 
-        display: block;
-        margin-bottom: 8px;
-        color: var(--secondary);
-        font-weight: 600;
-        font-size: 14px;
-    }
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        font-size: 14px;
-        font-family: inherit;
-    }
-    .form-group input:focus,
-    .form-group textarea:focus,
-    .form-group select:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-    }
-    .form-group textarea {
-        resize: vertical;
-        min-height: 100px;
-    }
-    .btn-submit {
-        background: var(--primary);
-        color: white;
-        padding: 12px 24px;
-        border: none;
-        border-radius: 6px;
-        font-weight: 600;
-        cursor: pointer;
-        font-size: 14px;
-        transition: background 0.2s;
-    }
-    .btn-submit:hover { background: #4f46e5; }
-    .btn-cancel {
-        background: #f1f5f9;
-        color: var(--secondary);
-        padding: 12px 24px;
-        border: none;
-        border-radius: 6px;
-        font-weight: 600;
-        cursor: pointer;
-        font-size: 14px;
-        transition: background 0.2s;
-        text-decoration: none;
-        display: inline-block;
-    }
-    .btn-cancel:hover { background: #e2e8f0; }
-</style>
-
-<div style="margin-bottom: 30px;">
-    <h1 class="page-title">
-        <i class="fas fa-clipboard-list"></i>
-        Buka Presensi
-    </h1>
-    <p class="page-description">Pilih mata pelajaran dan atur waktu presensi</p>
-</div>
-
-@if($errors->any())
-    <div style="background: #fef2f2; border-left: 4px solid #ef4444; color: #991b1b; padding: 12px 16px; border-radius: 4px; margin-bottom: 24px;">
-        <i class="fas fa-exclamation-circle"></i>
-        <ul style="margin: 8px 0 0 0; padding-left: 20px;">
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
+    <!-- PAGE HEADER -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3 mb-2">
+            <i class="fas fa-clipboard-list text-green-500"></i>
+            Buka Presensi
+        </h1>
+        <p class="text-gray-600 text-sm">Pilih mata pelajaran dan atur waktu presensi</p>
     </div>
-@endif
 
-<div class="card">
-    <div class="card-body">
-        <form action="{{ route('guru.attendance.store') }}" method="POST">
-            @csrf
+    <!-- ERROR ALERT -->
+    @if($errors->any())
+        <div class="bg-red-50 border-l-4 border-red-500 text-red-900 p-4 rounded mb-6">
+            <i class="fas fa-exclamation-circle mr-2"></i>
+            <ul class="space-y-1">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-            <div class="form-group">
-                <label for="class_subject_id">Mata Pelajaran</label>
-                <select id="class_subject_id" name="class_subject_id" required>
-                    <option value="">-- Pilih Mata Pelajaran --</option>
-                    @foreach($classSubjects as $subject)
-                        <option value="{{ $subject->id }}" @selected(old('class_subject_id') == $subject->id)>
-                            {{ $subject->eClass->name }} - {{ $subject->subject->name }}
-                        </option>
-                    @endforeach
-                </select>
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h2 class="font-bold text-gray-900 text-lg">Form Buka Presensi</h2>
             </div>
+            <div class="p-6">
+                <form action="{{ route('guru.attendance.store') }}" method="POST">
+                    @csrf
 
-            <div class="form-group">
-                <label for="attendance_date">Tanggal Presensi</label>
-                <input type="date" id="attendance_date" name="attendance_date" value="{{ old('attendance_date', today()->format('Y-m-d')) }}" required>
-            </div>
+                    <!-- SUBJECT FIELD -->
+                    <div class="mb-6">
+                        <label for="class_subject_id" class="block font-semibold text-gray-900 mb-2">
+                            Mata Pelajaran <span class="text-red-500">*</span>
+                        </label>
+                        <select id="class_subject_id" name="class_subject_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition" required>
+                            <option value="">-- Pilih Mata Pelajaran --</option>
+                            @foreach($classSubjects as $subject)
+                                <option value="{{ $subject->id }}" @selected(old('class_subject_id') == $subject->id)>
+                                    {{ $subject->eClass->name }} - {{ $subject->subject->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-            <div class="form-group">
-                <label for="opened_at">Jam Buka Presensi</label>
-                <input type="time" id="opened_at" name="opened_at" value="{{ old('opened_at', now()->format('H:i')) }}" required>
-            </div>
+                    <!-- DATE FIELD -->
+                    <div class="mb-6">
+                        <label for="attendance_date" class="block font-semibold text-gray-900 mb-2">
+                            Tanggal Presensi <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" id="attendance_date" name="attendance_date" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition" value="{{ old('attendance_date', today()->format('Y-m-d')) }}" required>
+                    </div>
 
-            <div class="form-group">
-                <label for="notes">Catatan (Opsional)</label>
-                <textarea id="notes" name="notes" placeholder="Contoh: Presensi untuk topik Geometri Ruang">{{ old('notes') }}</textarea>
-            </div>
+                    <!-- TIME FIELD -->
+                    <div class="mb-6">
+                        <label for="opened_at" class="block font-semibold text-gray-900 mb-2">
+                            Jam Buka Presensi <span class="text-red-500">*</span>
+                        </label>
+                        <input type="time" id="opened_at" name="opened_at" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition" value="{{ old('opened_at', now()->format('H:i')) }}" required>
+                    </div>
 
-            <div style="display: flex; gap: 12px;">
-                <button type="submit" class="btn-submit">
-                    <i class="fas fa-check"></i> Buka Presensi
-                </button>
-                <a href="{{ route('guru.attendance.index') }}" class="btn-cancel">
-                    <i class="fas fa-arrow-left"></i> Kembali
-                </a>
+                    <!-- NOTES FIELD -->
+                    <div class="mb-8">
+                        <label for="notes" class="block font-semibold text-gray-900 mb-2">
+                            Catatan (Opsional)
+                        </label>
+                        <textarea id="notes" name="notes" placeholder="Contoh: Presensi untuk topik Geometri Ruang" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition resize-none" rows="4">{{ old('notes') }}</textarea>
+                    </div>
+
+                    <!-- ACTION BUTTONS -->
+                    <div class="flex gap-3">
+                        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-flex items-center gap-2">
+                            <i class="fas fa-check"></i> Buka Presensi
+                        </button>
+                        <a href="{{ route('guru.attendance.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-6 rounded-lg text-sm transition inline-flex items-center gap-2">
+                            <i class="fas fa-arrow-left"></i> Kembali
+                        </a>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
     </div>
-</div>
-
 @endsection

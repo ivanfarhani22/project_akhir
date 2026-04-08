@@ -4,147 +4,155 @@
 @section('icon', 'fas fa-edit')
 
 @section('content')
-    <div style="margin-bottom: 30px;">
-        <p style="color: #999; font-size: 14px; margin-bottom: 5px;">Manajemen Tugas</p>
-        <h1 class="page-title">
-            <i class="fas fa-edit"></i>
+    <!-- PAGE HEADER -->
+    <div class="mb-8">
+        <p class="text-gray-600 text-sm mb-2">Manajemen Tugas</p>
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3 mb-2">
+            <i class="fas fa-edit text-blue-500"></i>
             Edit Tugas
         </h1>
-        <p class="page-description">{{ $assignment->title }}</p>
+        <p class="text-gray-600 text-sm">{{ $assignment->title }}</p>
     </div>
 
+    <!-- ERROR ALERT -->
     @if ($errors->any())
-        <div class="alert alert-danger">
-            <i class="fas fa-exclamation-circle"></i>
-            <div>
-                <strong>Terjadi kesalahan:</strong>
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p class="text-red-900 font-semibold flex items-center gap-2 mb-2">
+                <i class="fas fa-exclamation-circle"></i>
+                Terjadi kesalahan:
+            </p>
+            <ul class="text-red-800 text-sm space-y-1">
                 @foreach ($errors->all() as $error)
-                    <div>{{ $error }}</div>
+                    <li>• {{ $error }}</li>
                 @endforeach
-            </div>
+            </ul>
         </div>
     @endif
 
-    <div class="card" style="max-width: 700px;">
-        <div class="card-header">
-            <div class="card-title">
-                <i class="fas fa-tasks" style="color: var(--primary); margin-right: 10px;"></i>
-                Form Edit Tugas
-            </div>
-        </div>
-
-        <div class="card-body">
-            <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--primary);">
-                <p style="font-size: 13px; color: var(--primary); margin: 0;">
-                    <i class="fas fa-info-circle"></i>
-                    <strong>Info:</strong> Edit hanya akan mengubah tugas ini. Siswa yang sudah mengumpulkan akan tetap memiliki submission mereka.
-                </p>
+    <div class="max-w-2xl">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h2 class="font-bold text-gray-900 text-lg flex items-center gap-2">
+                    <i class="fas fa-tasks text-blue-500"></i>
+                    Form Edit Tugas
+                </h2>
             </div>
 
-            <form method="POST" action="{{ route('guru.assignments.update', $assignment) }}" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                        Judul Tugas *
-                    </label>
-                    <input 
-                        type="text" 
-                        name="title" 
-                        id="title" 
-                        class="form-input"
-                        value="{{ old('title', $assignment->title) }}" 
-                        placeholder="Contoh: Latihan Soal Chapter 5 - Fungsi Kuadrat"
-                        style="width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; transition: all 0.3s ease;"
-                        required
-                    >
+            <div class="p-6">
+                <!-- INFO BOX -->
+                <div class="bg-blue-50 px-4 py-3 rounded-lg mb-6 border-l-4 border-blue-500">
+                    <p class="text-sm text-blue-900">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <strong>Info:</strong> Edit hanya akan mengubah tugas ini. Siswa yang sudah mengumpulkan akan tetap memiliki submission mereka.
+                    </p>
                 </div>
 
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                        Deskripsi
-                    </label>
-                    <textarea 
-                        name="description" 
-                        id="description"
-                        style="width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; transition: all 0.3s ease; font-family: inherit; resize: vertical;"
-                        rows="4"
-                        placeholder="Jelaskan detail tugas, instruksi, dan kriteria penilaian..."
-                    >{{ old('description', $assignment->description) }}</textarea>
-                </div>
+                <form method="POST" action="{{ route('guru.assignments.update', $assignment) }}" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
 
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                        Batas Waktu *
-                    </label>
-                    <input 
-                        type="datetime-local" 
-                        name="deadline" 
-                        id="deadline"
-                        class="form-input"
-                        value="{{ old('deadline', $assignment->deadline->format('Y-m-d\TH:i')) }}" 
-                        style="width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; transition: all 0.3s ease;"
-                        required
-                    >
-                </div>
-
-                <div class="form-group" style="margin-bottom: 25px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 10px; color: var(--secondary);">
-                        File Tugas (Opsional)
-                    </label>
-                    
-                    @if($assignment->file_path)
-                        <div style="background: #f5f5f5; padding: 12px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <p style="margin: 0; font-weight: 600; color: var(--secondary); font-size: 14px;">
-                                    <i class="fas fa-file"></i> File Saat Ini
-                                </p>
-                                <p style="margin: 5px 0 0; font-size: 12px; color: #999;">
-                                    {{ pathinfo($assignment->file_path, PATHINFO_EXTENSION) }}
-                                </p>
-                            </div>
-                            <a href="{{ asset('storage/' . $assignment->file_path) }}" target="_blank" class="btn" style="padding: 5px 10px; font-size: 12px; background: var(--primary); color: white; text-decoration: none; border-radius: 4px;">
-                                <i class="fas fa-download"></i> Download
-                            </a>
-                        </div>
-                    @endif
-
-                    <div style="position: relative; border: 2px dashed var(--border); border-radius: 12px; padding: 40px 20px; text-align: center; background: #fafafa; cursor: pointer; transition: all 0.3s ease;" id="dropzone">
-                        <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: var(--primary); margin-bottom: 15px; display: block;"></i>
-                        <p style="font-weight: 600; color: var(--secondary); margin-bottom: 5px;">Klik atau drag file di sini</p>
-                        <p style="color: #999; font-size: 13px; margin-bottom: 10px;">PDF, DOC, XLS, PPT, ZIP (Max 10MB)</p>
-                        <p style="color: #bbb; font-size: 12px;">Biarkan kosong jika tidak ingin mengubah file</p>
+                    <!-- TITLE FIELD -->
+                    <div class="mb-6">
+                        <label class="block font-semibold text-gray-900 mb-2">
+                            Judul Tugas <span class="text-red-500">*</span>
+                        </label>
                         <input 
-                            type="file" 
-                            name="file" 
-                            id="file"
-                            style="display: none;"
+                            type="text" 
+                            name="title" 
+                            id="title" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                            value="{{ old('title', $assignment->title) }}" 
+                            placeholder="Contoh: Latihan Soal Chapter 5 - Fungsi Kuadrat"
+                            required
                         >
                     </div>
-                    <p style="color: #28a745; font-size: 12px; margin-top: 10px;" id="filename"></p>
-                    @error('file')
-                        <span style="color: var(--danger); font-size: 12px; margin-top: 5px; display: block;">{{ $message }}</span>
-                    @enderror
-                </div>
 
-                <div style="display: flex; gap: 10px;">
-                    <button 
-                        type="submit" 
-                        class="btn btn-primary"
-                        style="flex: 1; justify-content: center;"
-                    >
-                        <i class="fas fa-save"></i> Perbarui Tugas
-                    </button>
-                    <a 
-                        href="{{ route('guru.assignments.index', ['class_id' => $assignment->eClass->id]) }}" 
-                        class="btn btn-secondary"
-                        style="flex: 1; justify-content: center; text-decoration: none;"
-                    >
-                        <i class="fas fa-arrow-left"></i> Batal
-                    </a>
-                </div>
-            </form>
+                    <!-- DESCRIPTION FIELD -->
+                    <div class="mb-6">
+                        <label class="block font-semibold text-gray-900 mb-2">
+                            Deskripsi
+                        </label>
+                        <textarea 
+                            name="description" 
+                            id="description"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition resize-none"
+                            rows="4"
+                            placeholder="Jelaskan detail tugas, instruksi, dan kriteria penilaian..."
+                        >{{ old('description', $assignment->description) }}</textarea>
+                    </div>
+
+                    <!-- DEADLINE FIELD -->
+                    <div class="mb-6">
+                        <label class="block font-semibold text-gray-900 mb-2">
+                            Batas Waktu <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="datetime-local" 
+                            name="deadline" 
+                            id="deadline"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                            value="{{ old('deadline', $assignment->deadline->format('Y-m-d\TH:i')) }}" 
+                            required
+                        >
+                    </div>
+
+                    <!-- FILE UPLOAD FIELD -->
+                    <div class="mb-8">
+                        <label class="block font-semibold text-gray-900 mb-3">
+                            File Tugas (Opsional)
+                        </label>
+                        
+                        @if($assignment->file_path)
+                            <div class="bg-gray-100 px-4 py-3 rounded-lg mb-4 flex justify-between items-center">
+                                <div>
+                                    <p class="font-semibold text-gray-900 text-sm">
+                                        <i class="fas fa-file mr-2"></i> File Saat Ini
+                                    </p>
+                                    <p class="text-xs text-gray-600 mt-1">
+                                        {{ strtoupper(pathinfo($assignment->file_path, PATHINFO_EXTENSION)) }}
+                                    </p>
+                                </div>
+                                <a href="{{ asset('storage/' . $assignment->file_path) }}" target="_blank" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1.5 px-3 rounded text-xs transition inline-flex items-center gap-1">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            </div>
+                        @endif
+
+                        <div class="relative border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 hover:border-blue-400 hover:bg-blue-50 transition cursor-pointer" id="dropzone">
+                            <i class="fas fa-cloud-upload-alt text-blue-500 text-5xl mb-4 block"></i>
+                            <p class="font-semibold text-gray-900 mb-1">Klik atau drag file di sini</p>
+                            <p class="text-gray-600 text-sm mb-2">PDF, DOC, XLS, PPT, ZIP (Max 10MB)</p>
+                            <p class="text-gray-500 text-xs">Biarkan kosong jika tidak ingin mengubah file</p>
+                            <input 
+                                type="file" 
+                                name="file" 
+                                id="file"
+                                class="hidden"
+                            >
+                        </div>
+                        <p class="text-green-600 text-xs mt-3 font-medium" id="filename"></p>
+                        @error('file')
+                            <span class="text-red-600 text-xs mt-2 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <!-- ACTION BUTTONS -->
+                    <div class="flex gap-3">
+                        <button 
+                            type="submit" 
+                            class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-flex justify-center items-center gap-2"
+                        >
+                            <i class="fas fa-save"></i> Perbarui Tugas
+                        </button>
+                        <a 
+                            href="{{ route('guru.assignments.index', ['class_id' => $assignment->eClass->id]) }}" 
+                            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-6 rounded-lg text-sm transition inline-flex justify-center items-center gap-2"
+                        >
+                            <i class="fas fa-arrow-left"></i> Batal
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -157,19 +165,16 @@
 
         dropzone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            dropzone.style.borderColor = 'var(--primary)';
-            dropzone.style.background = 'rgba(196, 30, 58, 0.05)';
+            dropzone.classList.add('border-blue-500', 'bg-blue-50');
         });
 
         dropzone.addEventListener('dragleave', () => {
-            dropzone.style.borderColor = 'var(--border)';
-            dropzone.style.background = '#fafafa';
+            dropzone.classList.remove('border-blue-500', 'bg-blue-50');
         });
 
         dropzone.addEventListener('drop', (e) => {
             e.preventDefault();
-            dropzone.style.borderColor = 'var(--border)';
-            dropzone.style.background = '#fafafa';
+            dropzone.classList.remove('border-blue-500', 'bg-blue-50');
             
             if (e.dataTransfer.files.length > 0) {
                 fileInput.files = e.dataTransfer.files;
@@ -182,18 +187,11 @@
         function updateFilename() {
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
-                filename.textContent = '✓ File dipilih: ' + file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)';
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                filename.textContent = `✓ File dipilih: ${file.name} (${sizeMB} MB)`;
             } else {
                 filename.textContent = '';
             }
         }
     </script>
-
-    <style>
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
-        }
-    </style>
 @endsection

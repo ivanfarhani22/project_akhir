@@ -4,55 +4,56 @@
 @section('icon', 'fas fa-chalkboard')
 
 @section('content')
-    <div style="margin-bottom: 30px;">
-        <h1 class="page-title">
-            <i class="fas fa-chalkboard"></i>
+    <!-- PAGE HEADER -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3 mb-2">
+            <i class="fas fa-chalkboard text-amber-500"></i>
             Kelas Saya
         </h1>
-        <p class="page-description">Kelola kelas dan siswa Anda</p>
+        <p class="text-gray-600 text-sm">Kelola kelas dan siswa Anda</p>
     </div>
 
     @if($classSubjects->count() > 0)
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             @foreach($classSubjects as $cs)
-                <div class="card">
-                    <div class="card-body">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition border border-gray-100 overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start gap-3 mb-4">
                             <div>
-                                <h3 style="font-size: 18px; font-weight: 600; color: var(--secondary); margin-bottom: 5px;">
+                                <h3 class="text-lg font-bold text-gray-900 mb-1">
                                     {{ $cs->eClass->name }}
                                 </h3>
-                                <span style="background: var(--primary); color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px;">
+                                <span class="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full">
                                     {{ $cs->subject->name }}
                                 </span>
                             </div>
-                            <span style="background: var(--primary); color: white; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap">
                                 {{ $cs->eClass->students->count() }} Siswa
                             </span>
                         </div>
 
-                        <p style="color: #666; font-size: 13px; margin-bottom: 15px;">
-                            {{ $cs->eClass->description }}
+                        <p class="text-gray-600 text-sm mb-4">
+                            {{ Str::limit($cs->eClass->description, 100) }}
                         </p>
 
-                        <div style="border-top: 1px solid var(--border); padding-top: 15px; margin-top: 15px;">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                                <div style="text-align: center; padding: 10px; background: #f8f9fa; border-radius: 8px;">
-                                    <p style="color: #999; font-size: 12px;">Materi</p>
-                                    <p style="font-size: 20px; font-weight: 700; color: var(--primary);">{{ $cs->eClass->materials->count() }}</p>
+                        <div class="border-t border-gray-200 pt-4 mt-4">
+                            <div class="grid grid-cols-2 gap-3 mb-4">
+                                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                    <p class="text-xs text-gray-600 font-medium">Materi</p>
+                                    <p class="text-2xl font-bold text-amber-600">{{ $cs->eClass->materials->count() }}</p>
                                 </div>
-                                <div style="text-align: center; padding: 10px; background: #f8f9fa; border-radius: 8px;">
-                                    <p style="color: #999; font-size: 12px;">Tugas</p>
-                                    <p style="font-size: 20px; font-weight: 700; color: var(--primary);">{{ $cs->eClass->assignments->count() }}</p>
+                                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                    <p class="text-xs text-gray-600 font-medium">Tugas</p>
+                                    <p class="text-2xl font-bold text-blue-600">{{ $cs->eClass->assignments->count() }}</p>
                                 </div>
                             </div>
 
-                            <div style="display: flex; gap: 10px;">
-                                <a href="{{ route('guru.materials.index', ['class' => $cs->eClass->id]) }}" class="btn btn-primary" style="flex: 1; justify-content: center; font-size: 13px;">
-                                    <i class="fas fa-book"></i> Materi
+                            <div class="flex gap-2">
+                                <a href="{{ route('guru.materials.index', ['class' => $cs->eClass->id]) }}" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-3 rounded-lg text-sm transition text-center">
+                                    <i class="fas fa-book mr-2"></i> Materi
                                 </a>
-                                <a href="{{ route('guru.assignments.index', ['class' => $cs->eClass->id]) }}" class="btn btn-primary" style="flex: 1; justify-content: center; font-size: 13px;">
-                                    <i class="fas fa-tasks"></i> Tugas
+                                <a href="{{ route('guru.assignments.index', ['class' => $cs->eClass->id]) }}" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-3 rounded-lg text-sm transition text-center">
+                                    <i class="fas fa-tasks mr-2"></i> Tugas
                                 </a>
                             </div>
                         </div>
@@ -61,11 +62,9 @@
             @endforeach
         </div>
     @else
-        <div class="card">
-            <div class="card-body" style="text-align: center; padding: 60px 20px;">
-                <i class="fas fa-inbox" style="font-size: 64px; color: #ddd; margin-bottom: 20px; display: block;"></i>
-                <p style="color: #999; font-size: 16px;">Anda belum mengajar kelas apapun</p>
-            </div>
+        <div class="bg-white rounded-lg shadow-sm p-12 text-center border border-gray-100">
+            <i class="fas fa-inbox text-gray-300 text-5xl mb-4 block"></i>
+            <p class="text-gray-600 text-base">Anda belum mengajar kelas apapun</p>
         </div>
     @endif
 @endsection

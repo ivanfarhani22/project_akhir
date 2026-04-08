@@ -26,6 +26,14 @@ Route::get('/', function () {
 // API Routes (no auth required)
 Route::get('/api/settings/dark-mode', [\App\Http\Controllers\Admin\SettingController::class, 'getDarkMode']);
 
+// API Routes (authenticated)
+Route::middleware(['auth'])->prefix('api')->group(function () {
+    Route::get('/search', [\App\Http\Controllers\Api\SearchController::class, 'search']);
+    Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/clear', [\App\Http\Controllers\Api\NotificationController::class, 'clearAll']);
+});
+
 // Dashboard Admin E-Learning
 Route::middleware(['auth', 'role:admin_elearning'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', function () {
@@ -69,6 +77,8 @@ Route::middleware(['auth', 'role:admin_elearning'])->prefix('admin')->name('admi
     Route::post('/banners/reorder', [\App\Http\Controllers\Admin\SettingController::class, 'reorderBanners'])->name('banners.reorder');
     
     // Class Subject Management Routes
+    Route::get('/classes/{class}/subjects', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'getByClass'])->name('classes.subjects');
+    Route::get('/class-subjects/{classSubject}/students', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'getStudents'])->name('class-subjects.students');
     Route::post('/classes/{class}/subjects', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'store'])->name('class-subjects.store');
     Route::get('/classes/{class}/subjects/create', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'create'])->name('class-subjects.create');
     Route::get('/classes/{class}/subjects/{classSubject}/edit', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'edit'])->name('class-subjects.edit');

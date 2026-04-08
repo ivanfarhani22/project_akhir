@@ -4,143 +4,89 @@
 @section('icon', 'fas fa-clipboard-list')
 
 @section('content')
-<style>
-    .attendance-card { 
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 24px;
-    }
-    .attendance-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-    .attendance-card .status-badge {
-        display: inline-block;
-        padding: 6px 14px;
-        background: rgba(255,255,255,0.2);
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        margin-top: 12px;
-    }
-    .attendance-card .status-badge.open { background: rgba(34,197,94,0.3); }
-    .attendance-card .status-badge.closed { background: rgba(239,68,68,0.3); }
-    .attendance-card .status-badge.attended { background: rgba(34,197,94,0.4); }
-    
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-    .info-item { background: #f8fafc; padding: 16px; border-radius: 8px; }
-    .info-item label { color: #64748b; font-size: 12px; text-transform: uppercase; display: block; margin-bottom: 4px; }
-    .info-item .value { color: var(--secondary); font-weight: 600; font-size: 16px; }
-    
-    .btn-attend { 
-        background: #22c55e;
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        width: 100%;
-        transition: background 0.2s;
-    }
-    .btn-attend:hover { background: #16a34a; }
-    .btn-attend:disabled { background: #cbd5e1; cursor: not-allowed; }
-    
-    .success-message {
-        background: #f0fdf4;
-        border-left: 4px solid #22c55e;
-        color: #166534;
-        padding: 12px 16px;
-        border-radius: 4px;
-        margin-bottom: 16px;
-    }
-    .error-message {
-        background: #fef2f2;
-        border-left: 4px solid #ef4444;
-        color: #991b1b;
-        padding: 12px 16px;
-        border-radius: 4px;
-        margin-bottom: 16px;
-    }
-</style>
-
-<div style="margin-bottom: 30px;">
-    <h1 class="page-title">
-        <i class="fas fa-clipboard-list"></i>
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+        <i class="fas fa-clipboard-list text-purple-500"></i>
         Presensi
     </h1>
-    <p class="page-description">{{ $classSubject->subject->name }} • {{ $classSubject->eClass->name }}</p>
+    <p class="text-gray-600 text-sm mt-1">{{ $classSubject->subject->name }} • {{ $classSubject->eClass->name }}</p>
 </div>
 
 @if(session('success'))
-    <div class="success-message">
-        <i class="fas fa-check-circle"></i> {{ session('success') }}
+    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded mb-6">
+        <p class="text-green-800 font-semibold">
+            <i class="fas fa-check-circle"></i> {{ session('success') }}
+        </p>
     </div>
 @endif
 
 @if($errors->any())
-    <div class="error-message">
-        <i class="fas fa-exclamation-circle"></i> {{ $errors->first() }}
+    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
+        <p class="text-red-800 font-semibold">
+            <i class="fas fa-exclamation-circle"></i> {{ $errors->first() }}
+        </p>
     </div>
 @endif
 
 @if($session)
-    <div class="attendance-card">
-        <h2>Presensi Hari Ini</h2>
-        <p style="margin: 8px 0; opacity: 0.9;">{{ $session->attendance_date->format('l, d F Y') }}</p>
+    <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg shadow-md p-8 mb-8">
+        <h2 class="text-2xl font-bold mb-2">Presensi Hari Ini</h2>
+        <p class="text-purple-100 mb-4">{{ $session->attendance_date->format('l, d F Y') }}</p>
         
-        <div class="status-badge open">
+        <span class="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-full text-sm font-semibold mb-6">
             <i class="fas fa-circle"></i> Presensi Terbuka
-        </div>
+        </span>
         
-        <div class="info-grid" style="margin-top: 16px;">
-            <div class="info-item">
-                <label>Waktu Dibuka</label>
-                <div class="value">{{ $session->opened_at }}</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 mb-6">
+            <div class="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
+                <p class="text-purple-100 text-sm font-semibold mb-1 uppercase">Waktu Dibuka</p>
+                <p class="text-white font-bold text-lg">{{ $session->opened_at }}</p>
             </div>
-            <div class="info-item">
-                <label>Status Anda</label>
-                <div class="value">
+            <div class="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
+                <p class="text-purple-100 text-sm font-semibold mb-1 uppercase">Status Anda</p>
+                <p class="text-white font-bold text-lg">
                     @if($hasAttended)
-                        <span style="color: #22c55e;"><i class="fas fa-check-circle"></i> Sudah Hadir</span>
+                        <span class="inline-flex items-center gap-1 text-green-300"><i class="fas fa-check-circle"></i> Sudah Hadir</span>
                     @else
-                        <span style="color: #f59e0b;"><i class="fas fa-clock"></i> Belum Hadir</span>
+                        <span class="inline-flex items-center gap-1 text-amber-300"><i class="fas fa-clock"></i> Belum Hadir</span>
                     @endif
-                </div>
+                </p>
             </div>
         </div>
 
         @if(!$hasAttended)
             <form action="{{ route('siswa.attendance.store', $session) }}" method="POST">
                 @csrf
-                <button type="submit" class="btn-attend">
+                <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition">
                     <i class="fas fa-check"></i> Lakukan Absensi Sekarang
                 </button>
             </form>
         @else
-            <div style="background: rgba(34,197,94,0.1); padding: 12px; border-radius: 8px; text-align: center;">
-                <i class="fas fa-check-circle" style="color: #22c55e; font-size: 24px; display: block; margin-bottom: 8px;"></i>
-                <p style="margin: 0; color: #22c55e; font-weight: 600;">Absensi Anda Tercatat</p>
+            <div class="bg-green-500/20 p-4 rounded-lg text-center border border-green-500/30">
+                <i class="fas fa-check-circle text-green-400 text-3xl mb-2 block"></i>
+                <p class="text-green-700 font-bold">Absensi Anda Tercatat</p>
             </div>
         @endif
     </div>
 @else
-    <div class="card">
-        <div class="card-body" style="text-align: center; padding: 48px 20px;">
-            <i class="fas fa-inbox" style="font-size: 56px; color: #cbd5e1; margin-bottom: 16px; display: block;"></i>
-            <p style="color: #64748b; font-size: 16px; margin-bottom: 8px;">Belum Ada Presensi Hari Ini</p>
-            <p style="color: #94a3b8; font-size: 13px;">Guru akan membuka presensi saat pelajaran dimulai</p>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden mb-8">
+        <div class="p-12 text-center">
+            <i class="fas fa-inbox text-gray-300 text-5xl mb-4 block"></i>
+            <p class="text-gray-600 text-base font-semibold mb-2">Belum Ada Presensi Hari Ini</p>
+            <p class="text-gray-500 text-sm">Guru akan membuka presensi saat pelajaran dimulai</p>
         </div>
     </div>
 @endif
 
-<div class="card" style="margin-top: 24px;">
-    <div class="card-header">
-        <div class="card-title">
-            <i class="fas fa-history" style="color: var(--primary); margin-right: 8px;"></i>
+<!-- ATTENDANCE HISTORY -->
+<div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <h2 class="font-bold text-gray-900 flex items-center gap-2">
+            <i class="fas fa-history text-blue-500"></i>
             Riwayat Presensi
-        </div>
+        </h2>
     </div>
-    <div class="card-body">
+    <div class="p-6">
         @php
             $allSessions = $classSubject->attendanceSessions()
                 ->where('status', '!=', 'cancelled')
@@ -151,43 +97,43 @@
         @endphp
 
         @if($allSessions->count() > 0)
-            <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse;">
+            <div class="overflow-x-auto">
+                <table class="w-full">
                     <thead>
-                        <tr style="border-bottom: 2px solid var(--border);">
-                            <th style="padding: 12px; text-align: left; color: #64748b; font-weight: 600; font-size: 12px; text-transform: uppercase;">Tanggal</th>
-                            <th style="padding: 12px; text-align: left; color: #64748b; font-weight: 600; font-size: 12px; text-transform: uppercase;">Status</th>
-                            <th style="padding: 12px; text-align: left; color: #64748b; font-weight: 600; font-size: 12px; text-transform: uppercase;">Waktu Hadir</th>
+                        <tr class="border-b-2 border-gray-200">
+                            <th class="px-4 py-3 text-left text-gray-600 font-semibold text-xs uppercase">Tanggal</th>
+                            <th class="px-4 py-3 text-left text-gray-600 font-semibold text-xs uppercase">Status</th>
+                            <th class="px-4 py-3 text-left text-gray-600 font-semibold text-xs uppercase">Waktu Hadir</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-gray-200">
                         @foreach($allSessions as $sess)
                             @php
                                 $record = $sess->records->where('student_id', auth()->id())->first();
                             @endphp
-                            <tr style="border-bottom: 1px solid var(--border);">
-                                <td style="padding: 12px; color: var(--secondary);">
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-4 py-3 text-gray-900 font-medium">
                                     {{ $sess->attendance_date->format('d M Y') }}
                                 </td>
-                                <td style="padding: 12px;">
+                                <td class="px-4 py-3">
                                     @if($record)
                                         @php
-                                            $statusColors = [
-                                                'present' => ['bg' => '#f0fdf4', 'text' => '#166534', 'label' => 'Hadir'],
-                                                'absent' => ['bg' => '#fef2f2', 'text' => '#991b1b', 'label' => 'Tidak Hadir'],
-                                                'late' => ['bg' => '#fefce8', 'text' => '#854d0e', 'label' => 'Terlambat'],
-                                                'excused' => ['bg' => '#eff6ff', 'text' => '#0c4a6e', 'label' => 'Izin'],
+                                            $statusConfig = [
+                                                'present' => ['bg' => 'bg-green-100', 'text' => 'text-green-800', 'label' => 'Hadir'],
+                                                'absent' => ['bg' => 'bg-red-100', 'text' => 'text-red-800', 'label' => 'Tidak Hadir'],
+                                                'late' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-800', 'label' => 'Terlambat'],
+                                                'excused' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-800', 'label' => 'Izin'],
                                             ];
-                                            $colors = $statusColors[$record->status] ?? ['bg' => '#f1f5f9', 'text' => '#1e293b', 'label' => 'Unknown'];
+                                            $config = $statusConfig[$record->status] ?? ['bg' => 'bg-gray-100', 'text' => 'text-gray-800', 'label' => 'Unknown'];
                                         @endphp
-                                        <span style="background: {{ $colors['bg'] }}; color: {{ $colors['text'] }}; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">
-                                            {{ $colors['label'] }}
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ $config['bg'] }} {{ $config['text'] }}">
+                                            {{ $config['label'] }}
                                         </span>
                                     @else
-                                        <span style="color: #94a3b8; font-size: 12px;">—</span>
+                                        <span class="text-gray-500 text-sm">—</span>
                                     @endif
                                 </td>
-                                <td style="padding: 12px; color: #64748b; font-size: 13px;">
+                                <td class="px-4 py-3 text-gray-600 text-sm">
                                     @if($record && $record->checked_in_at)
                                         {{ $record->checked_in_at->format('H:i') }}
                                     @else
@@ -200,7 +146,7 @@
                 </table>
             </div>
         @else
-            <p style="text-align: center; color: #94a3b8; padding: 24px 0;">Belum ada riwayat presensi</p>
+            <p class="text-center text-gray-500 py-8">Belum ada riwayat presensi</p>
         @endif
     </div>
 </div>

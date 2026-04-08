@@ -4,76 +4,79 @@
 @section('icon', 'fas fa-book')
 
 @section('content')
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <!-- PAGE HEADER -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-            <p style="color: #999; font-size: 14px; margin-bottom: 5px;">Kelola Materi</p>
-            <h1 class="page-title">
-                <i class="fas fa-book"></i>
+            <p class="text-gray-600 text-sm mb-2">Kelola Materi</p>
+            <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3 mb-2">
+                <i class="fas fa-book text-amber-500"></i>
                 Materi Pembelajaran
             </h1>
-            <p class="page-description">Kelas: <strong>{{ $class->name }}</strong></p>
+            <p class="text-gray-600 text-sm">Kelas: <strong>{{ $class->name }}</strong></p>
         </div>
-        <a href="{{ route('guru.materials.create', ['class_id' => $class->id]) }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Upload Materi
+        <a href="{{ route('guru.materials.create', ['class_id' => $class->id]) }}" class="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-6 rounded-lg text-sm transition whitespace-nowrap">
+            <i class="fas fa-plus mr-2"></i> Upload Materi
         </a>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <div class="card-title">Daftar Materi</div>
-            <span style="background: #f0f0f0; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+    <!-- MATERIALS SECTION -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+        <div class="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <h2 class="font-bold text-gray-900 text-lg">Daftar Materi</h2>
+            <span class="bg-gray-200 text-gray-800 text-xs font-semibold px-3 py-1 rounded-full">
                 Total: {{ $materials->count() }}
             </span>
         </div>
-        <div class="card-body">
+
+        <div class="p-6">
             @if($materials->isEmpty())
-                <div style="text-align: center; padding: 60px 20px; color: #999;">
-                    <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; display: block; opacity: 0.3;"></i>
-                    <p style="font-size: 16px;">Belum ada materi</p>
-                    <a href="{{ route('guru.materials.create', ['class_id' => $class->id]) }}" class="btn btn-primary" style="margin-top: 15px;">
-                        <i class="fas fa-plus"></i> Upload Materi Pertama
+                <div class="text-center py-12">
+                    <i class="fas fa-inbox text-gray-300 text-5xl mb-4 block"></i>
+                    <p class="text-gray-600 text-base mb-4">Belum ada materi</p>
+                    <a href="{{ route('guru.materials.create', ['class_id' => $class->id]) }}" class="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-block">
+                        <i class="fas fa-plus mr-2"></i> Upload Materi Pertama
                     </a>
                 </div>
             @else
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     @foreach($materials as $material)
-                        <div class="card" style="position: relative;">
-                            <div class="card-header">
-                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div class="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition overflow-hidden">
+                            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                                <div class="flex justify-between items-start gap-3">
                                     <div>
-                                        <h3 class="card-title">{{ Str::limit($material->title, 30) }}</h3>
-                                        <p style="font-size: 12px; color: #999; margin-top: 5px;">
+                                        <h3 class="font-bold text-gray-900 text-sm">{{ Str::limit($material->title, 30) }}</h3>
+                                        <p class="text-xs text-gray-600 mt-1">
                                             <i class="fas fa-file"></i> {{ strtoupper($material->file_type) }}
                                         </p>
                                     </div>
-                                    <span class="badge" style="background-color: #e7f3f0; color: #00897b; font-size: 11px;">v{{ $material->version }}</span>
+                                    <span class="bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded whitespace-nowrap">
+                                        v{{ $material->version }}
+                                    </span>
                                 </div>
                             </div>
-                            <div class="card-body" style="padding: 15px 20px;">
+
+                            <div class="p-4">
                                 @if($material->description)
-                                    <p style="font-size: 13px; color: #666; margin-bottom: 10px; line-height: 1.5;">
+                                    <p class="text-sm text-gray-700 mb-4 line-clamp-3">
                                         {{ Str::limit($material->description, 80) }}
                                     </p>
                                 @endif
 
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid var(--border); margin-top: 10px; padding-top: 10px;">
-                                    <span style="font-size: 12px; color: #999;">
-                                        <i class="fas fa-calendar"></i> {{ $material->created_at->format('d M Y') }}
-                                    </span>
-                                    <span style="font-size: 12px; color: #999;">
-                                        <i class="fas fa-eye"></i> Dibagikan
-                                    </span>
+                                <div class="flex justify-between items-center text-xs text-gray-600 py-3 border-t border-b border-gray-200 my-3">
+                                    <span><i class="fas fa-calendar mr-1"></i> {{ $material->created_at->format('d M Y') }}</span>
+                                    <span><i class="fas fa-eye mr-1"></i> Dibagikan</span>
                                 </div>
 
-                                <div style="display: flex; gap: 8px; margin-top: 15px;">
-                                    <a href="{{ route('guru.materials.edit', $material) }}" class="btn btn-sm" style="flex: 1; background: #0066cc; color: white; text-decoration: none; text-align: center;">
-                                        <i class="fas fa-edit"></i> Edit
+                                <div class="flex gap-2 mt-4">
+                                    <a href="{{ route('guru.materials.edit', $material) }}" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-3 rounded text-xs transition text-center">
+                                        <i class="fas fa-edit mr-1"></i> Edit
                                     </a>
-                                    <form method="POST" action="{{ route('guru.materials.destroy', $material) }}" style="flex: 1;" onsubmit="return confirm('Yakin ingin menghapus materi ini?')">
+                                    <form method="POST" action="{{ route('guru.materials.destroy', $material) }}" class="flex-1 delete-form">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="btn btn-sm" style="width: 100%; background: #dc3545; color: white; border: none; cursor: pointer;">
-                                            <i class="fas fa-trash"></i> Hapus
+                                        <button type="button" class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-3 rounded text-xs transition"
+                                            onclick="confirmDelete(event, '{{ $material->title }}')">
+                                            <i class="fas fa-trash mr-1"></i> Hapus
                                         </button>
                                     </form>
                                 </div>
@@ -86,9 +89,25 @@
     </div>
 
     <!-- BACK BUTTON -->
-    <div style="margin-top: 30px;">
-        <a href="{{ route('guru.dashboard') }}" class="btn btn-secondary" style="text-decoration: none;">
+    <div class="mt-8">
+        <a href="{{ route('guru.dashboard') }}" class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-6 rounded-lg text-sm transition">
             <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
         </a>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+function confirmDelete(event, name) {
+    event.preventDefault();
+    const form = event.target.closest('form');
+    showConfirmation(
+        `Apakah Anda yakin ingin menghapus materi "${name}"?`,
+        'Konfirmasi Penghapusan',
+        function() {
+            form.submit();
+        }
+    );
+}
+</script>
+@endpush

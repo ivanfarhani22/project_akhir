@@ -4,24 +4,26 @@
 @section('icon', 'fas fa-book')
 
 @section('content')
-    <div style="margin-bottom: 30px;">
-        <p style="color: #999; font-size: 14px; margin-bottom: 5px;">Edit Materi</p>
-        <h1 class="page-title">
-            <i class="fas fa-edit"></i>
+    <!-- PAGE HEADER -->
+    <div class="mb-8">
+        <p class="text-gray-600 text-sm mb-2">Edit Materi</p>
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3 mb-2">
+            <i class="fas fa-edit text-amber-500"></i>
             {{ $material->title }}
         </h1>
-        <p class="page-description">Update atau upload versi materi baru</p>
+        <p class="text-gray-600 text-sm">Update atau upload versi materi baru</p>
     </div>
 
-    <div style="max-width: 700px;">
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">Edit Materi Pembelajaran</div>
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h2 class="font-bold text-gray-900 text-lg">Edit Materi Pembelajaran</h2>
             </div>
-            <div class="card-body">
-                <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0066cc;">
-                    <p style="font-size: 13px; color: #0066cc; margin: 0;">
-                        <i class="fas fa-info-circle"></i>
+            <div class="p-6">
+                <!-- INFO BOX -->
+                <div class="bg-blue-50 px-4 py-3 rounded-lg mb-6 border-l-4 border-blue-500">
+                    <p class="text-sm text-blue-900">
+                        <i class="fas fa-info-circle mr-2"></i>
                         <strong>Info:</strong> Jika Anda upload file baru, versi materi akan otomatis bertambah ({{ $material->version }} → {{ $material->version + 1 }})
                     </p>
                 </div>
@@ -30,81 +32,84 @@
                     @csrf
                     @method('PUT')
 
-                    <div style="margin-bottom: 20px;">
-                        <label for="title" style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                            Judul Materi <span style="color: var(--primary);">*</span>
+                    <!-- TITLE FIELD -->
+                    <div class="mb-6">
+                        <label for="title" class="block font-semibold text-gray-900 mb-2">
+                            Judul Materi <span class="text-red-500">*</span>
                         </label>
                         <input 
                             type="text" 
                             name="title" 
                             id="title"
-                            style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px;"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition"
                             value="{{ old('title', $material->title) }}" 
                             required
                         >
                         @error('title')
-                            <span style="color: var(--danger); font-size: 12px; margin-top: 5px; display: block;">{{ $message }}</span>
+                            <span class="text-red-600 text-xs mt-2 block">{{ $message }}</span>
                         @enderror
                     </div>
 
-                    <div style="margin-bottom: 20px;">
-                        <label for="description" style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
+                    <!-- DESCRIPTION FIELD -->
+                    <div class="mb-6">
+                        <label for="description" class="block font-semibold text-gray-900 mb-2">
                             Deskripsi
                         </label>
                         <textarea 
                             name="description" 
                             id="description"
-                            style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; min-height: 100px; resize: vertical;"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition resize-none"
                             rows="4"
                         >{{ old('description', $material->description) }}</textarea>
                         @error('description')
-                            <span style="color: var(--danger); font-size: 12px; margin-top: 5px; display: block;">{{ $message }}</span>
+                            <span class="text-red-600 text-xs mt-2 block">{{ $message }}</span>
                         @enderror
                     </div>
 
-                    <div style="margin-bottom: 30px;">
-                        <label style="display: block; font-weight: 600; margin-bottom: 10px; color: var(--secondary);">
-                            File Saat Ini
-                        </label>
-                        <div style="background: #f5f5f5; padding: 12px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                    <!-- CURRENT FILE -->
+                    <div class="mb-8">
+                        <label class="block font-semibold text-gray-900 mb-3">File Saat Ini</label>
+                        <div class="bg-gray-100 px-4 py-3 rounded-lg mb-4 flex justify-between items-center">
                             <div>
-                                <p style="margin: 0; font-weight: 600; color: var(--secondary); font-size: 14px;">
-                                    <i class="fas fa-file"></i> {{ $material->file_type }}
+                                <p class="font-semibold text-gray-900 text-sm">
+                                    <i class="fas fa-file mr-2"></i> {{ $material->file_type }}
                                 </p>
-                                <p style="margin: 5px 0 0; font-size: 12px; color: #999;">
+                                <p class="text-xs text-gray-600 mt-1">
                                     Versi {{ $material->version }} • Dibuat {{ $material->created_at->format('d M Y') }}
                                 </p>
                             </div>
                         </div>
 
-                        <label for="file" style="display: block; font-weight: 600; margin-bottom: 10px; color: var(--secondary);">
+                        <!-- FILE UPLOAD FIELD -->
+                        <label for="file" class="block font-semibold text-gray-900 mb-3">
                             Upload File Baru (Opsional)
                         </label>
-                        <div style="position: relative; border: 2px dashed var(--border); border-radius: 12px; padding: 40px 20px; text-align: center; background: #fafafa; cursor: pointer; transition: all 0.3s ease;" id="dropzone">
-                            <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: var(--primary); margin-bottom: 15px; display: block;"></i>
-                            <p style="font-weight: 600; color: var(--secondary); margin-bottom: 5px;">Klik atau drag file di sini</p>
-                            <p style="color: #999; font-size: 13px;">PDF, DOC, XLS, PPT, ZIP (Max 10MB)</p>
+                        <div class="relative border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 hover:border-amber-400 hover:bg-amber-50 transition cursor-pointer" id="dropzone">
+                            <i class="fas fa-cloud-upload-alt text-amber-500 text-5xl mb-4 block"></i>
+                            <p class="font-semibold text-gray-900 mb-1">Klik atau drag file di sini</p>
+                            <p class="text-gray-600 text-sm">PDF, DOC, XLS, PPT, ZIP (Max 10MB)</p>
                             <input 
                                 type="file" 
                                 name="file" 
                                 id="file"
-                                style="display: none;"
+                                class="hidden"
                             >
                         </div>
-                        <p style="color: #28a745; font-size: 12px; margin-top: 10px;" id="filename"></p>
+                        <p class="text-green-600 text-xs mt-3 font-medium" id="filename"></p>
                         @error('file')
-                            <span style="color: var(--danger); font-size: 12px; margin-top: 5px; display: block;">{{ $message }}</span>
+                            <span class="text-red-600 text-xs mt-2 block">{{ $message }}</span>
                         @enderror
                     </div>
 
-                    <div style="display: flex; gap: 10px;">
+                    <!-- ACTION BUTTONS -->
+                    <div class="flex gap-3">
                         <button 
                             type="submit" 
-                            class="btn btn-primary"
+                            class="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-flex items-center gap-2"
                         >
                             <i class="fas fa-save"></i> Simpan Perubahan
                         </button>
-                        <a href="{{ route('guru.materials.index', ['class_id' => $material->eClass->id]) }}" class="btn btn-secondary" style="text-decoration: none;">
+                        <a href="{{ route('guru.materials.index', ['class_id' => $material->eClass->id]) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-6 rounded-lg text-sm transition inline-flex items-center gap-2">
                             <i class="fas fa-times"></i> Batal
                         </a>
                     </div>
@@ -122,19 +127,16 @@
 
         dropzone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            dropzone.style.borderColor = 'var(--primary)';
-            dropzone.style.background = '#fff5f5';
+            dropzone.classList.add('border-amber-500', 'bg-amber-50');
         });
 
         dropzone.addEventListener('dragleave', () => {
-            dropzone.style.borderColor = 'var(--border)';
-            dropzone.style.background = '#fafafa';
+            dropzone.classList.remove('border-amber-500', 'bg-amber-50');
         });
 
         dropzone.addEventListener('drop', (e) => {
             e.preventDefault();
-            dropzone.style.borderColor = 'var(--border)';
-            dropzone.style.background = '#fafafa';
+            dropzone.classList.remove('border-amber-500', 'bg-amber-50');
             fileInput.files = e.dataTransfer.files;
             updateFilename();
         });

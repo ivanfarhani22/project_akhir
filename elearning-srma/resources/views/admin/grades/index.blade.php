@@ -29,13 +29,13 @@
     </div>
 
     <!-- Filter Card -->
-    <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-6">
-        <form action="{{ route('admin.grades.index') }}" method="GET" class="flex gap-4 items-end flex-wrap">
-            <div class="w-48">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
+    <div class="bg-white rounded-lg shadow-md border border-gray-200 p-3 sm:p-6 mb-6">
+        <form action="{{ route('admin.grades.index') }}" method="GET" class="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-end flex-wrap">
+            <div class="w-full sm:w-48">
+                <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                     <i class="fas fa-door-open text-red-600 mr-2"></i>Kelas
                 </label>
-                <select name="class" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-red-600 focus:outline-none">
+                <select name="class" class="w-full px-3 sm:px-4 py-2 border-2 border-gray-300 rounded-lg text-xs sm:text-sm focus:border-red-600 focus:outline-none">
                     <option value="">Semua Kelas</option>
                     @foreach($classes as $class)
                         <option value="{{ $class->id }}" @selected(request('class') == $class->id)>
@@ -45,27 +45,27 @@
                 </select>
             </div>
             <div class="flex-1 min-w-xs">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
                     <i class="fas fa-search text-red-600 mr-2"></i>Nama Siswa
                 </label>
                 <input type="text" name="student" placeholder="Cari nama siswa..." 
                     value="{{ request('student') }}" 
-                    class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-red-600 focus:outline-none">
+                    class="w-full px-3 sm:px-4 py-2 border-2 border-gray-300 rounded-lg text-xs sm:text-sm focus:border-red-600 focus:outline-none">
             </div>
 
             <!-- Search Button -->
-            <button type="submit" class="inline-flex items-center gap-2 bg-red-500 text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition">
+            <button type="submit" class="inline-flex items-center gap-2 bg-red-500 text-white px-3 sm:px-6 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-red-600 transition justify-center whitespace-nowrap">
                 <i class="fas fa-search"></i> Cari
             </button>
 
             <!-- Reset Button -->
-            <a href="{{ route('admin.grades.index') }}" class="inline-flex items-center gap-2 bg-gray-200 text-gray-900 px-6 py-2 rounded-lg font-semibold text-sm hover:bg-gray-300 transition">
+            <a href="{{ route('admin.grades.index') }}" class="inline-flex items-center gap-2 bg-gray-200 text-gray-900 px-3 sm:px-6 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-gray-300 transition justify-center whitespace-nowrap">
                 <i class="fas fa-redo"></i> Reset
             </a>
         </form>
 
         <!-- Info Text -->
-        <p class="text-gray-500 text-sm mt-4">
+        <p class="text-gray-500 text-xs sm:text-sm mt-4">
             Menampilkan <strong>{{ $grades->count() }}</strong> dari <strong>{{ $grades->total() }}</strong> nilai
         </p>
     </div>

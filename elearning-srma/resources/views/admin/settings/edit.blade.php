@@ -252,21 +252,6 @@ body.font-large  { font-size: 18px; }
                     </div>
                 </div>
 
-                <div class="section-title">Tampilan</div>
-                <div class="switch-box">
-                    <div class="switch-box-label">
-                        <h4><i class="fas fa-moon" style="color: #dc2626; margin-right: 6px;"></i>Mode Gelap</h4>
-                        <p>Aktifkan tampilan gelap untuk semua pengguna</p>
-                    </div>
-                    <input 
-                        type="checkbox" 
-                        id="dark_mode"
-                        name="dark_mode" 
-                        class="checkbox-toggle"
-                        value="1"
-                        {{ $themeSettings['dark_mode'] === 'true' ? 'checked' : '' }}>
-                </div>
-
                 <div class="action-buttons">
                     <a href="{{ route('admin.dashboard') }}" class="btn btn-cancel">
                         <i class="fas fa-xmark"></i> Batal
@@ -302,10 +287,10 @@ body.font-large  { font-size: 18px; }
                                 {{ $banner->is_active ? 'Aktif' : 'Nonaktif' }}
                             </span>
                             <div class="banner-actions">
-                                <form method="POST" action="{{ route('admin.banners.delete', $banner->id) }}" style="margin: 0;" onsubmit="return confirm('Hapus banner ini?');">
+                                <form method="POST" action="{{ route('admin.banners.delete', $banner->id) }}" style="margin: 0;" class="delete-form">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="banner-btn btn-delete" title="Hapus">
+                                    <button type="button" onclick="confirmDelete(event, 'Banner')" class="banner-btn btn-delete" title="Hapus">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -370,29 +355,13 @@ body.font-large  { font-size: 18px; }
 </div>
 
 <script>
-// ─── Terapkan dark mode & font size dari server saat halaman load ─────────────
+// ─── Terapkan font size dari server saat halaman load ─────────────
 (function() {
-    const isDark   = {{ $themeSettings['dark_mode'] === 'true' ? 'true' : 'false' }};
     const fontSize = '{{ $themeSettings['font_size'] }}';
-
-    if (isDark) {
-        document.body.classList.add('dark-mode');
-    } else {
-        document.body.classList.remove('dark-mode');
-    }
 
     document.body.classList.remove('font-small', 'font-normal', 'font-large');
     document.body.classList.add('font-' + fontSize);
 })();
-
-// ─── Preview real-time dark mode saat toggle diubah ──────────────────────────
-document.getElementById('dark_mode').addEventListener('change', function() {
-    if (this.checked) {
-        document.body.classList.add('dark-mode');
-    } else {
-        document.body.classList.remove('dark-mode');
-    }
-});
 
 // ─── Preview real-time font size saat select diubah ──────────────────────────
 document.getElementById('font_size').addEventListener('change', function() {
@@ -435,14 +404,14 @@ function handleBannerUpload(input) {
 
 // ─── Konfirmasi reset ─────────────────────────────────────────────────────────
 function confirmReset() {
-    if (confirm('Reset semua pengaturan ke nilai default?\nTindakan ini tidak dapat dibatalkan.')) {
+    showConfirmation('Reset semua pengaturan ke nilai default?\nTindakan ini tidak dapat dibatalkan.', 'Konfirmasi Reset', function() {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '{{ route('admin.settings.reset') }}';
         form.innerHTML = '<input type="hidden" name="_token" value="{{ csrf_token() }}">';
         document.body.appendChild(form);
         form.submit();
-    }
+    });
 }
 
 // ─── Auto-hide alert setelah 5 detik ─────────────────────────────────────────
@@ -453,6 +422,14 @@ setTimeout(function() {
         setTimeout(() => el.remove(), 500);
     });
 }, 5000);
+
+function confirmDelete(event, name) {
+    event.preventDefault();
+    const form = event.target.closest('form');
+    showConfirmation(`Yakin ingin menghapus ${name}?`, 'Konfirmasi Hapus', function() {
+        form.submit();
+    });
+}
 </script>
 
 @endsection

@@ -5,45 +5,45 @@
 
 @section('content')
     <!-- Header Section -->
-    <div class="flex justify-between items-start mb-8">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-8 gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-3 mb-2">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-3 mb-2">
                 <i class="fas fa-book text-red-500"></i>
                 Manajemen Mata Pelajaran
             </h1>
-            <p class="text-gray-500 text-sm">Kelola semua mata pelajaran di sekolah</p>
+            <p class="text-gray-500 text-xs sm:text-sm">Kelola semua mata pelajaran di sekolah</p>
         </div>
-        <a href="{{ route('admin.subjects.create') }}" class="inline-flex items-center gap-2 bg-red-500 text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition">
-            <i class="fas fa-plus"></i> Tambah Mata Pelajaran
+        <a href="{{ route('admin.subjects.create') }}" class="inline-flex items-center gap-2 bg-red-500 text-white px-3 sm:px-6 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-red-600 transition whitespace-nowrap">
+            <i class="fas fa-plus"></i> <span class="hidden sm:inline">Tambah Mata Pelajaran</span>
         </a>
     </div>
 
     <!-- Search & Filter Bar -->
-    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-        <form method="GET" action="{{ route('admin.subjects.index') }}" class="flex gap-4 items-end">
+    <div class="bg-white rounded-lg shadow-sm p-3 sm:p-6 mb-6">
+        <form method="GET" action="{{ route('admin.subjects.index') }}" class="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-end">
             <!-- Search Input -->
-            <div class="flex-1">
-                <label class="block text-sm font-semibold text-gray-900 mb-2">
+            <div class="flex-1 min-w-xs">
+                <label class="block text-xs sm:text-sm font-semibold text-gray-900 mb-2">
                     <i class="fas fa-search"></i> Cari Mata Pelajaran
                 </label>
                 <input type="text" name="search" placeholder="Cari nama, kode, atau deskripsi..." 
                        value="{{ request('search') }}"
-                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition">
+                       class="w-full px-3 sm:px-4 py-2 border-2 border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-red-500 transition">
             </div>
 
             <!-- Search Button -->
-            <button type="submit" class="inline-flex items-center gap-2 bg-red-500 text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition">
-                <i class="fas fa-search"></i> Cari
+            <button type="submit" class="inline-flex items-center justify-center gap-2 bg-red-500 text-white px-3 sm:px-6 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-red-600 transition whitespace-nowrap">
+                <i class="fas fa-search"></i> <span class="hidden sm:inline">Cari</span>
             </button>
 
             <!-- Reset Button -->
-            <a href="{{ route('admin.subjects.index') }}" class="inline-flex items-center gap-2 bg-gray-300 text-gray-900 px-6 py-2 rounded-lg font-semibold text-sm hover:bg-gray-400 transition">
-                <i class="fas fa-redo"></i> Reset
+            <a href="{{ route('admin.subjects.index') }}" class="inline-flex items-center justify-center gap-2 bg-gray-300 text-gray-900 px-3 sm:px-6 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-gray-400 transition whitespace-nowrap">
+                <i class="fas fa-redo"></i> <span class="hidden sm:inline">Reset</span>
             </a>
         </form>
 
         <!-- Info Text -->
-        <small class="text-gray-500 mt-4 block">
+        <small class="text-gray-500 mt-4 block text-xs sm:text-sm">
             Menampilkan {{ $subjects->count() }} dari {{ $subjects->total() }} mata pelajaran
         </small>
     </div>
@@ -51,10 +51,10 @@
     <!-- Subjects Table -->
     <div class="bg-white rounded-lg shadow-sm overflow-hidden">
         @if($subjects->isEmpty())
-            <div class="text-center py-16 px-6">
-                <i class="fas fa-inbox text-6xl text-gray-300 mb-4 block"></i>
-                <h3 class="text-gray-600 font-semibold mb-2">Tidak ada mata pelajaran ditemukan</h3>
-                <p class="text-gray-500 mb-6">
+            <div class="text-center py-12 sm:py-16 px-3 sm:px-6">
+                <i class="fas fa-inbox text-5xl sm:text-6xl text-gray-300 mb-4 block"></i>
+                <h3 class="text-gray-600 font-semibold mb-2 text-sm sm:text-base">Tidak ada mata pelajaran ditemukan</h3>
+                <p class="text-gray-500 mb-6 text-xs sm:text-sm">
                     @if(request('search'))
                         Coba ubah pencarian Anda atau <a href="{{ route('admin.subjects.index') }}" class="text-red-500 font-semibold hover:underline">reset filter</a>
                     @else
@@ -64,41 +64,41 @@
             </div>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full">
+                <table class="w-full text-xs sm:text-sm">
                     <thead class="bg-gray-50 border-b-2 border-gray-200">
                         <tr>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Nama Mata Pelajaran</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Kode</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Deskripsi</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Aksi</th>
+                            <th class="px-3 sm:px-6 py-3 sm:py-4 text-left font-semibold text-gray-900">Nama Mata Pelajaran</th>
+                            <th class="px-3 sm:px-6 py-3 sm:py-4 text-left font-semibold text-gray-900">Kode</th>
+                            <th class="px-3 sm:px-6 py-3 sm:py-4 text-left font-semibold text-gray-900 hidden sm:table-cell">Deskripsi</th>
+                            <th class="px-3 sm:px-6 py-3 sm:py-4 text-left font-semibold text-gray-900">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
                         @foreach($subjects as $subject)
                             <tr class="hover:bg-gray-50 transition">
-                                <td class="px-6 py-4">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4">
                                     <span class="font-semibold text-gray-900 flex items-center gap-2">
-                                        <i class="fas fa-book text-red-500"></i> {{ $subject->name }}
+                                        <i class="fas fa-book text-red-500 flex-shrink-0"></i> <span class="truncate">{{ $subject->name }}</span>
                                     </span>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <code class="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4">
+                                    <code class="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-2 sm:px-3 py-1 rounded whitespace-nowrap">
                                         {{ $subject->code }}
                                     </code>
                                 </td>
-                                <td class="px-6 py-4 text-gray-600 text-sm">
+                                <td class="px-3 sm:px-6 py-3 sm:py-4 text-gray-600 hidden sm:table-cell">
                                     {{ Str::limit($subject->description ?? '-', 60) }}
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex gap-2">
-                                        <a href="{{ route('admin.subjects.edit', $subject) }}" class="inline-flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded text-xs font-semibold hover:bg-blue-600 transition">
-                                            <i class="fas fa-edit"></i> Edit
+                                <td class="px-3 sm:px-6 py-3 sm:py-4">
+                                    <div class="flex gap-1 sm:gap-2 flex-col sm:flex-row">
+                                        <a href="{{ route('admin.subjects.edit', $subject) }}" class="inline-flex items-center justify-center gap-2 bg-blue-500 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded text-xs font-semibold hover:bg-blue-600 transition whitespace-nowrap">
+                                            <i class="fas fa-edit"></i> <span class="hidden sm:inline">Edit</span>
                                         </a>
-                                        <form method="POST" action="{{ route('admin.subjects.destroy', $subject) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus mata pelajaran ini?')">
+                                        <form method="POST" action="{{ route('admin.subjects.destroy', $subject) }}" class="inline w-full sm:w-auto delete-form">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="inline-flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded text-xs font-semibold hover:bg-red-600 transition">
-                                                <i class="fas fa-trash"></i> Hapus
+                                            <button type="button" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-red-500 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded text-xs font-semibold hover:bg-red-600 transition whitespace-nowrap" onclick="confirmDelete(event, '{{ $subject->name }}')">
+                                                <i class="fas fa-trash"></i> <span class="hidden sm:inline">Hapus</span>
                                             </button>
                                         </form>
                                     </div>
@@ -111,31 +111,31 @@
 
             <!-- Pagination -->
             @if($subjects->hasPages())
-                <div class="flex justify-center items-center gap-4 py-8 px-6 border-t border-gray-200">
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4 py-6 sm:py-8 px-3 sm:px-6 border-t border-gray-200">
                     <!-- Previous Button -->
                     @if($subjects->onFirstPage())
-                        <button disabled class="inline-flex items-center gap-2 bg-gray-200 text-gray-400 px-4 py-2 rounded-lg font-semibold text-sm cursor-not-allowed">
-                            <i class="fas fa-chevron-left"></i> Sebelumnya
+                        <button disabled class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gray-200 text-gray-400 px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm cursor-not-allowed">
+                            <i class="fas fa-chevron-left"></i> <span class="hidden sm:inline">Sebelumnya</span>
                         </button>
                     @else
-                        <a href="{{ $subjects->previousPageUrl() }}" class="inline-flex items-center gap-2 bg-gray-300 text-gray-900 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gray-400 transition">
-                            <i class="fas fa-chevron-left"></i> Sebelumnya
+                        <a href="{{ $subjects->previousPageUrl() }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gray-300 text-gray-900 px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-gray-400 transition">
+                            <i class="fas fa-chevron-left"></i> <span class="hidden sm:inline">Sebelumnya</span>
                         </a>
                     @endif
 
                     <!-- Page Info -->
-                    <div class="px-4 py-2 bg-gray-100 rounded-lg text-sm text-gray-700 font-semibold">
-                        Halaman {{ $subjects->currentPage() }} dari {{ $subjects->lastPage() }}
+                    <div class="px-3 sm:px-4 py-2 bg-gray-100 rounded-lg text-xs sm:text-sm text-gray-700 font-semibold whitespace-nowrap">
+                        Hal. {{ $subjects->currentPage() }}/{{ $subjects->lastPage() }}
                     </div>
 
                     <!-- Next Button -->
                     @if($subjects->hasMorePages())
-                        <a href="{{ $subjects->nextPageUrl() }}" class="inline-flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition">
-                            Selanjutnya <i class="fas fa-chevron-right"></i>
+                        <a href="{{ $subjects->nextPageUrl() }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-red-500 text-white px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-red-600 transition">
+                            <span class="hidden sm:inline">Selanjutnya</span> <i class="fas fa-chevron-right"></i>
                         </a>
                     @else
-                        <button disabled class="inline-flex items-center gap-2 bg-gray-200 text-gray-400 px-4 py-2 rounded-lg font-semibold text-sm cursor-not-allowed">
-                            Selanjutnya <i class="fas fa-chevron-right"></i>
+                        <button disabled class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gray-200 text-gray-400 px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm cursor-not-allowed">
+                            <span class="hidden sm:inline">Selanjutnya</span> <i class="fas fa-chevron-right"></i>
                         </button>
                     @endif
                 </div>
@@ -144,3 +144,18 @@
     </div>
 @endsection
 
+@push('scripts')
+<script>
+function confirmDelete(event, name) {
+    event.preventDefault();
+    const form = event.target.closest('form');
+    showConfirmation(
+        `Apakah Anda yakin ingin menghapus mata pelajaran "${name}"? Aksi ini tidak dapat diubah.`,
+        'Konfirmasi Penghapusan',
+        function() {
+            form.submit();
+        }
+    );
+}
+</script>
+@endpush

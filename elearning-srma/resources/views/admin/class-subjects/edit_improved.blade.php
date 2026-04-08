@@ -114,10 +114,10 @@
                             <i class="fas fa-arrow-left"></i> Batal
                         </a>
                         <div class="flex gap-3">
-                            <form method="POST" action="{{ route('admin.class-subjects.destroy', $classSubject) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus mata pelajaran ini?');">
+                            <form method="POST" action="{{ route('admin.class-subjects.destroy', $classSubject) }}" class="inline delete-form">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="inline-flex items-center gap-2 px-6 py-2 bg-red-600 text-white rounded-lg font-semibold text-sm hover:bg-red-700 transition">
+                                <button type="button" onclick="confirmDelete(event, '{{ $classSubject->name }}')" class="inline-flex items-center gap-2 px-6 py-2 bg-red-600 text-white rounded-lg font-semibold text-sm hover:bg-red-700 transition">
                                     <i class="fas fa-trash"></i> Hapus
                                 </button>
                             </form>
@@ -173,4 +173,17 @@
             background-color: #ef4444 !important;
         }
     </style>
+
+@push('scripts')
+<script>
+function confirmDelete(event, name) {
+    event.preventDefault();
+    const form = event.target.closest('form');
+    showConfirmation(`Yakin ingin menghapus mata pelajaran "${name}"?`, 'Konfirmasi Hapus', function() {
+        form.submit();
+    });
+}
+</script>
+@endpush
+
 @endsection

@@ -4,43 +4,42 @@
 @section('icon', 'fas fa-chalkboard')
 
 @section('content')
-    <div style="margin-bottom: 30px;">
-        <h1 class="page-title">
-            <i class="fas fa-chalkboard"></i>
+    <!-- PAGE HEADER -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3 mb-2">
+            <i class="fas fa-chalkboard text-blue-500"></i>
             Kelas Saya
         </h1>
-        <p class="page-description">Daftar kelas yang Anda ikuti</p>
+        <p class="text-gray-600 text-sm">Daftar kelas yang Anda ikuti</p>
     </div>
 
     @if($classes->count() > 0)
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             @foreach($classes as $class)
-                <div class="card">
-                    <div class="card-body">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start gap-3 mb-4">
                             <div>
-                                <h3 style="font-size: 18px; font-weight: 600; color: var(--secondary); margin-bottom: 5px;">
-                                    {{ $class->name }}
-                                </h3>
-                                <p style="color: #999; font-size: 14px;">{{ $class->subject->name }}</p>
+                                <h3 class="text-lg font-bold text-gray-900 mb-1">{{ $class->name }}</h3>
+                                <p class="text-gray-600 text-sm">{{ $class->subject->name }}</p>
                             </div>
-                            <span style="background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 whitespace-nowrap">
                                 {{ $class->students->count() }} Siswa
                             </span>
                         </div>
 
-                        <p style="color: #666; font-size: 13px; margin-bottom: 5px;">
+                        <p class="text-gray-700 text-sm mb-2">
                             <strong>Guru:</strong> {{ $class->teacher->name }}
                         </p>
-                        <p style="color: #999; font-size: 12px; margin-bottom: 15px;">
+                        <p class="text-gray-600 text-sm mb-6 line-clamp-2">
                             {{ $class->description }}
                         </p>
 
-                        <div style="border-top: 1px solid var(--border); padding-top: 15px; display: flex; gap: 10px;">
-                            <a href="#" class="btn btn-primary btn-sm" style="flex: 1; justify-content: center;">
+                        <div class="border-t border-gray-200 pt-4 flex gap-2">
+                            <a href="#" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg text-sm transition text-center inline-flex items-center justify-center gap-2">
                                 <i class="fas fa-book"></i> Materi
                             </a>
-                            <a href="#" class="btn btn-secondary btn-sm" style="flex: 1; justify-content: center;">
+                            <a href="#" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg text-sm transition text-center inline-flex items-center justify-center gap-2">
                                 <i class="fas fa-tasks"></i> Tugas
                             </a>
                         </div>
@@ -49,11 +48,9 @@
             @endforeach
         </div>
     @else
-        <div class="card">
-            <div class="card-body" style="text-align: center; padding: 60px 20px;">
-                <i class="fas fa-inbox" style="font-size: 64px; color: #ddd; margin-bottom: 20px; display: block;"></i>
-                <p style="color: #999; font-size: 16px;">Anda belum terdaftar di kelas apapun</p>
-            </div>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-12 text-center">
+            <i class="fas fa-inbox text-gray-300 text-5xl mb-4 block"></i>
+            <p class="text-gray-600 text-base">Anda belum terdaftar di kelas apapun</p>
         </div>
     @endif
 @endsection

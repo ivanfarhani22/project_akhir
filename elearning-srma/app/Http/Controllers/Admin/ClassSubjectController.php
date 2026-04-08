@@ -139,4 +139,27 @@ class ClassSubjectController extends Controller
         return redirect()->route('admin.classes.show', $class)
                         ->with('success', 'Mata pelajaran berhasil dihapus!');
     }
+
+    /**
+     * Ambil subjects untuk kelas tertentu (untuk AJAX)
+     */
+    public function getByClass(EClass $class)
+    {
+        $classSubjects = $class->classSubjects()
+                              ->with(['subject', 'teacher'])
+                              ->get();
+        
+        return response()->json($classSubjects);
+    }
+
+    /**
+     * Ambil students untuk class-subject tertentu (untuk AJAX)
+     */
+    public function getStudents(ClassSubject $classSubject)
+    {
+        $students = $classSubject->eClass->students()
+                                 ->get(['id', 'name']);
+        
+        return response()->json($students);
+    }
 }

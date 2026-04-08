@@ -29,10 +29,10 @@
             <a href="{{ route('admin.assignments.edit', $assignment) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition font-semibold">
                 <i class="fas fa-pencil"></i> Edit
             </a>
-            <form action="{{ route('admin.assignments.destroy', $assignment) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin?')">
+            <form action="{{ route('admin.assignments.destroy', $assignment) }}" method="POST" class="inline delete-form">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-semibold">
+                <button type="button" onclick="confirmDelete(event, '{{ $assignment->title }}')" class="inline-flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-semibold">
                     <i class="fas fa-trash"></i> Hapus
                 </button>
             </form>
@@ -274,5 +274,13 @@ document.addEventListener('click', function(event) {
         event.target.classList.add('hidden');
     }
 });
+
+function confirmDelete(event, name) {
+    event.preventDefault();
+    const form = event.target.closest('form');
+    showConfirmation(`Yakin ingin menghapus tugas "${name}"?`, 'Konfirmasi Hapus', function() {
+        form.submit();
+    });
+}
 </script>
 @endsection

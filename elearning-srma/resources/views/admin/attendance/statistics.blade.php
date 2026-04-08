@@ -4,39 +4,39 @@
 @section('icon', 'fas fa-chart-bar')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 py-8">
+<div class="max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
     <!-- Breadcrumb -->
-    <nav class="flex items-center space-x-2 mb-8 text-sm text-gray-600">
+    <nav class="flex items-center space-x-2 mb-8 text-xs sm:text-sm text-gray-600 flex-wrap">
         <a href="{{ route('admin.dashboard') }}" class="hover:text-red-600 transition">Dashboard</a>
         <span class="text-gray-400">/</span>
         <a href="{{ route('admin.attendance.index') }}" class="hover:text-red-600 transition">Presensi</a>
         <span class="text-gray-400">/</span>
-        <span class="text-red-600 font-semibold">Statistik</span>
+        <span class="text-red-600 font-semibold truncate">Statistik</span>
     </nav>
 
     <!-- Header -->
-    <div class="flex items-center justify-between mb-8">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-8 gap-4">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <span class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3 flex-wrap">
+                <span class="w-9 sm:w-10 h-9 sm:h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600 text-sm sm:text-base flex-shrink-0">
                     <i class="fas fa-chart-bar"></i>
                 </span>
-                Statistik Presensi
+                <span class="break-words">Statistik Presensi</span>
             </h1>
-            <p class="text-gray-600 mt-2">Analisis lengkap data presensi siswa</p>
+            <p class="text-gray-600 mt-2 text-xs sm:text-sm">Analisis lengkap data presensi siswa</p>
         </div>
-        <a href="{{ route('admin.attendance.index') }}" class="inline-flex items-center gap-2 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold">
-            <i class="fas fa-arrow-left"></i> Kembali
+        <a href="{{ route('admin.attendance.index') }}" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold text-xs sm:text-sm whitespace-nowrap">
+            <i class="fas fa-arrow-left"></i> <span class="hidden sm:inline">Kembali</span><span class="sm:hidden">Back</span>
         </a>
     </div>
 
     <!-- Filter Card -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 class="font-semibold text-lg text-gray-900 mb-4">Filter Statistik</h2>
-        <form method="GET" action="{{ route('admin.attendance.statistics') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="bg-white rounded-lg shadow-md p-3 sm:p-6 mb-8">
+        <h2 class="font-semibold text-base sm:text-lg text-gray-900 mb-4">Filter Statistik</h2>
+        <form method="GET" action="{{ route('admin.attendance.statistics') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Kelas</label>
-                <select name="class_id" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition" onchange="this.form.submit()">
+                <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Kelas</label>
+                <select name="class_id" class="w-full px-3 sm:px-4 py-2 border-2 border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-red-500 transition" onchange="this.form.submit()">
                     <option value="">-- Semua Kelas --</option>
                     @foreach($classes as $class)
                         <option value="{{ $class->id }}" {{ request('class_id') == $class->id ? 'selected' : '' }}>
@@ -47,51 +47,51 @@
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Dari Tanggal</label>
-                <input type="date" name="from" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition" value="{{ request('from') }}" onchange="this.form.submit()">
+                <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Dari Tanggal</label>
+                <input type="date" name="from" class="w-full px-3 sm:px-4 py-2 border-2 border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-red-500 transition" value="{{ request('from') }}" onchange="this.form.submit()">
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Sampai Tanggal</label>
-                <input type="date" name="to" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition" value="{{ request('to') }}" onchange="this.form.submit()">
+                <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Sampai Tanggal</label>
+                <input type="date" name="to" class="w-full px-3 sm:px-4 py-2 border-2 border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-red-500 transition" value="{{ request('to') }}" onchange="this.form.submit()">
             </div>
         </form>
     </div>
 
     <!-- Main Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-8">
         <!-- Total Sessions -->
-        <div class="bg-gradient-to-br from-red-500 to-red-600 text-white rounded-lg shadow-md p-6">
+        <div class="bg-gradient-to-br from-red-500 to-red-600 text-white rounded-lg shadow-md p-3 sm:p-6">
             <div class="text-center">
-                <p class="text-red-100 text-sm font-semibold mb-2">Total Sesi</p>
-                <h3 class="text-4xl font-bold">{{ $statistics['total_sessions'] }}</h3>
+                <p class="text-red-100 text-xs sm:text-sm font-semibold mb-2">Total Sesi</p>
+                <h3 class="text-2xl sm:text-4xl font-bold">{{ $statistics['total_sessions'] }}</h3>
                 <p class="text-red-100 text-xs mt-2">Sesi presensi</p>
             </div>
         </div>
 
         <!-- Present -->
-        <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-lg shadow-md p-6">
+        <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-lg shadow-md p-3 sm:p-6">
             <div class="text-center">
-                <p class="text-green-100 text-sm font-semibold mb-2">Hadir</p>
-                <h3 class="text-4xl font-bold">{{ $statistics['present'] }}</h3>
+                <p class="text-green-100 text-xs sm:text-sm font-semibold mb-2">Hadir</p>
+                <h3 class="text-2xl sm:text-4xl font-bold">{{ $statistics['present'] }}</h3>
                 <p class="text-green-100 text-xs mt-2">{{ $statistics['attendance_rate'] }}%</p>
             </div>
         </div>
 
         <!-- Absent -->
-        <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-lg shadow-md p-6">
+        <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-lg shadow-md p-3 sm:p-6">
             <div class="text-center">
-                <p class="text-orange-100 text-sm font-semibold mb-2">Absen</p>
-                <h3 class="text-4xl font-bold">{{ $statistics['absent'] }}</h3>
+                <p class="text-orange-100 text-xs sm:text-sm font-semibold mb-2">Absen</p>
+                <h3 class="text-2xl sm:text-4xl font-bold">{{ $statistics['absent'] }}</h3>
                 <p class="text-orange-100 text-xs mt-2">Siswa absen</p>
             </div>
         </div>
 
         <!-- Late / Sick -->
-        <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-lg shadow-md p-6">
+        <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-lg shadow-md p-3 sm:p-6">
             <div class="text-center">
-                <p class="text-yellow-100 text-sm font-semibold mb-2">Terlambat/Sakit</p>
-                <h3 class="text-4xl font-bold">{{ $statistics['late'] + $statistics['sick'] }}</h3>
+                <p class="text-yellow-100 text-xs sm:text-sm font-semibold mb-2">Terlambat/Sakit</p>
+                <h3 class="text-2xl sm:text-4xl font-bold">{{ $statistics['late'] + $statistics['sick'] }}</h3>
                 <p class="text-yellow-100 text-xs mt-2">Kasus lainnya</p>
             </div>
         </div>
@@ -100,51 +100,51 @@
     <!-- Statistics by Class Table -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <!-- Card Header -->
-        <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
-            <h2 class="text-white font-semibold text-lg flex items-center gap-2">
+        <div class="bg-gradient-to-r from-red-500 to-red-600 px-3 sm:px-6 py-3 sm:py-4">
+            <h2 class="text-white font-semibold text-base sm:text-lg flex items-center gap-2">
                 <i class="fas fa-table"></i>
-                Statistik per Kelas
+                <span class="hidden sm:inline">Statistik per Kelas</span><span class="sm:hidden">per Kelas</span>
             </h2>
         </div>
 
         <!-- Table Content -->
         <div class="overflow-x-auto">
-            <table class="w-full border-collapse">
+            <table class="w-full border-collapse text-xs sm:text-sm">
                 <thead class="bg-gray-100">
                     <tr class="border-b-2 border-gray-300">
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Kelas</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 w-32">Jumlah Sesi</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 w-32">Total Siswa</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 w-24">Hadir</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 w-24">Absen</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 w-48">Rate Kehadiran</th>
+                        <th class="px-2 sm:px-6 py-2 sm:py-3 text-left font-semibold text-gray-700">Kelas</th>
+                        <th class="px-2 sm:px-6 py-2 sm:py-3 text-left font-semibold text-gray-700 hidden sm:table-cell">Jumlah Sesi</th>
+                        <th class="px-2 sm:px-6 py-2 sm:py-3 text-left font-semibold text-gray-700 hidden md:table-cell">Total Siswa</th>
+                        <th class="px-2 sm:px-6 py-2 sm:py-3 text-left font-semibold text-gray-700 hidden lg:table-cell">Hadir</th>
+                        <th class="px-2 sm:px-6 py-2 sm:py-3 text-left font-semibold text-gray-700 hidden xl:table-cell">Absen</th>
+                        <th class="px-2 sm:px-6 py-2 sm:py-3 text-left font-semibold text-gray-700">Rate</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($statistics['by_class'] as $className => $classStats)
                         <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
-                            <td class="px-6 py-4 font-semibold text-gray-900">{{ $className }}</td>
-                            <td class="px-6 py-4">
-                                <span class="inline-block px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-semibold">
+                            <td class="px-2 sm:px-6 py-2 sm:py-4 font-semibold text-gray-900 truncate">{{ $className }}</td>
+                            <td class="px-2 sm:px-6 py-2 sm:py-4 hidden sm:table-cell">
+                                <span class="inline-block px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold">
                                     {{ $classStats['count'] }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4">
-                                <span class="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+                            <td class="px-2 sm:px-6 py-2 sm:py-4 hidden md:table-cell">
+                                <span class="inline-block px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
                                     {{ $classStats['total_students'] }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4">
-                                <span class="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+                            <td class="px-2 sm:px-6 py-2 sm:py-4 hidden lg:table-cell">
+                                <span class="inline-block px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
                                     {{ $classStats['present'] }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4">
-                                <span class="inline-block px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-semibold">
+                            <td class="px-2 sm:px-6 py-2 sm:py-4 hidden xl:table-cell">
+                                <span class="inline-block px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold">
                                     {{ $classStats['absent'] }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-2 sm:px-6 py-2 sm:py-4">
                                 @php
                                     $rate = $classStats['total_students'] > 0 ? ($classStats['present'] / $classStats['total_students']) * 100 : 0;
                                 @endphp

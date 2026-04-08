@@ -4,16 +4,17 @@
 @section('icon', 'fas fa-tasks')
 
 @section('content')
-    <div style="margin-bottom: 30px;">
-        <div style="display: flex; justify-content: space-between; align-items: start;">
+    <!-- PAGE HEADER -->
+    <div class="mb-8">
+        <div class="flex justify-between items-start gap-4">
             <div>
-                <h1 class="page-title">
-                    <i class="fas fa-tasks"></i>
+                <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                    <i class="fas fa-tasks text-amber-500"></i>
                     {{ $assignment->title }}
                 </h1>
-                <p class="page-description">{{ $assignment->eClass->subject->name }} • {{ $assignment->eClass->name }}</p>
+                <p class="text-gray-600 text-sm mt-1">{{ $assignment->eClass->subject->name }} • {{ $assignment->eClass->name }}</p>
             </div>
-            <a href="{{ route('siswa.assignments.index') }}" style="color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 5px;">
+            <a href="{{ route('siswa.assignments.index') }}" class="text-blue-500 hover:text-blue-600 font-semibold text-sm transition inline-flex items-center gap-2">
                 <i class="fas fa-arrow-left"></i> Kembali
             </a>
         </div>
@@ -28,65 +29,62 @@
         $isOverdue = now() > $deadline && !$submission->submitted_at;
     @endphp
 
-    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
-        <!-- MAIN CONTENT -->
-        <div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- MAIN CONTENT (2/3) -->
+        <div class="lg:col-span-2 space-y-6">
             <!-- Description Card -->
-            <div class="card" style="margin-bottom: 20px;">
-                <div class="card-header">
-                    <div class="card-title">
-                        <i class="fas fa-file-alt" style="color: var(--primary); margin-right: 10px;"></i>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <h2 class="font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-file-alt text-blue-500"></i>
                         Deskripsi Tugas
-                    </div>
+                    </h2>
                 </div>
-                <div class="card-body">
-                    <div style="color: #666; font-size: 14px; line-height: 1.6;">
-                        {!! $assignment->description !!}
-                    </div>
+                <div class="p-6 text-gray-700 text-base leading-relaxed">
+                    {!! $assignment->description !!}
                 </div>
             </div>
 
             <!-- Grade Card (if exists) -->
             @if($submission && $submission->grade)
-                <div class="card" style="margin-bottom: 20px; background: linear-gradient(135deg, #fff3e0, #ffe0b2); border-left: 4px solid #f39c12;">
-                    <div class="card-header" style="background: transparent; border-bottom: none;">
-                        <div class="card-title" style="color: #e65100;">
-                            <i class="fas fa-star" style="margin-right: 10px;"></i>
+                <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg shadow-sm border-l-4 border-amber-500 overflow-hidden">
+                    <div class="px-6 py-4 bg-transparent">
+                        <h2 class="font-bold text-amber-900 flex items-center gap-2">
+                            <i class="fas fa-star"></i>
                             Penilaian Anda
-                        </div>
+                        </h2>
                     </div>
-                    <div class="card-body">
-                        <div style="text-align: center; padding: 20px;">
-                            <div style="font-size: 48px; font-weight: 700; color: #f39c12; margin-bottom: 10px;">
-                                {{ $submission->grade->score }}
-                                @if($submission->grade->max_score)
-                                    <span style="color: #999; font-size: 32px;">/ {{ $submission->grade->max_score }}</span>
-                                @endif
-                            </div>
-                            @php
-                                $maxScore = $submission->grade->max_score ?? 100;
-                                $percentage = ($submission->grade->score / $maxScore) * 100;
-                                $gradeLabel = $percentage >= 85 ? 'Sangat Baik' : ($percentage >= 70 ? 'Baik' : ($percentage >= 60 ? 'Cukup' : 'Kurang'));
-                                $gradeColor = $percentage >= 85 ? '#28a745' : ($percentage >= 70 ? '#17a2b8' : ($percentage >= 60 ? '#ffc107' : '#dc3545'));
-                            @endphp
-                            <p style="color: {{ $gradeColor }}; font-weight: 600; font-size: 16px; margin-bottom: 10px;">
-                                {{ $gradeLabel }}
-                            </p>
-                            <div style="background: #eee; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 15px;">
-                                <div style="background: {{ $gradeColor }}; height: 100%; width: {{ $percentage }}%;"></div>
-                            </div>
-                            <p style="color: #666; font-size: 12px;">Persentase: {{ number_format($percentage, 1) }}%</p>
+                    <div class="px-6 py-8 text-center">
+                        <div class="text-5xl font-bold text-amber-600 mb-3">
+                            {{ $submission->grade->score }}
+                            @if($submission->grade->max_score)
+                                <span class="text-3xl text-gray-500 font-normal">/ {{ $submission->grade->max_score }}</span>
+                            @endif
                         </div>
+                        @php
+                            $maxScore = $submission->grade->max_score ?? 100;
+                            $percentage = ($submission->grade->score / $maxScore) * 100;
+                            $gradeLabel = $percentage >= 85 ? 'Sangat Baik' : ($percentage >= 70 ? 'Baik' : ($percentage >= 60 ? 'Cukup' : 'Kurang'));
+                            $gradeColor = $percentage >= 85 ? 'text-green-600' : ($percentage >= 70 ? 'text-blue-600' : ($percentage >= 60 ? 'text-yellow-600' : 'text-red-600'));
+                            $gradeBg = $percentage >= 85 ? 'bg-green-500' : ($percentage >= 70 ? 'bg-blue-500' : ($percentage >= 60 ? 'bg-yellow-500' : 'bg-red-500'));
+                        @endphp
+                        <p class="font-bold text-lg mb-4 {{ $gradeColor }}">
+                            {{ $gradeLabel }}
+                        </p>
+                        <div class="bg-gray-300 h-2 rounded-full overflow-hidden mb-3">
+                            <div class="{{ $gradeBg }} h-full rounded-full transition-all" style="width: {{ $percentage }}%;"></div>
+                        </div>
+                        <p class="text-gray-600 text-sm">Persentase: {{ number_format($percentage, 1) }}%</p>
 
                         @if($submission->grade->feedback)
-                            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(0,0,0,0.1);">
-                                <p style="color: #999; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; font-weight: 600;">Komentar Guru</p>
-                                <p style="color: #333; font-size: 13px; line-height: 1.6;">{{ $submission->grade->feedback }}</p>
+                            <div class="mt-6 pt-6 border-t border-amber-200 text-left">
+                                <p class="text-amber-900 text-xs font-bold mb-2 uppercase">Komentar Guru</p>
+                                <p class="text-gray-700 text-sm leading-relaxed">{{ $submission->grade->feedback }}</p>
                             </div>
                         @endif
 
                         @if($submission->grade->graded_at)
-                            <p style="color: #999; font-size: 11px; margin-top: 15px;">
+                            <p class="text-gray-600 text-xs mt-4 pt-4 border-t border-amber-200">
                                 <i class="fas fa-check-circle"></i>
                                 Dinilai pada {{ $submission->grade->graded_at->format('d M Y H:i') }}
                             </p>
@@ -97,29 +95,29 @@
 
             <!-- Submission Files -->
             @if($submission && $submission->file_path)
-                <div class="card" style="margin-bottom: 20px;">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <i class="fas fa-paperclip" style="color: #2980b9; margin-right: 10px;"></i>
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <h2 class="font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-paperclip text-blue-500"></i>
                             File Pengumpulan Anda
-                        </div>
+                        </h2>
                     </div>
-                    <div class="card-body">
-                        <div style="padding: 15px; background: #f8f9fa; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <i class="fas fa-file" style="font-size: 24px; color: #2980b9;"></i>
+                    <div class="p-6">
+                        <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 flex justify-between items-center gap-4">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-file text-2xl text-blue-500"></i>
                                 <div>
-                                    <p style="font-weight: 600; color: var(--secondary); margin-bottom: 2px;">
+                                    <p class="font-bold text-gray-900">
                                         {{ basename($submission->file_path) }}
                                     </p>
                                     @if($submission->submitted_at)
-                                        <p style="color: #999; font-size: 12px;">
+                                        <p class="text-gray-600 text-xs mt-1">
                                             Dikirim: {{ $submission->submitted_at->format('d M Y H:i') }}
                                         </p>
                                     @endif
                                 </div>
                             </div>
-                            <a href="#" class="btn btn-primary btn-sm">
+                            <a href="#" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg text-sm transition inline-flex items-center gap-2 whitespace-nowrap">
                                 <i class="fas fa-download"></i> Download
                             </a>
                         </div>
@@ -129,34 +127,34 @@
 
             <!-- Submission Form (if not submitted or deadline not passed) -->
             @if(!$submission || !$submission->submitted_at || (now()->lessThan($deadline)))
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <i class="fas fa-cloud-upload-alt" style="color: #27ae60; margin-right: 10px;"></i>
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <h2 class="font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-cloud-upload-alt text-green-500"></i>
                             Pengumpulan Tugas
-                        </div>
+                        </h2>
                     </div>
-                    <div class="card-body">
-                        <form action="#" method="POST" enctype="multipart/form-data" style="display: grid; gap: 15px;">
+                    <div class="p-6">
+                        <form action="#" method="POST" enctype="multipart/form-data" class="space-y-4">
                             @csrf
                             
                             <div>
-                                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--secondary);">
-                                    <i class="fas fa-file-upload"></i> Unggah File
+                                <label class="block font-semibold text-gray-900 mb-2">
+                                    <i class="fas fa-file-upload mr-2"></i> Unggah File
                                 </label>
-                                <input type="file" name="file" style="display: block; width: 100%; padding: 10px; border: 2px dashed var(--border); border-radius: 6px; cursor: pointer;" required>
-                                <p style="color: #999; font-size: 12px; margin-top: 6px;">Format yang didukung: PDF, DOC, DOCX, XLS, XLSX, ZIP (Maksimal 10 MB)</p>
+                                <input type="file" name="file" class="block w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition focus:outline-none" required>
+                                <p class="text-gray-600 text-xs mt-2">Format yang didukung: PDF, DOC, DOCX, XLS, XLSX, ZIP (Maksimal 10 MB)</p>
                             </div>
 
                             @if($submission && $submission->submitted_at && now()->lessThan($deadline))
-                                <div style="background: #e3f2fd; padding: 10px; border-radius: 6px; border-left: 4px solid #2980b9;">
-                                    <p style="color: #1565c0; font-size: 12px;">
+                                <div class="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-500">
+                                    <p class="text-blue-700 text-sm">
                                         ℹ️ Anda dapat mengubah pengumpulan Anda sebelum deadline
                                     </p>
                                 </div>
                             @endif
 
-                            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                            <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition text-center inline-flex items-center justify-center gap-2">
                                 <i class="fas fa-paper-plane"></i> 
                                 {{ $submission && $submission->submitted_at ? 'Perbarui Pengumpulan' : 'Kirim Pengumpulan' }}
                             </button>
@@ -166,22 +164,22 @@
             @endif
         </div>
 
-        <!-- SIDEBAR -->
-        <div>
+        <!-- SIDEBAR (1/3) -->
+        <div class="space-y-6">
             <!-- Status Card -->
-            <div class="card" style="margin-bottom: 20px;">
-                <div class="card-header">
-                    <div class="card-title">
-                        <i class="fas fa-info-circle" style="color: var(--primary); margin-right: 10px;"></i>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden sticky top-4">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <h2 class="font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-info-circle text-blue-500"></i>
                         Status Tugas
-                    </div>
+                    </h2>
                 </div>
-                <div class="card-body">
-                    <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border);">
-                        <p style="color: #999; font-size: 11px; text-transform: uppercase; margin-bottom: 6px; font-weight: 600;">Status</p>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="width: 12px; height: 12px; background: {{ $submission && $submission->submitted_at ? '#28a745' : ($isOverdue ? '#dc3545' : '#17a2b8') }}; border-radius: 50%;"></span>
-                            <span style="color: var(--secondary); font-weight: 600;">
+                <div class="p-6 space-y-4">
+                    <div class="pb-4 border-b border-gray-200">
+                        <p class="text-gray-600 text-xs font-semibold mb-2 uppercase">Status</p>
+                        <div class="flex items-center gap-2">
+                            <span class="inline-block w-3 h-3 rounded-full {{ $submission && $submission->submitted_at ? ($isLate ? 'bg-orange-500' : 'bg-green-500') : ($isOverdue ? 'bg-red-500' : 'bg-blue-500') }}"></span>
+                            <span class="text-gray-900 font-bold">
                                 @if($submission && $submission->submitted_at)
                                     {{ $isLate ? '⚠️ Terlambat' : '✓ Terkumpul' }}
                                 @elseif($isOverdue)
@@ -193,11 +191,11 @@
                         </div>
                     </div>
 
-                    <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border);">
-                        <p style="color: #999; font-size: 11px; text-transform: uppercase; margin-bottom: 6px; font-weight: 600;">Deadline</p>
-                        <p style="color: var(--secondary); font-weight: 600;">{{ $deadline->format('d M Y') }}</p>
-                        <p style="color: #666; font-size: 12px;">{{ $deadline->format('H:i') }} WIB</p>
-                        <p style="color: {{ now()->greaterThan($deadline) ? '#dc3545' : '#f39c12' }}; font-size: 12px; font-weight: 600;">
+                    <div class="pb-4 border-b border-gray-200">
+                        <p class="text-gray-600 text-xs font-semibold mb-2 uppercase">Deadline</p>
+                        <p class="text-gray-900 font-bold">{{ $deadline->format('d M Y') }}</p>
+                        <p class="text-gray-600 text-sm">{{ $deadline->format('H:i') }} WIB</p>
+                        <p class="text-sm font-bold mt-2 {{ now()->greaterThan($deadline) ? 'text-red-600' : 'text-amber-600' }}">
                             @php
                                 $now = now();
                                 if ($now->greaterThan($deadline)) {
@@ -216,12 +214,12 @@
                     </div>
 
                     @if($submission && $submission->submitted_at)
-                        <div style="margin-bottom: 15px;">
-                            <p style="color: #999; font-size: 11px; text-transform: uppercase; margin-bottom: 6px; font-weight: 600;">Waktu Pengumpulan</p>
-                            <p style="color: var(--secondary); font-weight: 600;">{{ $submission->submitted_at->format('d M Y') }}</p>
-                            <p style="color: #666; font-size: 12px;">{{ $submission->submitted_at->format('H:i') }} WIB</p>
+                        <div>
+                            <p class="text-gray-600 text-xs font-semibold mb-2 uppercase">Waktu Pengumpulan</p>
+                            <p class="text-gray-900 font-bold">{{ $submission->submitted_at->format('d M Y') }}</p>
+                            <p class="text-gray-600 text-sm">{{ $submission->submitted_at->format('H:i') }} WIB</p>
                             @if($isLate)
-                                <p style="color: #ffc107; font-size: 11px; margin-top: 6px; font-weight: 600;">⚠️ Terlambat {{ $submission->submitted_at->diffInHours($deadline) }} jam</p>
+                                <p class="text-amber-600 text-xs font-bold mt-2">⚠️ Terlambat {{ $submission->submitted_at->diffInHours($deadline) }} jam</p>
                             @endif
                         </div>
                     @endif
@@ -229,27 +227,27 @@
             </div>
 
             <!-- Class Info Card -->
-            <div class="card" style="margin-bottom: 20px;">
-                <div class="card-header">
-                    <div class="card-title">
-                        <i class="fas fa-book" style="color: #2980b9; margin-right: 10px;"></i>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <h2 class="font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fas fa-book text-blue-500"></i>
                         Informasi Kelas
-                    </div>
+                    </h2>
                 </div>
-                <div class="card-body">
-                    <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
-                        <p style="color: #999; font-size: 11px; text-transform: uppercase; margin-bottom: 4px;">Mata Pelajaran</p>
-                        <p style="color: var(--secondary); font-weight: 600;">{{ $assignment->eClass->subject->name }}</p>
+                <div class="p-6 space-y-3 divide-y divide-gray-200">
+                    <div class="pb-3">
+                        <p class="text-gray-600 text-xs font-semibold mb-1 uppercase">Mata Pelajaran</p>
+                        <p class="text-gray-900 font-bold">{{ $assignment->eClass->subject->name }}</p>
                     </div>
                     
-                    <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
-                        <p style="color: #999; font-size: 11px; text-transform: uppercase; margin-bottom: 4px;">Kelas</p>
-                        <p style="color: var(--secondary); font-weight: 600;">{{ $assignment->eClass->name }}</p>
+                    <div class="pt-3 pb-3">
+                        <p class="text-gray-600 text-xs font-semibold mb-1 uppercase">Kelas</p>
+                        <p class="text-gray-900 font-bold">{{ $assignment->eClass->name }}</p>
                     </div>
 
-                    <div>
-                        <p style="color: #999; font-size: 11px; text-transform: uppercase; margin-bottom: 4px;">Pengajar</p>
-                        <p style="color: var(--secondary); font-weight: 600;">{{ $assignment->eClass->teacher->name }}</p>
+                    <div class="pt-3">
+                        <p class="text-gray-600 text-xs font-semibold mb-1 uppercase">Pengajar</p>
+                        <p class="text-gray-900 font-bold">{{ $assignment->eClass->teacher->name }}</p>
                     </div>
                 </div>
             </div>

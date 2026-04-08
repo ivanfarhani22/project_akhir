@@ -1,96 +1,99 @@
 @extends('layouts.guru')
 
-@section('title', 'Manajemen Tugas')
+@section('title', 'Tugas-Tugas')
 @section('icon', 'fas fa-tasks')
 
 @section('content')
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <!-- PAGE HEADER -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-            <h1 class="page-title">
-                <i class="fas fa-tasks"></i>
-                Manajemen Tugas
+            <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3 mb-2">
+                <i class="fas fa-tasks text-blue-500"></i>
+                Tugas-Tugas
             </h1>
-            <p class="page-description">Kelola semua tugas dan soal Anda</p>
+            <p class="text-gray-600 text-sm">Kelola semua tugas dari semua kelas Anda</p>
         </div>
-        <a href="{{ route('guru.assignments.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Tugas Baru
+        <a href="{{ route('guru.assignments.create') }}" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg text-sm transition whitespace-nowrap inline-flex items-center gap-2">
+            <i class="fas fa-plus"></i> Buat Tugas
         </a>
     </div>
 
-    <!-- Filter Kelas -->
+    <!-- CLASS FILTER -->
     @if($classes->count() > 0)
-        <div class="card" style="margin-bottom: 20px;">
-            <div class="card-body">
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <a href="{{ route('guru.assignments.index') }}" class="btn btn-secondary btn-sm" style="background: var(--primary); color: white;">
-                        <i class="fas fa-list"></i> Semua Tugas
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-8">
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('guru.assignments.index') }}" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1.5 px-4 rounded text-sm transition inline-flex items-center gap-2">
+                    <i class="fas fa-list"></i> Semua Tugas
+                </a>
+                @foreach($classes as $class)
+                    <a href="{{ route('guru.assignments.index', ['class_id' => $class->id]) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-1.5 px-4 rounded text-sm transition">
+                        {{ $class->name }}
                     </a>
-                    @foreach($classes as $class)
-                        <a href="{{ route('guru.assignments.index', ['class_id' => $class->id]) }}" class="btn btn-secondary btn-sm">
-                            {{ $class->name }}
-                        </a>
-                    @endforeach
-                </div>
+                @endforeach
             </div>
         </div>
     @endif
 
-    <div class="card">
-        <div class="card-header">
-            <div class="card-title">Daftar Tugas</div>
-            <span style="background: #f0f0f0; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+    <!-- ASSIGNMENTS TABLE -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+        <div class="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <h2 class="font-bold text-gray-900 text-lg">Daftar Tugas</h2>
+            <span class="bg-gray-200 text-gray-800 text-xs font-semibold px-3 py-1 rounded-full">
                 Total: {{ $assignments->count() }}
             </span>
         </div>
-        <div class="table-responsive">
-            @if($assignments->isEmpty())
-                <div style="text-align: center; padding: 60px 20px; color: #999;">
-                    <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; display: block; opacity: 0.3;"></i>
-                    <p style="font-size: 16px;">Belum ada tugas</p>
-                    <a href="{{ route('guru.assignments.create') }}" class="btn btn-primary" style="margin-top: 15px;">
-                        <i class="fas fa-plus"></i> Buat Tugas Pertama
-                    </a>
-                </div>
-            @else
-                <table>
-                    <thead>
+
+        @if($assignments->isEmpty())
+            <div class="text-center py-12 px-6">
+                <i class="fas fa-inbox text-gray-300 text-5xl mb-4 block"></i>
+                <p class="text-gray-600 text-base mb-4">Belum ada tugas</p>
+                <a href="{{ route('guru.assignments.create') }}" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-flex items-center gap-2">
+                    <i class="fas fa-plus"></i> Buat Tugas Pertama
+                </a>
+            </div>
+        @else
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th>Kelas</th>
-                            <th>Judul Tugas</th>
-                            <th>Deadline</th>
-                            <th>Pengumpulan</th>
-                            <th>Aksi</th>
+                            <th class="px-6 py-3 text-left font-semibold text-gray-900">Kelas</th>
+                            <th class="px-6 py-3 text-left font-semibold text-gray-900">Judul Tugas</th>
+                            <th class="px-6 py-3 text-left font-semibold text-gray-900">Deadline</th>
+                            <th class="px-6 py-3 text-center font-semibold text-gray-900">Pengumpulan</th>
+                            <th class="px-6 py-3 text-center font-semibold text-gray-900">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-gray-200">
                         @foreach($assignments as $assignment)
                             @php
                                 $submissions = $assignment->submissions;
                                 $totalSubmissions = $submissions->count();
                                 $isDeadlinePassed = $assignment->deadline < now();
                             @endphp
-                            <tr>
-                                <td style="font-weight: 600;">{{ $assignment->eClass->name }}</td>
-                                <td>{{ Str::limit($assignment->title, 40) }}</td>
-                                <td>
-                                    <span style="background: {{ $isDeadlinePassed ? '#ff6b6b' : '#ffc107' }}; color: white; padding: 4px 12px; border-radius: 4px; font-size: 12px;">
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-6 py-4 font-medium text-gray-900">{{ $assignment->eClass->name }}</td>
+                                <td class="px-6 py-4 text-gray-700">{{ Str::limit($assignment->title, 40) }}</td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded text-xs font-semibold {{ $isDeadlinePassed ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800' }}">
+                                        <i class="fas {{ $isDeadlinePassed ? 'fa-times-circle' : 'fa-clock' }}"></i>
                                         {{ $assignment->deadline->format('d M Y H:i') }}
                                     </span>
                                 </td>
-                                <td style="text-align: center;">
-                                    <span style="background: #e3f2fd; color: #1976d2; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                                <td class="px-6 py-4 text-center">
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded text-xs font-semibold bg-blue-100 text-blue-800">
+                                        <i class="fas fa-file-upload"></i>
                                         {{ $totalSubmissions }}/{{ $assignment->eClass->students->count() }}
                                     </span>
                                 </td>
-                                <td>
-                                    <div style="display: flex; gap: 5px;">
-                                        <a href="{{ route('guru.assignments.edit', $assignment) }}" class="btn btn-secondary btn-sm">
+                                <td class="px-6 py-4">
+                                    <div class="flex justify-center gap-2">
+                                        <a href="{{ route('guru.assignments.edit', $assignment) }}" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-2 rounded text-xs transition" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form method="POST" action="{{ route('guru.assignments.destroy', $assignment) }}" style="display: inline;" onsubmit="return confirm('Yakin ingin menghapus?')">
+                                        <form method="POST" action="{{ route('guru.assignments.destroy', $assignment) }}" class="inline delete-form">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm">
+                                            <button type="button" class="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-2 rounded text-xs transition" onclick="confirmDelete(event, '{{ $assignment->title }}')" title="Hapus">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
@@ -100,7 +103,23 @@
                         @endforeach
                     </tbody>
                 </table>
-            @endif
-        </div>
+            </div>
+        @endif
     </div>
 @endsection
+
+@push('scripts')
+<script>
+function confirmDelete(event, name) {
+    event.preventDefault();
+    const form = event.target.closest('form');
+    showConfirmation(
+        `Apakah Anda yakin ingin menghapus tugas "${name}"?`,
+        'Konfirmasi Penghapusan',
+        function() {
+            form.submit();
+        }
+    );
+}
+</script>
+@endpush

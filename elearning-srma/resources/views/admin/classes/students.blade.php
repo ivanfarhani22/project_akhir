@@ -122,11 +122,10 @@
                                 <td class="px-6 py-4 text-sm text-gray-600">{{ $student->email }}</td>
                                 <td class="px-6 py-4 text-center">
                                     <form method="POST" action="{{ route('admin.classes.students.destroy', [$class, $student]) }}" 
-                                        style="display: inline;" 
-                                        onsubmit="return confirm('Hapus {{ $student->name }} dari kelas ini?')">
+                                        style="display: inline;" class="delete-form">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-xs hover:bg-red-700 transition">
+                                        <button type="button" onclick="confirmDelete(event, '{{ $student->name }}')" class="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-xs hover:bg-red-700 transition">
                                             <i class="fas fa-trash"></i> Hapus
                                         </button>
                                     </form>
@@ -151,3 +150,15 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+function confirmDelete(event, name) {
+    event.preventDefault();
+    const form = event.target.closest('form');
+    showConfirmation(`Yakin ingin menghapus "${name}" dari kelas ini?`, 'Konfirmasi Hapus', function() {
+        form.submit();
+    });
+}
+</script>
+@endpush

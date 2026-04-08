@@ -6,56 +6,56 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 py-8">
     <!-- Header Section -->
-    <div class="flex justify-between items-start mb-8">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-8">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <span class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
-                    <i class="fas fa-chalkboard"></i>
+            <h1 class="text-xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
+                <span class="w-8 h-8 sm:w-10 sm:h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600 flex-shrink-0">
+                    <i class="fas fa-chalkboard text-sm sm:text-base"></i>
                 </span>
                 Kelola Kelas
             </h1>
-            <p class="text-gray-600 mt-2">Kelola kelas, mata pelajaran, guru, dan siswa</p>
+            <p class="text-gray-600 mt-2 text-xs sm:text-sm">Kelola kelas, mata pelajaran, guru, dan siswa</p>
         </div>
-        <a href="{{ route('admin.classes.create') }}" class="inline-flex items-center gap-2 bg-red-500 text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition">
+        <a href="{{ route('admin.classes.create') }}" class="inline-flex items-center gap-2 bg-red-500 text-white px-3 sm:px-6 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-red-600 transition whitespace-nowrap">
             <i class="fas fa-plus"></i> Tambah Kelas
         </a>
     </div>
 
     <!-- Search & Filter Bar -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-        <form method="GET" action="{{ route('admin.classes.index') }}" class="flex gap-4 items-end">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-6 mb-6">
+        <form method="GET" action="{{ route('admin.classes.index') }}" class="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-end">
             <!-- Search Input -->
             <div class="flex-1">
-                <label class="block text-sm font-semibold text-gray-900 mb-2">
+                <label class="block text-xs sm:text-sm font-semibold text-gray-900 mb-2">
                     <i class="fas fa-search"></i> Cari Kelas
                 </label>
                 <input type="text" name="search" placeholder="Cari nama kelas..." 
                        value="{{ request('search') }}"
-                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition">
+                       class="w-full px-3 sm:px-4 py-2 border-2 border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-red-500 transition">
             </div>
 
             <!-- Search Button -->
-            <button type="submit" class="inline-flex items-center gap-2 bg-red-500 text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition">
+            <button type="submit" class="inline-flex items-center gap-2 bg-red-500 text-white px-3 sm:px-6 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-red-600 transition justify-center whitespace-nowrap">
                 <i class="fas fa-search"></i> Cari
             </button>
 
             <!-- Reset Button -->
-            <a href="{{ route('admin.classes.index') }}" class="inline-flex items-center gap-2 bg-gray-200 text-gray-900 px-6 py-2 rounded-lg font-semibold text-sm hover:bg-gray-300 transition">
+            <a href="{{ route('admin.classes.index') }}" class="inline-flex items-center gap-2 bg-gray-200 text-gray-900 px-3 sm:px-6 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-gray-300 transition justify-center whitespace-nowrap">
                 <i class="fas fa-redo"></i> Reset
             </a>
         </form>
 
         <!-- Info Text -->
-        <p class="text-gray-500 text-sm mt-4">
+        <p class="text-gray-500 text-xs sm:text-sm mt-4">
             Menampilkan <strong>{{ $classes->count() }}</strong> dari <strong>{{ $classes->total() }}</strong> kelas
         </p>
     </div>
 
     @if($classes->isEmpty())
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-            <i class="fas fa-inbox text-6xl text-gray-300 mb-4 inline-block"></i>
-            <h3 class="text-gray-600 text-lg font-semibold mb-2">Tidak ada kelas ditemukan</h3>
-            <p class="text-gray-500 mb-4">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 sm:p-12 text-center">
+            <i class="fas fa-inbox text-5xl sm:text-6xl text-gray-300 mb-4 inline-block"></i>
+            <h3 class="text-gray-600 text-base sm:text-lg font-semibold mb-2">Tidak ada kelas ditemukan</h3>
+            <p class="text-gray-500 mb-4 text-xs sm:text-sm">
                 @if(request('search'))
                     Coba ubah pencarian Anda atau <a href="{{ route('admin.classes.index') }}" class="text-red-600 hover:text-red-700 font-semibold">reset filter</a>
                 @else
@@ -65,7 +65,7 @@
         </div>
     @else
         <!-- Classes Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-8">
             @foreach($classes as $class)
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
                     <!-- Card Header -->

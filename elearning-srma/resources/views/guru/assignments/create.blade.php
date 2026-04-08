@@ -4,127 +4,134 @@
 @section('icon', 'fas fa-plus-circle')
 
 @section('content')
-    <div style="margin-bottom: 30px;">
-        <p style="color: #999; font-size: 14px; margin-bottom: 5px;">Manajemen Tugas</p>
-        <h1 class="page-title">
-            <i class="fas fa-plus-circle"></i>
+    <!-- PAGE HEADER -->
+    <div class="mb-8">
+        <p class="text-gray-600 text-sm mb-2">Manajemen Tugas</p>
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3 mb-2">
+            <i class="fas fa-plus-circle text-blue-500"></i>
             Buat Tugas Baru
         </h1>
-        <p class="page-description">Kelas: <strong>{{ $class->name }}</strong> • {{ $class->subject->name }}</p>
+        <p class="text-gray-600 text-sm">Kelas: <strong>{{ $class->name }}</strong> • {{ $class->subject->name }}</p>
     </div>
 
+    <!-- ERROR ALERT -->
     @if ($errors->any())
-        <div class="alert alert-danger">
-            <i class="fas fa-exclamation-circle"></i>
-            <div>
-                <strong>Terjadi kesalahan:</strong>
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p class="text-red-900 font-semibold flex items-center gap-2 mb-2">
+                <i class="fas fa-exclamation-circle"></i>
+                Terjadi kesalahan:
+            </p>
+            <ul class="text-red-800 text-sm space-y-1">
                 @foreach ($errors->all() as $error)
-                    <div>{{ $error }}</div>
+                    <li>• {{ $error }}</li>
                 @endforeach
-            </div>
+            </ul>
         </div>
     @endif
 
-    <div class="card" style="max-width: 700px;">
-        <div class="card-header">
-            <div class="card-title">
-                <i class="fas fa-tasks" style="color: var(--primary); margin-right: 10px;"></i>
-                Form Buat Tugas
+    <div class="max-w-2xl">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h2 class="font-bold text-gray-900 text-lg flex items-center gap-2">
+                    <i class="fas fa-tasks text-blue-500"></i>
+                    Form Buat Tugas
+                </h2>
             </div>
-        </div>
 
-        <div class="card-body">
-            <form method="POST" action="{{ route('guru.assignments.store') }}" enctype="multipart/form-data">
-                @csrf
+            <div class="p-6">
+                <form method="POST" action="{{ route('guru.assignments.store') }}" enctype="multipart/form-data">
+                    @csrf
 
-                <input type="hidden" name="e_class_id" value="{{ $class->id }}">
+                    <input type="hidden" name="e_class_id" value="{{ $class->id }}">
 
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                        Judul Tugas *
-                    </label>
-                    <input 
-                        type="text" 
-                        name="title" 
-                        id="title" 
-                        class="form-input"
-                        value="{{ old('title') }}" 
-                        placeholder="Contoh: Latihan Soal Chapter 5 - Fungsi Kuadrat"
-                        style="width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; transition: all 0.3s ease;"
-                        required
-                    >
-                    <small style="color: #999; margin-top: 5px; display: block;">Berikan judul yang deskriptif untuk tugas ini</small>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                        Deskripsi
-                    </label>
-                    <textarea 
-                        name="description" 
-                        id="description"
-                        style="width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; transition: all 0.3s ease; font-family: inherit; resize: vertical;"
-                        rows="4"
-                        placeholder="Jelaskan detail tugas, instruksi, dan kriteria penilaian..."
-                    >{{ old('description') }}</textarea>
-                    <small style="color: #999; margin-top: 5px; display: block;">Tuliskan penjelasan lengkap untuk siswa</small>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                        Batas Waktu *
-                    </label>
-                    <input 
-                        type="datetime-local" 
-                        name="deadline" 
-                        id="deadline"
-                        class="form-input"
-                        value="{{ old('deadline') }}" 
-                        style="width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; transition: all 0.3s ease;"
-                        required
-                    >
-                    <small style="color: #999; margin-top: 5px; display: block;">Tentukan kapan siswa harus mengumpulkan tugas</small>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 25px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 10px; color: var(--secondary);">
-                        File Tugas (Opsional)
-                    </label>
-                    <div style="position: relative; border: 2px dashed var(--border); border-radius: 12px; padding: 40px 20px; text-align: center; background: #fafafa; cursor: pointer; transition: all 0.3s ease;" id="dropzone">
-                        <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: var(--primary); margin-bottom: 15px; display: block;"></i>
-                        <p style="font-weight: 600; color: var(--secondary); margin-bottom: 5px;">Klik atau drag file di sini</p>
-                        <p style="color: #999; font-size: 13px; margin-bottom: 10px;">PDF, DOC, XLS, PPT, ZIP (Max 10MB)</p>
-                        <p style="color: #bbb; font-size: 12px;">Gunakan file sebagai referensi atau template untuk tugas</p>
+                    <!-- TITLE FIELD -->
+                    <div class="mb-6">
+                        <label class="block font-semibold text-gray-900 mb-2">
+                            Judul Tugas <span class="text-red-500">*</span>
+                        </label>
                         <input 
-                            type="file" 
-                            name="file" 
-                            id="file"
-                            style="display: none;"
+                            type="text" 
+                            name="title" 
+                            id="title" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                            value="{{ old('title') }}" 
+                            placeholder="Contoh: Latihan Soal Chapter 5 - Fungsi Kuadrat"
+                            required
                         >
+                        <p class="text-gray-600 text-xs mt-2">Berikan judul yang deskriptif untuk tugas ini</p>
                     </div>
-                    <p style="color: #28a745; font-size: 12px; margin-top: 10px;" id="filename"></p>
-                    @error('file')
-                        <span style="color: var(--danger); font-size: 12px; margin-top: 5px; display: block;">{{ $message }}</span>
-                    @enderror
-                </div>
 
-                <div style="display: flex; gap: 10px;">
-                    <button 
-                        type="submit" 
-                        class="btn btn-primary"
-                        style="flex: 1; justify-content: center;"
-                    >
-                        <i class="fas fa-save"></i> Buat Tugas
-                    </button>
-                    <a 
-                        href="{{ route('guru.assignments.index', ['class_id' => $class->id]) }}" 
-                        class="btn btn-secondary"
-                        style="flex: 1; justify-content: center; text-decoration: none;"
-                    >
-                        <i class="fas fa-arrow-left"></i> Batal
-                    </a>
-                </div>
-            </form>
+                    <!-- DESCRIPTION FIELD -->
+                    <div class="mb-6">
+                        <label class="block font-semibold text-gray-900 mb-2">
+                            Deskripsi
+                        </label>
+                        <textarea 
+                            name="description" 
+                            id="description"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition resize-none"
+                            rows="4"
+                            placeholder="Jelaskan detail tugas, instruksi, dan kriteria penilaian..."
+                        >{{ old('description') }}</textarea>
+                        <p class="text-gray-600 text-xs mt-2">Tuliskan penjelasan lengkap untuk siswa</p>
+                    </div>
+
+                    <!-- DEADLINE FIELD -->
+                    <div class="mb-6">
+                        <label class="block font-semibold text-gray-900 mb-2">
+                            Batas Waktu <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="datetime-local" 
+                            name="deadline" 
+                            id="deadline"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                            value="{{ old('deadline') }}" 
+                            required
+                        >
+                        <p class="text-gray-600 text-xs mt-2">Tentukan kapan siswa harus mengumpulkan tugas</p>
+                    </div>
+
+                    <!-- FILE UPLOAD FIELD -->
+                    <div class="mb-8">
+                        <label class="block font-semibold text-gray-900 mb-3">
+                            File Tugas (Opsional)
+                        </label>
+                        <div class="relative border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 hover:border-blue-400 hover:bg-blue-50 transition cursor-pointer" id="dropzone">
+                            <i class="fas fa-cloud-upload-alt text-blue-500 text-5xl mb-4 block"></i>
+                            <p class="font-semibold text-gray-900 mb-1">Klik atau drag file di sini</p>
+                            <p class="text-gray-600 text-sm mb-2">PDF, DOC, XLS, PPT, ZIP (Max 10MB)</p>
+                            <p class="text-gray-500 text-xs">Gunakan file sebagai referensi atau template untuk tugas</p>
+                            <input 
+                                type="file" 
+                                name="file" 
+                                id="file"
+                                class="hidden"
+                            >
+                        </div>
+                        <p class="text-green-600 text-xs mt-3 font-medium" id="filename"></p>
+                        @error('file')
+                            <span class="text-red-600 text-xs mt-2 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <!-- ACTION BUTTONS -->
+                    <div class="flex gap-3">
+                        <button 
+                            type="submit" 
+                            class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-flex justify-center items-center gap-2"
+                        >
+                            <i class="fas fa-save"></i> Buat Tugas
+                        </button>
+                        <a 
+                            href="{{ route('guru.assignments.index', ['class_id' => $class->id]) }}" 
+                            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-6 rounded-lg text-sm transition inline-flex justify-center items-center gap-2"
+                        >
+                            <i class="fas fa-arrow-left"></i> Batal
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -137,19 +144,16 @@
 
         dropzone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            dropzone.style.borderColor = 'var(--primary)';
-            dropzone.style.background = 'rgba(196, 30, 58, 0.05)';
+            dropzone.classList.add('border-blue-500', 'bg-blue-50');
         });
 
         dropzone.addEventListener('dragleave', () => {
-            dropzone.style.borderColor = 'var(--border)';
-            dropzone.style.background = '#fafafa';
+            dropzone.classList.remove('border-blue-500', 'bg-blue-50');
         });
 
         dropzone.addEventListener('drop', (e) => {
             e.preventDefault();
-            dropzone.style.borderColor = 'var(--border)';
-            dropzone.style.background = '#fafafa';
+            dropzone.classList.remove('border-blue-500', 'bg-blue-50');
             
             if (e.dataTransfer.files.length > 0) {
                 fileInput.files = e.dataTransfer.files;
@@ -162,18 +166,11 @@
         function updateFilename() {
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
-                filename.textContent = '✓ File dipilih: ' + file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)';
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                filename.textContent = `✓ File dipilih: ${file.name} (${sizeMB} MB)`;
             } else {
                 filename.textContent = '';
             }
         }
     </script>
-
-    <style>
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
-        }
-    </style>
 @endsection

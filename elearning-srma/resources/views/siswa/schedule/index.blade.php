@@ -6,19 +6,16 @@
 @php
     $daysOrder = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
     $dayLabels = ['monday'=>'Senin','tuesday'=>'Selasa','wednesday'=>'Rabu','thursday'=>'Kamis','friday'=>'Jumat','saturday'=>'Sabtu','sunday'=>'Minggu'];
-    $dayColors = ['monday'=>'#6366f1','tuesday'=>'#0ea5e9','wednesday'=>'#10b981','thursday'=>'#f59e0b','friday'=>'#ef4444','saturday'=>'#8b5cf6','sunday'=>'#ec4899'];
+    $dayColors = ['monday'=>'bg-indigo-500','tuesday'=>'bg-sky-500','wednesday'=>'bg-emerald-500','thursday'=>'bg-amber-500','friday'=>'bg-red-500','saturday'=>'bg-purple-500','sunday'=>'bg-pink-500'];
     
-    // Ensure $classes is defined (passed from route)
     if (!isset($classes)) {
         $classes = collect([]);
     }
     
-    // Build schedule list from all classes' schedules
     $schedules = collect([]);
     foreach ($classes as $class) {
         if ($class->schedules && count($class->schedules) > 0) {
             foreach ($class->schedules as $schedule) {
-                // Attach class info to schedule for display
                 $schedule->class = $class;
                 $schedules->push($schedule);
             }
@@ -27,143 +24,111 @@
 @endphp
 
 @section('content')
-<style>
-    .jadwal-header { margin-bottom: 28px; }
-    .jadwal-header h1 { font-size: 24px; font-weight: 700; color: var(--secondary); margin-bottom: 4px; }
-    .jadwal-header p  { color: #94a3b8; font-size: 14px; }
-
-    /* Weekly table */
-    .table-wrap { overflow-x: auto; border-radius: 12px; }
-    .schedule-table { width: 100%; min-width: 640px; border-collapse: collapse; }
-    .schedule-table thead th {
-        background: #f1f5f9; color: #64748b; font-size: 11px; font-weight: 700;
-        text-transform: uppercase; letter-spacing: .05em; padding: 12px 16px; text-align: left;
-    }
-    .schedule-table tbody tr { border-bottom: 1px solid #f1f5f9; transition: background .15s; }
-    .schedule-table tbody tr:hover { background: #f8fafc; }
-    .schedule-table tbody td { padding: 12px 16px; font-size: 14px; color: var(--secondary); vertical-align: middle; }
-    .day-badge {
-        display: inline-flex; align-items: center; gap: 6px;
-        padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; color: #fff;
-    }
-    .time-chip {
-        display: inline-flex; align-items: center; gap: 5px;
-        background: #f1f5f9; color: #64748b; padding: 3px 10px; border-radius: 20px; font-size: 12px;
-    }
-
-    /* Subject cards */
-    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-    .subject-card {
-        background: #fff; border: 1px solid #e8edf3; border-radius: 14px;
-        overflow: hidden; transition: box-shadow .2s, transform .2s;
-    }
-    .subject-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.09); transform: translateY(-2px); }
-    .subject-card-top {
-        padding: 16px 18px 14px; display: flex; justify-content: space-between; align-items: flex-start;
-        border-bottom: 1px solid #f1f5f9;
-    }
-    .subject-card-top h3 { font-size: 15px; font-weight: 700; color: var(--secondary); margin-bottom: 2px; }
-    .subject-card-top p  { font-size: 12px; color: #94a3b8; }
-    .subject-card-body { padding: 14px 18px; }
-    .meta-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #475569; margin-bottom: 8px; }
-    .meta-row i { width: 16px; color: #94a3b8; }
-    .subject-card-body .btn-primary { width: 100%; justify-content: center; margin-top: 12px; font-size: 13px; }
-
-    /* Empty state */
-    .empty-state { text-align: center; padding: 64px 20px; }
-    .empty-state i { font-size: 56px; color: #e2e8f0; display: block; margin-bottom: 16px; }
-    .empty-state p { color: #94a3b8; font-size: 15px; }
-
-    @media (max-width: 600px) {
-        .jadwal-header h1 { font-size: 20px; }
-        .schedule-table { min-width: 500px; }
-    }
-</style>
-
-<div class="jadwal-header">
-    <h1><i class="fas fa-calendar-alt" style="color:var(--primary);margin-right:8px;"></i>Jadwal Pelajaran</h1>
-    <p>Lihat jadwal mingguan kelas Anda</p>
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+        <i class="fas fa-calendar-alt text-blue-500"></i>
+        Jadwal Pelajaran
+    </h1>
+    <p class="text-gray-600 text-sm mt-1">Lihat jadwal mingguan kelas Anda</p>
 </div>
 
 @if($schedules->count())
 
-    {{-- Weekly Table --}}
-    <div class="card" style="margin-bottom:24px;">
-        <div class="card-header">
-            <div class="card-title"><i class="fas fa-table" style="color:var(--primary);margin-right:8px;"></i>Jadwal Mingguan</div>
+    <!-- Weekly Table -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden mb-8">
+        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <h2 class="font-bold text-gray-900 flex items-center gap-2">
+                <i class="fas fa-table text-blue-500"></i>
+                Jadwal Mingguan
+            </h2>
         </div>
-        <div class="card-body table-wrap" style="padding:0;">
-            <table class="schedule-table">
+        <div class="overflow-x-auto">
+            <table class="w-full">
                 <thead>
-                    <tr>
-                        <th>Hari</th><th>Mata Pelajaran</th><th>Kelas</th><th>Pengajar</th><th>Waktu</th>
+                    <tr class="border-b-2 border-gray-200 bg-gray-50">
+                        <th class="px-6 py-4 text-left text-gray-600 font-semibold text-sm">Hari</th>
+                        <th class="px-6 py-4 text-left text-gray-600 font-semibold text-sm">Mata Pelajaran</th>
+                        <th class="px-6 py-4 text-left text-gray-600 font-semibold text-sm">Kelas</th>
+                        <th class="px-6 py-4 text-left text-gray-600 font-semibold text-sm">Pengajar</th>
+                        <th class="px-6 py-4 text-left text-gray-600 font-semibold text-sm">Waktu</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-200">
                     @php $hasAny = false; @endphp
                     @foreach($daysOrder as $day)
                         @php $daySchedules = $schedules->filter(fn($s) => strtolower($s->day_of_week) === $day)->sortBy('start_time'); @endphp
                         @foreach($daySchedules as $schedule)
-                            @php $hasAny = true; $color = $dayColors[$day] ?? '#6366f1'; $class = $schedule->class; @endphp
-                            <tr>
-                                <td>
+                            @php $hasAny = true; $colorClass = $dayColors[$day] ?? 'bg-indigo-500'; $class = $schedule->class; @endphp
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-6 py-4">
                                     @if($loop->first)
-                                        <span class="day-badge" style="background:{{ $color }}">{{ $dayLabels[$day] ?? ucfirst($day) }}</span>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold text-white {{ $colorClass }}">
+                                            {{ $dayLabels[$day] ?? ucfirst($day) }}
+                                        </span>
                                     @endif
                                 </td>
-                                <td><strong>{{ $class->classSubjects?->first()?->subject?->name ?? '—' }}</strong></td>
-                                <td>{{ $class->name }}</td>
-                                <td>{{ $class->classSubjects?->first()?->teacher?->name ?? '—' }}</td>
-                                <td>
+                                <td class="px-6 py-4 font-bold text-gray-900">{{ $class->classSubjects?->first()?->subject?->name ?? '—' }}</td>
+                                <td class="px-6 py-4 text-gray-600">{{ $class->name }}</td>
+                                <td class="px-6 py-4 text-gray-600">{{ $class->classSubjects?->first()?->teacher?->name ?? '—' }}</td>
+                                <td class="px-6 py-4">
                                     @if($schedule->start_time)
-                                        <span class="time-chip">
+                                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
                                             <i class="fas fa-clock"></i>
                                             {{ \Carbon\Carbon::createFromTimeString($schedule->start_time)->format('H:i') }}{{ $schedule->end_time ? ' – '.\Carbon\Carbon::createFromTimeString($schedule->end_time)->format('H:i') : '' }}
                                         </span>
                                     @else
-                                        <span style="color:#94a3b8">TBA</span>
+                                        <span class="text-gray-500">TBA</span>
                                     @endif
                                 </td>
                             </tr>
                         @endforeach
                     @endforeach
                     @if(!$hasAny)
-                        <tr><td colspan="5"><div class="empty-state"><i class="fas fa-calendar"></i><p>Belum ada jadwal yang tersedia</p></div></td></tr>
+                        <tr><td colspan="5"><div class="py-8 text-center text-gray-500"><i class="fas fa-calendar text-gray-300 text-3xl mb-2 block"></i><p>Belum ada jadwal yang tersedia</p></div></td></tr>
                     @endif
                 </tbody>
             </table>
         </div>
     </div>
 
-    {{-- Subject Cards --}}
-    <div class="cards-grid">
+    <!-- Subject Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         @foreach($schedules->sortBy(fn($s) => array_search(strtolower($s->day_of_week), $daysOrder)) as $schedule)
-            @php $color = $dayColors[strtolower($schedule->day_of_week)] ?? '#6366f1'; $class = $schedule->class; @endphp
-            <div class="subject-card">
-                <div class="subject-card-top">
+            @php $colorClass = $dayColors[strtolower($schedule->day_of_week)] ?? 'bg-indigo-500'; $class = $schedule->class; @endphp
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition overflow-hidden">
+                <div class="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-start gap-4">
                     <div>
-                        <h3>{{ $class->classSubjects?->first()?->subject?->name ?? 'Mata Pelajaran' }}</h3>
-                        <p>{{ $class->name }}</p>
+                        <h3 class="font-bold text-gray-900 text-sm">{{ $class->classSubjects?->first()?->subject?->name ?? 'Mata Pelajaran' }}</h3>
+                        <p class="text-gray-600 text-xs mt-1">{{ $class->name }}</p>
                     </div>
-                    <span class="day-badge" style="background:{{ $color }};flex-shrink:0;">
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold text-white {{ $colorClass }} whitespace-nowrap flex-shrink-0">
                         {{ $dayLabels[strtolower($schedule->day_of_week)] ?? $schedule->day_of_week }}
                     </span>
                 </div>
-                <div class="subject-card-body">
-                    <div class="meta-row"><i class="fas fa-chalkboard-teacher"></i> {{ $class->classSubjects?->first()?->teacher?->name ?? '—' }}</div>
+                <div class="p-4 space-y-2">
+                    <div class="flex items-center gap-2 text-gray-600 text-sm">
+                        <i class="fas fa-chalkboard-teacher text-gray-400"></i> 
+                        <span>{{ $class->classSubjects?->first()?->teacher?->name ?? '—' }}</span>
+                    </div>
                     @if($schedule->start_time)
-                        <div class="meta-row"><i class="fas fa-clock"></i> {{ \Carbon\Carbon::createFromTimeString($schedule->start_time)->format('H:i') }}{{ $schedule->end_time ? ' – '.\Carbon\Carbon::createFromTimeString($schedule->end_time)->format('H:i') : '' }}</div>
-                    @endif
-                    @if($schedule->room)
-                        <div class="meta-row"><i class="fas fa-door-open"></i> {{ $schedule->room }}</div>
-                    @endif
-                    @if($class->description)
-                        <div class="meta-row" style="align-items:flex-start;">
-                            <i class="fas fa-info-circle" style="margin-top:2px;"></i>
-                            <span style="color:#64748b;font-size:12px;">{{ Str::limit($class->description, 80) }}</span>
+                        <div class="flex items-center gap-2 text-gray-600 text-sm">
+                            <i class="fas fa-clock text-gray-400"></i>
+                            <span>{{ \Carbon\Carbon::createFromTimeString($schedule->start_time)->format('H:i') }}{{ $schedule->end_time ? ' – '.\Carbon\Carbon::createFromTimeString($schedule->end_time)->format('H:i') : '' }}</span>
                         </div>
                     @endif
-                    <a href="{{ route('siswa.subjects.show', $class->id) }}" class="btn btn-primary btn-sm">
+                    @if($schedule->room)
+                        <div class="flex items-center gap-2 text-gray-600 text-sm">
+                            <i class="fas fa-door-open text-gray-400"></i>
+                            <span>{{ $schedule->room }}</span>
+                        </div>
+                    @endif
+                    @if($class->description)
+                        <div class="flex items-start gap-2 text-gray-600 text-xs pt-2 border-t border-gray-200">
+                            <i class="fas fa-info-circle text-gray-400 mt-0.5 flex-shrink-0"></i>
+                            <span>{{ Str::limit($class->description, 80) }}</span>
+                        </div>
+                    @endif
+                    <a href="{{ route('siswa.subjects.show', $class->id) }}" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg text-sm transition text-center inline-flex items-center justify-center gap-2 mt-3">
                         <i class="fas fa-arrow-right"></i> Lihat Detail
                     </a>
                 </div>
@@ -172,16 +137,16 @@
     </div>
 
 @else
-    <div class="card">
-        <div class="card-body empty-state">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-12 text-center">
             @if($classes->count() === 0)
-                <i class="fas fa-calendar-times"></i>
-                <p>Anda belum terdaftar di kelas apapun</p>
-                <p style="font-size:13px;margin-top:6px;">Jadwal akan muncul setelah Anda terdaftar di kelas.</p>
+                <i class="fas fa-calendar-times text-gray-300 text-5xl mb-4 block"></i>
+                <p class="text-gray-600 text-base font-semibold mb-1">Anda belum terdaftar di kelas apapun</p>
+                <p class="text-gray-500 text-sm">Jadwal akan muncul setelah Anda terdaftar di kelas.</p>
             @else
-                <i class="fas fa-clock"></i>
-                <p>Belum ada jadwal yang ditetapkan</p>
-                <p style="font-size:13px;margin-top:6px;">Hubungi guru atau admin untuk mengatur jadwal kelas Anda.</p>
+                <i class="fas fa-clock text-gray-300 text-5xl mb-4 block"></i>
+                <p class="text-gray-600 text-base font-semibold mb-1">Belum ada jadwal yang ditetapkan</p>
+                <p class="text-gray-500 text-sm">Hubungi guru atau admin untuk mengatur jadwal kelas Anda.</p>
             @endif
         </div>
     </div>
