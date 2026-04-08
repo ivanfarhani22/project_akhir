@@ -23,6 +23,9 @@ Route::get('/', function () {
     return redirect()->route('login');
 })->name('home');
 
+// API Routes (no auth required)
+Route::get('/api/settings/dark-mode', [\App\Http\Controllers\Admin\SettingController::class, 'getDarkMode']);
+
 // Dashboard Admin E-Learning
 Route::middleware(['auth', 'role:admin_elearning'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', function () {
@@ -32,6 +35,38 @@ Route::middleware(['auth', 'role:admin_elearning'])->prefix('admin')->name('admi
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
     Route::resource('classes', \App\Http\Controllers\Admin\ClassController::class);
     Route::resource('subjects', \App\Http\Controllers\Admin\SubjectController::class);
+    Route::resource('materials', \App\Http\Controllers\Admin\MaterialController::class);
+    Route::resource('assignments', \App\Http\Controllers\Admin\AssignmentController::class);
+    Route::resource('grades', \App\Http\Controllers\Admin\GradeController::class, ['only' => ['index', 'edit', 'update']]);
+    Route::resource('attendance', \App\Http\Controllers\Admin\AttendanceController::class, ['only' => ['index', 'create', 'store', 'show', 'destroy']])->parameter('attendance', 'session');
+    
+    // Materials
+    Route::get('/materials/{material}/download', [\App\Http\Controllers\Admin\MaterialController::class, 'download'])->name('materials.download');
+    Route::get('/materials/statistics', [\App\Http\Controllers\Admin\MaterialController::class, 'statistics'])->name('materials.statistics');
+    
+    // Assignments
+    Route::get('/assignments/{assignment}/submissions', [\App\Http\Controllers\Admin\AssignmentController::class, 'submissions'])->name('assignments.submissions');
+    Route::post('/assignments/{assignment}/submissions/{submission}/grade', [\App\Http\Controllers\Admin\AssignmentController::class, 'gradeSubmission'])->name('assignments.gradeSubmission');
+    Route::get('/assignments/statistics', [\App\Http\Controllers\Admin\AssignmentController::class, 'statistics'])->name('assignments.statistics');
+    
+    // Grades
+    Route::get('/grades/by-class/{class}', [\App\Http\Controllers\Admin\GradeController::class, 'byClass'])->name('grades.byClass');
+    Route::get('/grades/by-student/{student}', [\App\Http\Controllers\Admin\GradeController::class, 'byStudent'])->name('grades.byStudent');
+    Route::get('/grades/report', [\App\Http\Controllers\Admin\GradeController::class, 'report'])->name('grades.report');
+    Route::get('/grades/export', [\App\Http\Controllers\Admin\GradeController::class, 'exportCSV'])->name('grades.export');
+    
+    // Attendance
+    Route::get('/attendance/by-class/{class}', [\App\Http\Controllers\Admin\AttendanceController::class, 'byClass'])->name('attendance.byClass');
+    Route::get('/attendance/by-student/{student}', [\App\Http\Controllers\Admin\AttendanceController::class, 'byStudent'])->name('attendance.byStudent');
+    Route::get('/attendance/export', [\App\Http\Controllers\Admin\AttendanceController::class, 'export'])->name('attendance.export');
+    
+    // Settings
+    Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'edit'])->name('settings.edit');
+    Route::post('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+    Route::post('/settings/reset', [\App\Http\Controllers\Admin\SettingController::class, 'reset'])->name('settings.reset');
+    Route::delete('/banners/{id}', [\App\Http\Controllers\Admin\SettingController::class, 'deleteBanner'])->name('banners.delete');
+    Route::patch('/banners/{id}/toggle', [\App\Http\Controllers\Admin\SettingController::class, 'toggleBanner'])->name('banners.toggle');
+    Route::post('/banners/reorder', [\App\Http\Controllers\Admin\SettingController::class, 'reorderBanners'])->name('banners.reorder');
     
     // Class Subject Management Routes
     Route::post('/classes/{class}/subjects', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'store'])->name('class-subjects.store');
@@ -47,14 +82,6 @@ Route::middleware(['auth', 'role:admin_elearning'])->prefix('admin')->name('admi
     Route::put('/classes/{class}/schedules/{schedule}', [\App\Http\Controllers\Admin\ScheduleController::class, 'update'])->name('schedules.update');
     Route::delete('/classes/{class}/schedules/{schedule}', [\App\Http\Controllers\Admin\ScheduleController::class, 'destroy'])->name('schedules.destroy');
     
-    Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'edit'])->name('settings.edit');
-    Route::post('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
-    
-    // Banner Management
-    Route::delete('/banners/{id}', [\App\Http\Controllers\Admin\SettingController::class, 'deleteBanner'])->name('banners.delete');
-    Route::patch('/banners/{id}/toggle', [\App\Http\Controllers\Admin\SettingController::class, 'toggleBanner'])->name('banners.toggle');
-    Route::post('/banners/reorder', [\App\Http\Controllers\Admin\SettingController::class, 'reorderBanners'])->name('banners.reorder');
-    
     // Student Management in Classes
     Route::get('/classes/{class}/students', [\App\Http\Controllers\Admin\ClassStudentController::class, 'index'])->name('classes.students');
     Route::post('/classes/{class}/students', [\App\Http\Controllers\Admin\ClassStudentController::class, 'store'])->name('classes.students.store');
@@ -64,23 +91,28 @@ Route::middleware(['auth', 'role:admin_elearning'])->prefix('admin')->name('admi
 // Dashboard Guru
 Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(function () {
     Route::get('/dashboard', function () {
-        // Guru hanya lihat class dimana dia mengajar (via classSubjects)
-        $classes = \App\Models\EClass::whereHas('classSubjects', fn($q) => $q->where('teacher_id', auth()->id()))
-            ->with(['classSubjects' => fn($q) => $q->where('teacher_id', auth()->id()), 'students', 'materials', 'assignments'])
+        // Guru lihat semua classSubjects dimana dia mengajar
+        $classSubjects = \App\Models\ClassSubject::where('teacher_id', auth()->id())
+            ->with(['eClass' => fn($q) => $q->with('students', 'materials', 'assignments'), 'subject'])
+            ->orderBy('e_class_id')
             ->get();
-        $totalClasses = $classes->count();
-        $totalStudents = $classes->sum(fn($c) => $c->students->count());
-        $totalMaterials = \App\Models\Material::whereIn('e_class_id', $classes->pluck('id'))->count();
-        $totalAssignments = \App\Models\Assignment::whereIn('e_class_id', $classes->pluck('id'))->count();
-        return view('guru.dashboard', compact('classes', 'totalClasses', 'totalStudents', 'totalMaterials', 'totalAssignments'));
+        
+        $totalClassSubjects = $classSubjects->count();
+        $totalClasses = $classSubjects->pluck('eClass')->unique('id')->count();
+        $totalStudents = $classSubjects->pluck('eClass')->unique('id')->sum(fn($c) => $c->students->count());
+        $totalMaterials = $classSubjects->pluck('eClass')->unique('id')->sum(fn($c) => $c->materials->count());
+        $totalAssignments = $classSubjects->pluck('eClass')->unique('id')->sum(fn($c) => $c->assignments->count());
+        
+        return view('guru.dashboard', compact('classSubjects', 'totalClassSubjects', 'totalClasses', 'totalStudents', 'totalMaterials', 'totalAssignments'));
     })->name('dashboard');
     
     Route::get('/classes', function () {
-        // Guru hanya lihat class dimana dia mengajar
-        $classes = \App\Models\EClass::whereHas('classSubjects', fn($q) => $q->where('teacher_id', auth()->id()))
-            ->with(['classSubjects' => fn($q) => $q->where('teacher_id', auth()->id()), 'students', 'materials', 'assignments'])
+        // Guru hanya lihat classSubjects dimana dia mengajar
+        $classSubjects = \App\Models\ClassSubject::where('teacher_id', auth()->id())
+            ->with(['eClass' => fn($q) => $q->with('students', 'materials', 'assignments'), 'subject'])
+            ->orderBy('e_class_id')
             ->get();
-        return view('guru.classes.index', compact('classes'));
+        return view('guru.classes.index', compact('classSubjects'));
     })->name('classes.index');
     
     Route::resource('materials', \App\Http\Controllers\Guru\MaterialController::class);

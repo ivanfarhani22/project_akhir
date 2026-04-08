@@ -6,103 +6,161 @@ use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use App\Models\LoginBanner;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class SettingController extends Controller
 {
-    // Batas maksimal banner (untuk tampilan yang profesional)
     const MAX_BANNERS = 5;
 
     public function edit()
     {
         $settings = Setting::all()->pluck('value', 'key');
-        $bannerPath = $settings['login_banner'] ?? null;
-        
-        // Get multiple banners
+
         $banners = LoginBanner::orderBy('order')->get();
         $bannerCount = $banners->count();
         $remainingSlots = self::MAX_BANNERS - $bannerCount;
-        
-        return view('admin.settings.edit', compact('bannerPath', 'banners', 'bannerCount', 'remainingSlots'));
+
+        $themeSettings = [
+            'primary_color'   => $settings['primary_color']   ?? '#0066cc',
+            'secondary_color' => $settings['secondary_color'] ?? '#666666',
+            'accent_color'    => $settings['accent_color']    ?? '#ffc107',
+            'dark_mode'       => $settings['dark_mode']       ?? 'false',
+            'font_size'       => $settings['font_size']       ?? 'normal',
+            'school_name'     => $settings['school_name']     ?? 'E-Learning SRMA',
+            'academic_year'   => $settings['academic_year']   ?? date('Y'),
+            'semester'        => $settings['semester']        ?? '1',
+        ];
+
+        return view('admin.settings.edit', compact('banners', 'bannerCount', 'remainingSlots', 'themeSettings'));
+    }
+
+    /**
+     * API endpoint untuk mendapatkan semua settings aktif (dipakai layout global)
+     */
+    public function getActiveSettings()
+    {
+        $settings = Setting::all()->pluck('value', 'key');
+        return response()->json([
+            'dark_mode'     => $settings['dark_mode']     ?? 'false',
+            'font_size'     => $settings['font_size']     ?? 'normal',
+            'school_name'   => $settings['school_name']   ?? 'E-Learning SRMA',
+            'academic_year' => $settings['academic_year'] ?? date('Y'),
+            'semester'      => $settings['semester']      ?? '1',
+        ]);
     }
 
     public function update(Request $request)
     {
+        // Jika request berisi file banner, tangani upload saja
+        if ($request->hasFile('login_banners')) {
+            return $this->uploadBanners($request);
+        }
+
+        // Validasi pengaturan akademik
         $validated = $request->validate([
-            'login_banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // Max 5MB (old single banner, deprecated)
-            'login_banners.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // Multiple banners
+            'school_name'   => 'required|string|max:100',
+            'academic_year' => 'required|numeric|digits:4|min:2000|max:2100',
+            'semester'      => 'required|in:1,2',
+            'font_size'     => 'required|in:small,normal,large',
+            'dark_mode'     => 'nullable',
         ]);
 
-        // Handle new multiple banner uploads
-        if ($request->hasFile('login_banners')) {
-            $currentCount = LoginBanner::count();
-            $newFiles = array_filter($request->file('login_banners')); // Filter out empty files
-            
-            // Check if total banners exceed max
-            if (($currentCount + count($newFiles)) > self::MAX_BANNERS) {
-                return redirect()->back()->with('error', 'Jumlah banner tidak boleh melebihi ' . self::MAX_BANNERS . '!');
-            }
-            
-            foreach ($newFiles as $file) {
-                $path = $file->store('banners', 'public');
-                $order = LoginBanner::max('order') ?? 0;
-                
-                LoginBanner::create([
-                    'image_path' => '/storage/' . $path,
-                    'order' => $order + 1,
-                    'is_active' => true,
-                ]);
-            }
+        Setting::updateOrCreate(['key' => 'school_name'],   ['value' => $validated['school_name']]);
+        Setting::updateOrCreate(['key' => 'academic_year'], ['value' => $validated['academic_year']]);
+        Setting::updateOrCreate(['key' => 'semester'],      ['value' => $validated['semester']]);
+        Setting::updateOrCreate(['key' => 'font_size'],     ['value' => $validated['font_size']]);
 
-            \App\Models\ActivityLog::create([
-                'user_id' => auth()->id(),
-                'action' => 'update_settings',
-                'description' => 'Admin upload banner login (multiple)',
-                'ip_address' => $request->ip(),
-                'timestamp' => now(),
-            ]);
-        }
+        // Checkbox: ada = true, tidak ada = false
+        $darkMode = $request->has('dark_mode') ? 'true' : 'false';
+        Setting::updateOrCreate(['key' => 'dark_mode'], ['value' => $darkMode]);
 
-        // Handle old single banner setting (for backward compatibility)
-        if ($request->hasFile('login_banner')) {
-            $file = $request->file('login_banner');
-            $path = $file->store('banners', 'public');
-            
-            Setting::updateOrCreate(
-                ['key' => 'login_banner'],
-                ['value' => '/storage/' . $path]
-            );
-        }
+        \App\Models\ActivityLog::create([
+            'user_id'     => auth()->id(),
+            'action'      => 'update_settings',
+            'description' => 'Pembaruan pengaturan sistem',
+            'ip_address'  => $request->ip(),
+        ]);
 
-        return redirect()->route('admin.settings.edit')->with('success', 'Pengaturan berhasil diperbarui!');
+        return redirect()->route('admin.settings.edit')
+            ->with('success', 'Pengaturan berhasil disimpan!');
     }
 
     /**
-     * Delete banner by ID
+     * Upload banner baru
+     */
+    private function uploadBanners(Request $request)
+    {
+        $currentCount = LoginBanner::count();
+        $remainingSlots = self::MAX_BANNERS - $currentCount;
+
+        if ($remainingSlots <= 0) {
+            return redirect()->back()
+                ->with('error', 'Batas maksimal banner sudah tercapai (5/5).');
+        }
+
+        $request->validate([
+            'login_banners'   => 'required|array|max:' . $remainingSlots,
+            'login_banners.*' => 'required|image|mimes:jpg,jpeg,png,gif|max:5120',
+        ]);
+
+        $uploaded = 0;
+        foreach ($request->file('login_banners') as $file) {
+            if ($currentCount + $uploaded >= self::MAX_BANNERS) {
+                break;
+            }
+
+            $filename  = 'banner_' . time() . '_' . $uploaded . '.' . $file->getClientOriginalExtension();
+            $directory = 'images/banners';
+            $file->move(public_path($directory), $filename);
+
+            $lastOrder = LoginBanner::max('order') ?? 0;
+
+            LoginBanner::create([
+                'image_path' => $directory . '/' . $filename,
+                'is_active'  => true,
+                'order'      => $lastOrder + 1,
+            ]);
+
+            $uploaded++;
+        }
+
+        \App\Models\ActivityLog::create([
+            'user_id'     => auth()->id(),
+            'action'      => 'upload_banner',
+            'description' => "Upload {$uploaded} banner login baru",
+            'ip_address'  => $request->ip(),
+        ]);
+
+        return redirect()->back()
+            ->with('success', "{$uploaded} banner berhasil diupload!");
+    }
+
+    /**
+     * Hapus banner by ID
      */
     public function deleteBanner($id)
     {
         $banner = LoginBanner::findOrFail($id);
-        
-        // Delete file
-        if (file_exists(public_path($banner->image_path))) {
-            unlink(public_path($banner->image_path));
+
+        $fullPath = public_path($banner->image_path);
+        if (file_exists($fullPath)) {
+            unlink($fullPath);
         }
-        
+
         $banner->delete();
 
         \App\Models\ActivityLog::create([
-            'user_id' => auth()->id(),
-            'action' => 'delete_banner',
-            'description' => 'Admin delete banner login',
-            'ip_address' => request()->ip(),
-            'timestamp' => now(),
+            'user_id'     => auth()->id(),
+            'action'      => 'delete_banner',
+            'description' => 'Penghapusan banner login: ' . $banner->image_path,
+            'ip_address'  => request()->ip(),
         ]);
 
         return redirect()->back()->with('success', 'Banner berhasil dihapus!');
     }
 
     /**
-     * Toggle banner active status
+     * Toggle status aktif banner
      */
     public function toggleBanner($id)
     {
@@ -110,17 +168,16 @@ class SettingController extends Controller
         $banner->is_active = !$banner->is_active;
         $banner->save();
 
-        return redirect()->back()->with('success', 'Status banner berhasil diubah!');
+        $status = $banner->is_active ? 'diaktifkan' : 'dinonaktifkan';
+        return redirect()->back()->with('success', "Banner berhasil {$status}!");
     }
 
     /**
-     * Reorder banners
+     * Reorder banners (AJAX)
      */
     public function reorderBanners(Request $request)
     {
-        $request->validate([
-            'orders' => 'required|array',
-        ]);
+        $request->validate(['orders' => 'required|array']);
 
         foreach ($request->input('orders') as $order => $bannerId) {
             LoginBanner::where('id', $bannerId)->update(['order' => $order + 1]);
@@ -129,5 +186,34 @@ class SettingController extends Controller
         return response()->json(['success' => true, 'message' => 'Urutan banner berhasil diperbarui!']);
     }
 
-    // ... existing code ...
+    /**
+     * Reset pengaturan ke default
+     */
+    public function reset(Request $request)
+    {
+        $defaultSettings = [
+            'primary_color'   => '#0066cc',
+            'secondary_color' => '#666666',
+            'accent_color'    => '#ffc107',
+            'dark_mode'       => 'false',
+            'font_size'       => 'normal',
+            'school_name'     => 'E-Learning SRMA',
+            'academic_year'   => date('Y'),
+            'semester'        => '1',
+        ];
+
+        foreach ($defaultSettings as $key => $value) {
+            Setting::updateOrCreate(['key' => $key], ['value' => $value]);
+        }
+
+        \App\Models\ActivityLog::create([
+            'user_id'     => auth()->id(),
+            'action'      => 'reset_settings',
+            'description' => 'Reset pengaturan sistem ke nilai default',
+            'ip_address'  => $request->ip(),
+        ]);
+
+        return redirect()->route('admin.settings.edit')
+            ->with('success', 'Pengaturan direset ke nilai default!');
+    }
 }

@@ -44,6 +44,12 @@ class ClassSubjectController extends Controller
             return redirect()->back()->with('error', 'Mata pelajaran ini sudah ada di kelas ini!');
         }
 
+        // Verify teacher exists and has guru role
+        $teacher = User::findOrFail($validated['teacher_id']);
+        if ($teacher->role !== 'guru') {
+            return redirect()->back()->with('error', 'User yang dipilih bukan guru!');
+        }
+
         ClassSubject::create([
             'e_class_id' => $class->id,
             'subject_id' => $validated['subject_id'],

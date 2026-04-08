@@ -4,27 +4,32 @@
 @section('icon', 'fas fa-calendar-alt')
 
 @section('content')
-<div class="container mx-auto px-4 py-6">
+<div class="max-w-4xl mx-auto px-4 py-8">
     <!-- Breadcrumb -->
-    <nav class="flex items-center space-x-2 mb-6 text-gray-600">
-        <a href="{{ route('admin.dashboard') }}" class="hover:text-blue-600">Dashboard</a>
-        <span>/</span>
-        <a href="{{ route('admin.classes.index') }}" class="hover:text-blue-600">Kelas</a>
-        <span>/</span>
-        <a href="{{ route('admin.classes.show', $class) }}" class="hover:text-blue-600">{{ $class->name }}</a>
-        <span>/</span>
-        <span class="text-blue-600 font-semibold">Edit Jadwal</span>
+    <nav class="flex items-center space-x-2 mb-8 text-sm text-gray-600">
+        <a href="{{ route('admin.dashboard') }}" class="hover:text-red-600 transition">Dashboard</a>
+        <span class="text-gray-400">/</span>
+        <a href="{{ route('admin.classes.index') }}" class="hover:text-red-600 transition">Kelas</a>
+        <span class="text-gray-400">/</span>
+        <a href="{{ route('admin.classes.show', $class) }}" class="hover:text-red-600 transition">{{ $class->name }}</a>
+        <span class="text-gray-400">/</span>
+        <span class="text-red-600 font-semibold">Edit Jadwal</span>
     </nav>
 
     <!-- Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Edit Jadwal untuk {{ $class->name }}</h1>
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <span class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+                <i class="fas fa-calendar-alt"></i>
+            </span>
+            Edit Jadwal untuk {{ $class->name }}
+        </h1>
         <p class="text-gray-600 mt-2">Perbarui informasi jadwal pelajaran</p>
     </div>
 
     <!-- Form Card -->
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-800">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
             <h2 class="text-white font-bold text-lg">Form Edit Jadwal</h2>
         </div>
 
@@ -34,10 +39,10 @@
 
             <!-- Mata Pelajaran -->
             <div>
-                <label for="class_subject_id" class="block text-gray-700 font-semibold mb-2">
+                <label for="class_subject_id" class="block text-sm font-semibold text-gray-900 mb-2">
                     Mata Pelajaran <span class="text-red-500">*</span>
                 </label>
-                <select name="class_subject_id" id="class_subject_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 @error('class_subject_id') border-red-500 @enderror">
+                <select name="class_subject_id" id="class_subject_id" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('class_subject_id') border-red-500 @enderror">
                     <option value="">-- Pilih Mata Pelajaran --</option>
                     @foreach($classSubjects as $cs)
                         <option value="{{ $cs->id }}" @selected($schedule->class_subject_id == $cs->id)>
@@ -46,16 +51,16 @@
                     @endforeach
                 </select>
                 @error('class_subject_id')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             <!-- Hari -->
             <div>
-                <label for="day_of_week" class="block text-gray-700 font-semibold mb-2">
+                <label for="day_of_week" class="block text-sm font-semibold text-gray-900 mb-2">
                     Hari <span class="text-red-500">*</span>
                 </label>
-                <select name="day_of_week" id="day_of_week" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 @error('day_of_week') border-red-500 @enderror">
+                <select name="day_of_week" id="day_of_week" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('day_of_week') border-red-500 @enderror">
                     <option value="">-- Pilih Hari --</option>
                     <option value="monday" @selected($schedule->day_of_week == 'monday')>Senin (Monday)</option>
                     <option value="tuesday" @selected($schedule->day_of_week == 'tuesday')>Selasa (Tuesday)</option>
@@ -66,71 +71,71 @@
                     <option value="sunday" @selected($schedule->day_of_week == 'sunday')>Minggu (Sunday)</option>
                 </select>
                 @error('day_of_week')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             <!-- Waktu Mulai dan Selesai -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="start_time" class="block text-gray-700 font-semibold mb-2">
-                        Waktu Mulai (HH:MM) <span class="text-red-500">*</span>
+                    <label for="start_time" class="block text-sm font-semibold text-gray-900 mb-2">
+                        Waktu Mulai <span class="text-red-500">*</span>
                     </label>
                     <input type="time" name="start_time" id="start_time" required 
                            value="{{ old('start_time', $schedule->start_time) }}"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 @error('start_time') border-red-500 @enderror">
+                           class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('start_time') border-red-500 @enderror">
                     @error('start_time')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div>
-                    <label for="end_time" class="block text-gray-700 font-semibold mb-2">
-                        Waktu Selesai (HH:MM) <span class="text-red-500">*</span>
+                    <label for="end_time" class="block text-sm font-semibold text-gray-900 mb-2">
+                        Waktu Selesai <span class="text-red-500">*</span>
                     </label>
                     <input type="time" name="end_time" id="end_time" required 
                            value="{{ old('end_time', $schedule->end_time) }}"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 @error('end_time') border-red-500 @enderror">
+                           class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('end_time') border-red-500 @enderror">
                     @error('end_time')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
 
             <!-- Ruangan -->
             <div>
-                <label for="room" class="block text-gray-700 font-semibold mb-2">
-                    Ruangan (Optional)
+                <label for="room" class="block text-sm font-semibold text-gray-900 mb-2">
+                    Ruangan <span class="text-gray-500 text-xs">(Opsional)</span>
                 </label>
                 <input type="text" name="room" id="room" 
                        value="{{ old('room', $schedule->room) }}"
                        placeholder="Contoh: Ruang 101, Lab Komputer"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 @error('room') border-red-500 @enderror">
+                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('room') border-red-500 @enderror">
                 @error('room')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             <!-- Catatan -->
             <div>
-                <label for="notes" class="block text-gray-700 font-semibold mb-2">
-                    Catatan (Optional)
+                <label for="notes" class="block text-sm font-semibold text-gray-900 mb-2">
+                    Catatan <span class="text-gray-500 text-xs">(Opsional)</span>
                 </label>
-                <textarea name="notes" id="notes" rows="3" 
+                <textarea name="notes" id="notes" rows="4" 
                           placeholder="Catatan tambahan tentang jadwal ini..."
-                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 @error('notes') border-red-500 @enderror">{{ old('notes', $schedule->notes) }}</textarea>
+                          class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('notes') border-red-500 @enderror">{{ old('notes', $schedule->notes) }}</textarea>
                 @error('notes')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             <!-- Buttons -->
-            <div class="flex justify-between items-center pt-4 border-t border-gray-200">
-                <a href="{{ route('admin.classes.show', $class) }}" class="px-6 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold">
-                    Batal
+            <div class="flex flex-wrap gap-3 pt-6 border-t-2 border-gray-200 mt-6">
+                <a href="{{ route('admin.classes.show', $class) }}" class="inline-flex items-center gap-2 bg-white border-2 border-gray-300 text-gray-900 px-6 py-2 rounded-lg font-semibold text-sm hover:bg-gray-50 transition">
+                    <i class="fas fa-xmark"></i> Batal
                 </a>
-                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
-                    Simpan Perubahan
+                <button type="submit" class="ml-auto inline-flex items-center gap-2 bg-red-500 text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition">
+                    <i class="fas fa-save"></i> Simpan Perubahan
                 </button>
             </div>
         </form>

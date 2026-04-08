@@ -4,139 +4,147 @@
 @section('icon', 'fas fa-book')
 
 @section('content')
-    <!-- Breadcrumb -->
-    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 14px;">
-        <a href="{{ route('admin.classes.index') }}" style="color: var(--primary); text-decoration: none;">
-            <i class="fas fa-chalkboard"></i> Kelola Kelas
-        </a>
-        <span style="color: #999;">/</span>
-        <a href="{{ route('admin.classes.show', $class) }}" style="color: var(--primary); text-decoration: none;">
-            {{ $class->name }}
-        </a>
-        <span style="color: #999;">/</span>
-        <span style="color: var(--secondary); font-weight: 600;">Tambah Mata Pelajaran</span>
-    </div>
-
-    <!-- Header -->
-    <div style="margin-bottom: 30px;">
-        <h1 class="page-title">
-            <i class="fas fa-book-plus"></i>
-            Tambah Mata Pelajaran ke {{ $class->name }}
-        </h1>
-        <p class="page-description">Pilih mata pelajaran dan guru pengajar</p>
-    </div>
-
-    @if ($errors->any())
-        <div style="background: #fee; border: 2px solid #fcc; border-radius: 8px; padding: 15px; margin-bottom: 20px; color: #c33;">
-            <i class="fas fa-exclamation-circle"></i>
-            <strong>Terjadi kesalahan:</strong>
-            @foreach ($errors->all() as $error)
-                <div>{{ $error }}</div>
-            @endforeach
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Breadcrumb -->
+        <div class="flex items-center gap-2 mb-6 text-sm text-gray-600">
+            <a href="{{ route('admin.classes.index') }}" class="text-red-600 hover:text-red-700 font-medium">
+                <i class="fas fa-chalkboard"></i> Kelola Kelas
+            </a>
+            <span>/</span>
+            <a href="{{ route('admin.classes.show', $class) }}" class="text-red-600 hover:text-red-700 font-medium">
+                {{ $class->name }}
+            </a>
+            <span>/</span>
+            <span class="text-gray-700 font-semibold">Tambah Mata Pelajaran</span>
         </div>
-    @endif
 
-    <div class="card" style="max-width: 600px;">
-        <div class="card-header">
-            <div class="card-title">
-                <i class="fas fa-book" style="color: var(--primary); margin-right: 10px;"></i>
-                Informasi Mata Pelajaran
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+                    <i class="fas fa-book"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900">Tambah Mata Pelajaran</h1>
             </div>
+            <p class="text-gray-600">Tambahkan mata pelajaran baru ke kelas {{ $class->name }}</p>
         </div>
 
-        <div class="card-body">
-            <form method="POST" action="{{ route('admin.class-subjects.store', $class) }}">
-                @csrf
-
-                <!-- Mata Pelajaran (dengan Search) -->
-                <div style="margin-bottom: 25px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                        Pilih Mata Pelajaran <span style="color: var(--danger);">*</span>
-                    </label>
-                    <select 
-                        name="subject_id" 
-                        id="subjectSelect"
-                        style="width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px;"
-                        required
-                    >
-                        <option value="">-- Cari & Pilih Mata Pelajaran --</option>
-                        @foreach($availableSubjects as $subject)
-                            <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>
-                                {{ $subject->name }} ({{ $subject->code }})
-                            </option>
+        <!-- Error Messages -->
+        @if ($errors->any())
+            <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-exclamation-circle text-red-600 mt-1"></i>
+                    <div>
+                        <p class="font-semibold text-red-900">Terjadi kesalahan:</p>
+                        @foreach ($errors->all() as $error)
+                            <p class="text-red-700 text-sm mt-1">{{ $error }}</p>
                         @endforeach
-                    </select>
-                    @if($availableSubjects->isEmpty())
-                        <small style="color: #dc3545; margin-top: 5px; display: block;">
-                            ⚠️ Semua mata pelajaran sudah ditambahkan ke kelas ini atau belum ada mata pelajaran.
-                        </small>
-                    @else
-                        <small style="color: #999; margin-top: 5px; display: block;">
-                            Hanya menampilkan mata pelajaran yang belum ditambahkan ke kelas ini
-                        </small>
-                    @endif
+                    </div>
                 </div>
+            </div>
+        @endif
 
-                <!-- Guru Pengajar (dengan Search Select2) -->
-                <div style="margin-bottom: 25px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                        Guru Pengajar <span style="color: var(--danger);">*</span>
-                    </label>
-                    <select 
-                        name="teacher_id" 
-                        id="teacherSelect"
-                        style="width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px;"
-                        required
-                    >
-                        <option value="">-- Cari & Pilih Guru --</option>
-                        @foreach($teachers as $teacher)
-                            <option value="{{ $teacher->id }}" {{ old('teacher_id') == $teacher->id ? 'selected' : '' }}>
-                                {{ $teacher->name }} ({{ $teacher->email }})
-                            </option>
-                        @endforeach
-                    </select>
-                    @if($teachers->isEmpty())
-                        <small style="color: #dc3545; margin-top: 5px; display: block;">
-                            ⚠️ Tidak ada guru tersedia.
-                        </small>
-                    @else
-                        <small style="color: #999; margin-top: 5px; display: block;">
-                            Guru yang akan mengajar mata pelajaran ini
-                        </small>
-                    @endif
-                </div>
+        <!-- Form Card -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- Card Header -->
+            <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
+                <h2 class="text-white font-semibold text-lg flex items-center gap-2">
+                    <i class="fas fa-pen-to-square"></i>
+                    Form Tambah Mata Pelajaran
+                </h2>
+            </div>
 
-                <!-- Deskripsi -->
-                <div style="margin-bottom: 25px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                        Deskripsi (Opsional)
-                    </label>
-                    <textarea 
-                        name="description" 
-                        id="description"
-                        style="width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; resize: vertical;"
-                        rows="3"
-                        placeholder="Deskripsi singkat tentang mata pelajaran ini di kelas..."
-                    >{{ old('description') }}</textarea>
-                </div>
+            <!-- Card Body -->
+            <div class="p-6 space-y-6">
+                <form method="POST" action="{{ route('admin.class-subjects.store', $class) }}" class="space-y-6">
+                    @csrf
 
-                <!-- Buttons -->
-                <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                    <a 
-                        href="{{ route('admin.classes.show', $class) }}" 
-                        class="btn btn-secondary"
-                        style="text-decoration: none;"
-                    >
-                        <i class="fas fa-arrow-left"></i> Batal
-                    </a>
-                    <button 
-                        type="submit" 
-                        class="btn btn-primary"
-                    >
-                        <i class="fas fa-plus"></i> Tambah Mata Pelajaran
-                    </button>
-                </div>
-            </form>
+                    <!-- Mata Pelajaran (dengan Search) -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Pilih Mata Pelajaran
+                            <span class="text-red-600">*</span>
+                        </label>
+                        <select 
+                            name="subject_id" 
+                            id="subjectSelect" 
+                            required
+                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-red-500 transition"
+                        >
+                            <option value="">-- Cari & Pilih Mata Pelajaran --</option>
+                            @foreach($availableSubjects as $subject)
+                                <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>
+                                    {{ $subject->name }} ({{ $subject->code }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @if($availableSubjects->isEmpty())
+                            <p class="text-xs text-red-600 mt-2">
+                                ⚠️ Semua mata pelajaran sudah ditambahkan ke kelas ini atau belum ada mata pelajaran.
+                            </p>
+                        @else
+                            <p class="text-xs text-gray-500 mt-2">Hanya menampilkan mata pelajaran yang belum ditambahkan ke kelas ini</p>
+                        @endif
+                    </div>
+
+                    <!-- Guru Pengajar (dengan Search Select2) -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Guru Pengajar
+                            <span class="text-red-600">*</span>
+                        </label>
+                        <select 
+                            name="teacher_id" 
+                            id="teacherSelect" 
+                            required
+                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-red-500 transition"
+                        >
+                            <option value="">-- Cari & Pilih Guru --</option>
+                            @foreach($teachers as $teacher)
+                                <option value="{{ $teacher->id }}" {{ old('teacher_id') == $teacher->id ? 'selected' : '' }}>
+                                    {{ $teacher->name }} ({{ $teacher->email }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @if($teachers->isEmpty())
+                            <p class="text-xs text-red-600 mt-2">
+                                ⚠️ Tidak ada guru tersedia.
+                            </p>
+                        @else
+                            <p class="text-xs text-gray-500 mt-2">Guru yang akan mengajar mata pelajaran ini</p>
+                        @endif
+                    </div>
+
+                    <!-- Deskripsi -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Deskripsi (Opsional)
+                        </label>
+                        <textarea 
+                            name="description" 
+                            rows="3"
+                            placeholder="Deskripsi singkat tentang mata pelajaran ini di kelas..."
+                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-red-500 transition resize-none"
+                        >{{ old('description') }}</textarea>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex gap-3 justify-end pt-6 border-t border-gray-200">
+                        <a 
+                            href="{{ route('admin.classes.show', $class) }}" 
+                            class="inline-flex items-center gap-2 px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold text-sm hover:bg-gray-50 transition"
+                        >
+                            <i class="fas fa-arrow-left"></i> Batal
+                        </a>
+                        <button 
+                            type="submit" 
+                            class="inline-flex items-center gap-2 px-6 py-2 bg-red-500 text-white rounded-lg font-semibold text-sm hover:bg-red-600 transition"
+                        >
+                            <i class="fas fa-plus"></i> Tambah Mata Pelajaran
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -165,59 +173,25 @@
 
     <style>
         .select2-container--default .select2-selection--single {
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            padding: 8px 12px;
+            border: 2px solid #d1d5db !important;
+            border-radius: 0.5rem;
+            padding: 8px 12px !important;
             font-size: 14px;
             height: auto !important;
         }
         
         .select2-container--default.select2-container--focus .select2-selection--single {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
         }
 
         .select2-dropdown {
-            border: 2px solid var(--border);
-            border-radius: 8px;
+            border: 2px solid #d1d5db !important;
+            border-radius: 0.5rem;
         }
 
         .select2-results__option--highlighted {
-            background-color: var(--primary) !important;
-        }
-
-        .btn {
-            padding: 10px 16px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #5a5fd8;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-secondary {
-            background: #e5e7eb;
-            color: #374151;
-        }
-
-        .btn-secondary:hover {
-            background: #d1d5db;
-            transform: translateY(-2px);
+            background-color: #ef4444 !important;
         }
     </style>
 @endsection

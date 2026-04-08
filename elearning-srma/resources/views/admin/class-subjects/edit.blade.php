@@ -4,130 +4,139 @@
 @section('icon', 'fas fa-edit')
 
 @section('content')
-    <!-- Breadcrumb -->
-    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 14px;">
-        <a href="{{ route('admin.classes.index') }}" style="color: var(--primary); text-decoration: none;">
-            <i class="fas fa-chalkboard"></i> Kelola Kelas
-        </a>
-        <span style="color: #999;">/</span>
-        <a href="{{ route('admin.classes.show', $classSubject->eClass) }}" style="color: var(--primary); text-decoration: none;">
-            {{ $classSubject->eClass->name }}
-        </a>
-        <span style="color: #999;">/</span>
-        <span style="color: var(--secondary); font-weight: 600;">Edit Guru</span>
-    </div>
-
-    <!-- Header -->
-    <div style="margin-bottom: 30px;">
-        <h1 class="page-title">
-            <i class="fas fa-edit"></i>
-            Edit Guru {{ $classSubject->subject->name }}
-        </h1>
-        <p class="page-description">Ubah guru pengajar untuk mata pelajaran ini</p>
-    </div>
-
-    @if ($errors->any())
-        <div style="background: #fee; border: 2px solid #fcc; border-radius: 8px; padding: 15px; margin-bottom: 20px; color: #c33;">
-            <i class="fas fa-exclamation-circle"></i>
-            <strong>Terjadi kesalahan:</strong>
-            @foreach ($errors->all() as $error)
-                <div>{{ $error }}</div>
-            @endforeach
-        </div>
-    @endif
-
-    <div class="card" style="max-width: 600px;">
-        <div class="card-header">
-            <div class="card-title">
-                <i class="fas fa-user-tie" style="color: var(--primary); margin-right: 10px;"></i>
-                Informasi Guru
-            </div>
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Breadcrumb -->
+        <div class="flex items-center gap-2 mb-6 text-sm text-gray-600">
+            <a href="{{ route('admin.classes.index') }}" class="text-red-600 hover:text-red-700 font-medium">
+                <i class="fas fa-chalkboard"></i> Kelola Kelas
+            </a>
+            <span>/</span>
+            <a href="{{ route('admin.classes.show', $classSubject->eClass) }}" class="text-red-600 hover:text-red-700 font-medium">
+                {{ $classSubject->eClass->name }}
+            </a>
+            <span>/</span>
+            <span class="text-gray-700 font-semibold">Edit Guru</span>
         </div>
 
-        <div class="card-body">
-            <!-- Current Subject Info -->
-            <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; margin-bottom: 25px; border-left: 4px solid var(--primary);">
-                <p style="margin: 0; font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
-                    Mata Pelajaran
-                </p>
-                <p style="margin: 8px 0 0 0; font-size: 16px; font-weight: 700; color: var(--secondary);">
-                    {{ $classSubject->subject->name }}
-                </p>
-                @if ($classSubject->subject->code)
-                    <p style="margin: 5px 0 0 0; font-size: 13px; color: #666;">
-                        Kode: {{ $classSubject->subject->code }}
-                    </p>
-                @endif
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900">Edit Guru {{ $classSubject->subject->name }}</h1>
             </div>
+            <p class="text-gray-600">Ubah guru pengajar untuk mata pelajaran ini</p>
+        </div>
 
-            <!-- Form -->
-            <form method="POST" action="{{ route('admin.class-subjects.update', $classSubject) }}">
-                @csrf
-                @method('PUT')
-
-                <!-- Guru Pengajar (dengan Search Select2) -->
-                <div style="margin-bottom: 25px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                        Guru Pengajar <span style="color: var(--danger);">*</span>
-                    </label>
-                    <select 
-                        name="teacher_id" 
-                        id="teacherSelect"
-                        style="width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px;"
-                        required
-                    >
-                        <option value="">-- Cari & Pilih Guru --</option>
-                        @foreach($teachers as $teacher)
-                            <option value="{{ $teacher->id }}" {{ old('teacher_id', $classSubject->teacher_id) == $teacher->id ? 'selected' : '' }}>
-                                {{ $teacher->name }} ({{ $teacher->email }})
-                            </option>
+        <!-- Error Messages -->
+        @if ($errors->any())
+            <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-exclamation-circle text-red-600 mt-1"></i>
+                    <div>
+                        <p class="font-semibold text-red-900">Terjadi kesalahan:</p>
+                        @foreach ($errors->all() as $error)
+                            <p class="text-red-700 text-sm mt-1">{{ $error }}</p>
                         @endforeach
-                    </select>
-                    <small style="color: #999; margin-top: 5px; display: block;">
-                        Guru saat ini: <strong>{{ $classSubject->teacher->name }}</strong>
-                    </small>
-                </div>
-
-                <!-- Deskripsi -->
-                <div style="margin-bottom: 25px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                        Deskripsi (Opsional)
-                    </label>
-                    <textarea 
-                        name="description" 
-                        id="description"
-                        style="width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; resize: vertical;"
-                        rows="3"
-                        placeholder="Deskripsi singkat tentang mata pelajaran ini di kelas..."
-                    >{{ old('description', $classSubject->description) }}</textarea>
-                </div>
-
-                <!-- Buttons -->
-                <div style="display: flex; gap: 10px; justify-content: space-between;">
-                    <a 
-                        href="{{ route('admin.classes.show', $classSubject->eClass) }}" 
-                        class="btn btn-secondary"
-                        style="text-decoration: none;"
-                    >
-                        <i class="fas fa-arrow-left"></i> Batal
-                    </a>
-                    <div style="display: flex; gap: 10px;">
-                        <form method="POST" action="{{ route('admin.class-subjects.destroy', $classSubject) }}" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus mata pelajaran ini?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger">
-                                <i class="fas fa-trash"></i> Hapus
-                            </button>
-                        </form>
-                        <button 
-                            type="submit" 
-                            class="btn btn-primary"
-                        >
-                            <i class="fas fa-save"></i> Simpan Perubahan
-                        </button>
                     </div>
                 </div>
-            </form>
+            </div>
+        @endif
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- Card Header -->
+            <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
+                <h2 class="text-white font-semibold text-lg flex items-center gap-2">
+                    <i class="fas fa-pen-to-square"></i>
+                    Informasi Guru Pengajar
+                </h2>
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-6 space-y-6">
+                <!-- Current Subject Info -->
+                <div class="bg-gray-50 border-l-4 border-red-500 p-4 rounded">
+                    <p class="text-xs font-semibold text-gray-600 uppercase tracking-widest mb-1">
+                        Mata Pelajaran
+                    </p>
+                    <p class="text-lg font-bold text-gray-900">{{ $classSubject->subject->name }}</p>
+                    @if ($classSubject->subject->code)
+                        <p class="text-sm text-gray-600 mt-2">
+                            Kode: <span class="font-semibold">{{ $classSubject->subject->code }}</span>
+                        </p>
+                    @endif
+                </div>
+
+                <!-- Form -->
+                <form method="POST" action="{{ route('admin.class-subjects.update', [$classSubject->eClass, $classSubject]) }}" class="space-y-6">
+                    @csrf
+                    @method('PUT')
+
+                    <!-- Guru Pengajar (dengan Search Select2) -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Guru Pengajar
+                            <span class="text-red-600">*</span>
+                        </label>
+                        <select 
+                            name="teacher_id" 
+                            id="teacherSelect"
+                            required
+                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-red-500 transition"
+                        >
+                            <option value="">-- Cari & Pilih Guru --</option>
+                            @foreach($teachers as $teacher)
+                                <option value="{{ $teacher->id }}" {{ old('teacher_id', $classSubject->teacher_id) == $teacher->id ? 'selected' : '' }}>
+                                    {{ $teacher->name }} ({{ $teacher->email }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs text-gray-500 mt-2">
+                            Guru saat ini: <span class="font-semibold text-gray-700">{{ $classSubject->teacher->name }}</span>
+                        </p>
+                    </div>
+
+                    <!-- Deskripsi -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Deskripsi (Opsional)
+                        </label>
+                        <textarea 
+                            name="description" 
+                            rows="3"
+                            placeholder="Deskripsi singkat tentang mata pelajaran ini di kelas..."
+                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-red-500 transition resize-none"
+                        >{{ old('description', $classSubject->description) }}</textarea>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex gap-3 justify-between pt-6 border-t border-gray-200">
+                        <a 
+                            href="{{ route('admin.classes.show', $classSubject->eClass) }}" 
+                            class="inline-flex items-center gap-2 px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold text-sm hover:bg-gray-50 transition"
+                        >
+                            <i class="fas fa-arrow-left"></i> Batal
+                        </a>
+                        <div class="flex gap-3">
+                            <form method="POST" action="{{ route('admin.class-subjects.destroy', [$classSubject->eClass, $classSubject]) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus mata pelajaran ini?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="inline-flex items-center gap-2 px-6 py-2 bg-red-600 text-white rounded-lg font-semibold text-sm hover:bg-red-700 transition">
+                                    <i class="fas fa-trash"></i> Hapus
+                                </button>
+                            </form>
+                            <button 
+                                type="submit" 
+                                class="inline-flex items-center gap-2 px-6 py-2 bg-red-500 text-white rounded-lg font-semibold text-sm hover:bg-red-600 transition"
+                            >
+                                <i class="fas fa-save"></i> Simpan
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -149,69 +158,25 @@
 
     <style>
         .select2-container--default .select2-selection--single {
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            padding: 8px 12px;
+            border: 2px solid #d1d5db !important;
+            border-radius: 0.5rem;
+            padding: 8px 12px !important;
             font-size: 14px;
             height: auto !important;
         }
         
         .select2-container--default.select2-container--focus .select2-selection--single {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
         }
 
         .select2-dropdown {
-            border: 2px solid var(--border);
-            border-radius: 8px;
+            border: 2px solid #d1d5db !important;
+            border-radius: 0.5rem;
         }
 
         .select2-results__option--highlighted {
-            background-color: var(--primary) !important;
-        }
-
-        .btn {
-            padding: 10px 16px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #5a5fd8;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-secondary {
-            background: #e5e7eb;
-            color: #374151;
-        }
-
-        .btn-secondary:hover {
-            background: #d1d5db;
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-            transform: translateY(-2px);
+            background-color: #ef4444 !important;
         }
     </style>
 @endsection

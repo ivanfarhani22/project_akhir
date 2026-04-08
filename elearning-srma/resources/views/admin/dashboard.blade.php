@@ -5,208 +5,216 @@
 
 @section('content')
     <!-- STATISTICS CARDS -->
-    <div class="stats-grid">
-        <div class="stat-card users">
-            <div class="stat-info">
-                <h3>Total Siswa</h3>
-                <div class="stat-number">{{ \App\Models\User::where('role', 'siswa')->count() }}</div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Siswa -->
+        <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-red-500">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-gray-600 text-sm font-medium mb-2">Total Siswa</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ \App\Models\User::where('role', 'siswa')->count() }}</p>
+                </div>
+                <div class="bg-red-100 p-3 rounded-lg">
+                    <i class="fas fa-users text-red-500 text-xl"></i>
+                </div>
             </div>
-            <i class="fas fa-users stat-icon"></i>
         </div>
 
-        <div class="stat-card classes">
-            <div class="stat-info">
-                <h3>Total Guru</h3>
-                <div class="stat-number">{{ \App\Models\User::where('role', 'guru')->count() }}</div>
+        <!-- Total Guru -->
+        <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-blue-500">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-gray-600 text-sm font-medium mb-2">Total Guru</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ \App\Models\User::where('role', 'guru')->count() }}</p>
+                </div>
+                <div class="bg-blue-100 p-3 rounded-lg">
+                    <i class="fas fa-chalkboard text-blue-500 text-xl"></i>
+                </div>
             </div>
-            <i class="fas fa-chalkboard stat-icon"></i>
         </div>
 
-        <div class="stat-card subjects">
-            <div class="stat-info">
-                <h3>Total Kelas</h3>
-                <div class="stat-number">{{ \App\Models\EClass::count() }}</div>
+        <!-- Total Kelas -->
+        <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-green-500">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-gray-600 text-sm font-medium mb-2">Total Kelas</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ \App\Models\EClass::count() }}</p>
+                </div>
+                <div class="bg-green-100 p-3 rounded-lg">
+                    <i class="fas fa-book text-green-500 text-xl"></i>
+                </div>
             </div>
-            <i class="fas fa-book stat-icon"></i>
         </div>
 
-        <div class="stat-card activities">
-            <div class="stat-info">
-                <h3>Total Materi</h3>
-                <div class="stat-number">{{ \App\Models\Material::count() }}</div>
+        <!-- Total Materi -->
+        <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-amber-500">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-gray-600 text-sm font-medium mb-2">Total Materi</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ \App\Models\Material::count() }}</p>
+                </div>
+                <div class="bg-amber-100 p-3 rounded-lg">
+                    <i class="fas fa-file-alt text-amber-500 text-xl"></i>
+                </div>
             </div>
-            <i class="fas fa-file-alt stat-icon"></i>
         </div>
     </div>
 
     <!-- QUICK ACTIONS -->
-    <div class="page-header" style="margin-top: 30px; margin-bottom: 20px;">
-        <h2 style="font-size: 20px; font-weight: 600; color: var(--secondary); margin-bottom: 15px;">
-            <i class="fas fa-lightning-bolt" style="color: var(--primary); margin-right: 10px;"></i>
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+            <i class="fas fa-lightning-bolt text-red-500"></i>
             Aksi Cepat
         </h2>
-    </div>
-
-    <div class="stats-grid">
-        <a href="{{ route('admin.users.create') }}" style="text-decoration: none; color: inherit;">
-            <div class="card" style="text-align: center; padding: 30px; cursor: pointer;">
-                <div style="font-size: 48px; margin-bottom: 15px; color: var(--primary);">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Tambah Pengguna -->
+            <a href="{{ route('admin.users.create') }}" class="bg-white rounded-lg shadow-sm hover:shadow-md transition p-6 text-center group">
+                <div class="text-4xl text-red-500 mb-4 group-hover:scale-110 transition">
                     <i class="fas fa-user-plus"></i>
                 </div>
-                <h3 style="font-weight: 600; margin-bottom: 8px; color: var(--secondary);">Tambah Pengguna</h3>
-                <p style="font-size: 14px; color: #999;">Buat akun guru atau siswa baru</p>
-            </div>
-        </a>
+                <h3 class="font-bold text-gray-900 mb-2">Tambah Pengguna</h3>
+                <p class="text-sm text-gray-600">Buat akun guru atau siswa baru</p>
+            </a>
 
-        <a href="{{ route('admin.classes.create') }}" style="text-decoration: none; color: inherit;">
-            <div class="card" style="text-align: center; padding: 30px; cursor: pointer;">
-                <div style="font-size: 48px; margin-bottom: 15px; color: #28a745;">
+            <!-- Tambah Kelas -->
+            <a href="{{ route('admin.classes.create') }}" class="bg-white rounded-lg shadow-sm hover:shadow-md transition p-6 text-center group">
+                <div class="text-4xl text-green-500 mb-4 group-hover:scale-110 transition">
                     <i class="fas fa-plus-square"></i>
                 </div>
-                <h3 style="font-weight: 600; margin-bottom: 8px; color: var(--secondary);">Tambah Kelas</h3>
-                <p style="font-size: 14px; color: #999;">Buat kelas baru dengan guru</p>
-            </div>
-        </a>
+                <h3 class="font-bold text-gray-900 mb-2">Tambah Kelas</h3>
+                <p class="text-sm text-gray-600">Buat kelas baru dengan guru</p>
+            </a>
 
-        <a href="{{ route('admin.subjects.create') }}" style="text-decoration: none; color: inherit;">
-            <div class="card" style="text-align: center; padding: 30px; cursor: pointer;">
-                <div style="font-size: 48px; margin-bottom: 15px; color: #ffc107;">
+            <!-- Tambah Mata Pelajaran -->
+            <a href="{{ route('admin.subjects.create') }}" class="bg-white rounded-lg shadow-sm hover:shadow-md transition p-6 text-center group">
+                <div class="text-4xl text-amber-500 mb-4 group-hover:scale-110 transition">
                     <i class="fas fa-bookmark"></i>
                 </div>
-                <h3 style="font-weight: 600; margin-bottom: 8px; color: var(--secondary);">Tambah Mata Pelajaran</h3>
-                <p style="font-size: 14px; color: #999;">Tambahkan mata pelajaran baru</p>
-            </div>
-        </a>
-
-        <a href="{{ route('admin.settings.edit') }}" style="text-decoration: none; color: inherit;">
-            <div class="card" style="text-align: center; padding: 30px; cursor: pointer;">
-                <div style="font-size: 48px; margin-bottom: 15px; color: #17a2b8;">
-                    <i class="fas fa-sliders-h"></i>
-                </div>
-                <h3 style="font-weight: 600; margin-bottom: 8px; color: var(--secondary);">Pengaturan</h3>
-                <p style="font-size: 14px; color: #999;">Atur banner dan sistem</p>
-            </div>
-        </a>
+                <h3 class="font-bold text-gray-900 mb-2">Tambah Mata Pelajaran</h3>
+                <p class="text-sm text-gray-600">Tambahkan mata pelajaran baru</p>
+            </a>
+        </div>
     </div>
 
     <!-- RECENT ACTIVITY -->
-    <div class="page-header" style="margin-top: 40px; margin-bottom: 20px;">
-        <h2 style="font-size: 20px; font-weight: 600; color: var(--secondary); margin-bottom: 15px;">
-            <i class="fas fa-history" style="color: var(--primary); margin-right: 10px;"></i>
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+            <i class="fas fa-history text-red-500"></i>
             Aktivitas Terbaru
         </h2>
-    </div>
-
-    <div class="card">
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 20%;">Pengguna</th>
-                        <th style="width: 15%;">Aksi</th>
-                        <th style="width: 35%;">Deskripsi</th>
-                        <th style="width: 15%;">IP Address</th>
-                        <th style="width: 15%;">Waktu</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse(\App\Models\ActivityLog::with('user')->orderBy('timestamp', 'desc')->take(15)->get() as $log)
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <td>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div class="user-avatar" style="width: 32px; height: 32px; font-size: 12px;">
-                                        {{ substr($log->user->name, 0, 1) }}
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Pengguna</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Aksi</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Deskripsi</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">IP Address</th>
+                            <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Waktu</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        @forelse(\App\Models\ActivityLog::with('user')->orderBy('timestamp', 'desc')->take(15)->get() as $log)
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center text-xs font-bold">
+                                            {{ substr($log->user->name, 0, 1) }}
+                                        </div>
+                                        <span class="text-sm text-gray-900">{{ $log->user->name }}</span>
                                     </div>
-                                    <span>{{ $log->user->name }}</span>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="badge badge-primary">{{ $log->action }}</span>
-                            </td>
-                            <td>{{ Str::limit($log->description, 50) }}</td>
-                            <td>
-                                <code style="background: #f5f5f5; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
-                                    {{ $log->ip_address }}
-                                </code>
-                            </td>
-                            <td style="font-size: 13px; color: #999;">
-                                {{ \Carbon\Carbon::parse($log->timestamp)->diffForHumans() }}
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" style="text-align: center; color: #999; padding: 40px 20px;">
-                                <i class="fas fa-inbox" style="font-size: 32px; margin-bottom: 10px; display: block; opacity: 0.3;"></i>
-                                Tidak ada aktivitas
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-block bg-red-100 text-red-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                        {{ $log->action }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-600">{{ Str::limit($log->description, 50) }}</td>
+                                <td class="px-6 py-4">
+                                    <code class="bg-gray-100 text-gray-900 text-xs px-2 py-1 rounded">{{ $log->ip_address }}</code>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-500">
+                                    {{ \Carbon\Carbon::parse($log->timestamp)->diffForHumans() }}
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                                    <i class="fas fa-inbox text-4xl mb-4 block opacity-30"></i>
+                                    <p>Tidak ada aktivitas</p>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <!-- SYSTEM INFO -->
-    <div style="margin-top: 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-        <div class="card" style="padding: 20px;">
-            <h3 style="font-weight: 600; color: var(--secondary); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                <i class="fas fa-chart-bar" style="color: var(--primary);"></i>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Statistik Pengguna -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h3 class="font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <i class="fas fa-chart-bar text-red-500"></i>
                 Statistik Pengguna
             </h3>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
-                    <span style="color: #666;">Admin:</span>
-                    <strong>{{ \App\Models\User::where('role', 'admin_elearning')->count() }}</strong>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center pb-4 border-b border-gray-200">
+                    <span class="text-gray-600 text-sm">Admin:</span>
+                    <strong class="text-gray-900">{{ \App\Models\User::where('role', 'admin_elearning')->count() }}</strong>
                 </div>
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
-                    <span style="color: #666;">Guru:</span>
-                    <strong>{{ \App\Models\User::where('role', 'guru')->count() }}</strong>
+                <div class="flex justify-between items-center pb-4 border-b border-gray-200">
+                    <span class="text-gray-600 text-sm">Guru:</span>
+                    <strong class="text-gray-900">{{ \App\Models\User::where('role', 'guru')->count() }}</strong>
                 </div>
-                <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-                    <span style="color: #666;">Siswa:</span>
-                    <strong>{{ \App\Models\User::where('role', 'siswa')->count() }}</strong>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 text-sm">Siswa:</span>
+                    <strong class="text-gray-900">{{ \App\Models\User::where('role', 'siswa')->count() }}</strong>
                 </div>
             </div>
         </div>
 
-        <div class="card" style="padding: 20px;">
-            <h3 style="font-weight: 600; color: var(--secondary); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                <i class="fas fa-book-open" style="color: #28a745;"></i>
+        <!-- Statistik Pembelajaran -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h3 class="font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <i class="fas fa-book-open text-green-500"></i>
                 Statistik Pembelajaran
             </h3>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
-                    <span style="color: #666;">Kelas:</span>
-                    <strong>{{ \App\Models\EClass::count() }}</strong>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center pb-4 border-b border-gray-200">
+                    <span class="text-gray-600 text-sm">Kelas:</span>
+                    <strong class="text-gray-900">{{ \App\Models\EClass::count() }}</strong>
                 </div>
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
-                    <span style="color: #666;">Mata Pelajaran:</span>
-                    <strong>{{ \App\Models\Subject::count() }}</strong>
+                <div class="flex justify-between items-center pb-4 border-b border-gray-200">
+                    <span class="text-gray-600 text-sm">Mata Pelajaran:</span>
+                    <strong class="text-gray-900">{{ \App\Models\Subject::count() }}</strong>
                 </div>
-                <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-                    <span style="color: #666;">Tugas:</span>
-                    <strong>{{ \App\Models\Assignment::count() }}</strong>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 text-sm">Tugas:</span>
+                    <strong class="text-gray-900">{{ \App\Models\Assignment::count() }}</strong>
                 </div>
             </div>
         </div>
 
-        <div class="card" style="padding: 20px;">
-            <h3 style="font-weight: 600; color: var(--secondary); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                <i class="fas fa-clock" style="color: #17a2b8;"></i>
+        <!-- Informasi Sistem -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h3 class="font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <i class="fas fa-clock text-blue-500"></i>
                 Informasi Sistem
             </h3>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
-                    <span style="color: #666;">Versi:</span>
-                    <strong>1.0.0</strong>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center pb-4 border-b border-gray-200">
+                    <span class="text-gray-600 text-sm">Versi:</span>
+                    <strong class="text-gray-900">1.0.0</strong>
                 </div>
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
-                    <span style="color: #666;">Environment:</span>
-                    <strong>{{ app()->environment() }}</strong>
+                <div class="flex justify-between items-center pb-4 border-b border-gray-200">
+                    <span class="text-gray-600 text-sm">Environment:</span>
+                    <strong class="text-gray-900">{{ app()->environment() }}</strong>
                 </div>
-                <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-                    <span style="color: #666;">Database:</span>
-                    <strong>MySQL 8.0+</strong>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 text-sm">Database:</span>
+                    <strong class="text-gray-900">MySQL 8.0+</strong>
                 </div>
             </div>
         </div>

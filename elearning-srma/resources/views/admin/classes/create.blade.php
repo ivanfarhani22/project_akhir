@@ -4,160 +4,105 @@
 @section('icon', 'fas fa-plus-circle')
 
 @section('content')
-    <div style="margin-bottom: 30px;">
-        <p style="color: #999; font-size: 14px; margin-bottom: 5px;">Manajemen Pembelajaran</p>
-        <h1 class="page-title">
-            <i class="fas fa-plus-circle"></i>
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 mb-8 text-sm text-gray-600">
+        <a href="{{ route('admin.dashboard') }}" class="hover:text-red-600 transition">Dashboard</a>
+        <span class="text-gray-400">/</span>
+        <a href="{{ route('admin.classes.index') }}" class="hover:text-red-600 transition">Kelas</a>
+        <span class="text-gray-400">/</span>
+        <span class="text-red-600 font-semibold">Buat Kelas</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <span class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+                <i class="fas fa-plus-circle"></i>
+            </span>
             Buat Kelas Baru
         </h1>
-        <p class="page-description">Buat kelas baru dan atur informasi dasar</p>
+        <p class="text-gray-600 mt-2">Buat kelas baru dan atur informasi dasar</p>
     </div>
 
+    <!-- Error Messages -->
     @if ($errors->any())
-        <div class="alert alert-danger">
-            <i class="fas fa-exclamation-circle"></i>
-            <div>
-                <strong>Terjadi kesalahan:</strong>
-                @foreach ($errors->all() as $error)
-                    <div>{{ $error }}</div>
-                @endforeach
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-600"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">Terjadi kesalahan</h3>
+                    <div class="mt-2 text-sm text-red-700">
+                        <ul class="list-disc list-inside space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     @endif
 
-    <div class="card" style="max-width: 700px;">
-        <div class="card-header">
-            <div class="card-title">
-                <i class="fas fa-chalkboard" style="color: var(--primary); margin-right: 10px;"></i>
-                Informasi Kelas
+    <!-- Form Card -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4">
+            <h2 class="text-white font-bold text-lg">Form Buat Kelas</h2>
+        </div>
+
+        <form method="POST" action="{{ route('admin.classes.store') }}" class="p-6 space-y-6">
+            @csrf
+
+            <!-- Nama Kelas -->
+            <div>
+                <label for="name" class="block text-sm font-semibold text-gray-900 mb-2">
+                    Nama Kelas <span class="text-red-500">*</span>
+                </label>
+                <input 
+                    type="text" 
+                    name="name" 
+                    id="name" 
+                    value="{{ old('name') }}" 
+                    placeholder="Misal: Kelas X-A, XI IPA-1, XII IPS-2"
+                    class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('name') border-red-500 @enderror"
+                    required
+                >
+                <p class="text-gray-500 text-xs mt-2">Format jelas seperti X-A, XI-IPA-1, XII-IPS-2</p>
+                @error('name')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
-        </div>
 
-        <div class="card-body">
-            <form method="POST" action="{{ route('admin.classes.store') }}">
-                @csrf
+            <!-- Deskripsi -->
+            <div>
+                <label for="description" class="block text-sm font-semibold text-gray-900 mb-2">
+                    Deskripsi <span class="text-gray-500 text-xs">(Opsional)</span>
+                </label>
+                <textarea 
+                    name="description" 
+                    id="description"
+                    rows="4"
+                    placeholder="Deskripsi singkat tentang kelas ini..."
+                    class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('description') border-red-500 @enderror"
+                >{{ old('description') }}</textarea>
+                @error('description')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
 
-                <!-- Nama Kelas -->
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                        Nama Kelas <span style="color: var(--danger);">*</span>
-                    </label>
-                    <input 
-                        type="text" 
-                        name="name" 
-                        id="name" 
-                        class="form-input"
-                        value="{{ old('name') }}" 
-                        placeholder="Misal: Kelas X-A, XI IPA-1"
-                        style="width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; transition: all 0.3s ease;"
-                        required
-                    >
-                    <small style="color: #999; margin-top: 5px; display: block;">Format jelas seperti X-A, XI-IPA-1, XII-IPS-2, dll</small>
-                </div>
-
-                <!-- Deskripsi -->
-                <div class="form-group" style="margin-bottom: 25px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                        Deskripsi (Opsional)
-                    </label>
-                    <textarea 
-                        name="description" 
-                        id="description"
-                        style="width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; transition: all 0.3s ease; font-family: inherit; resize: vertical;"
-                        rows="3"
-                        placeholder="Deskripsi singkat tentang kelas ini..."
-                    >{{ old('description') }}</textarea>
-                </div>
-
-                <!-- <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border);">
-                <h3 style="margin-bottom: 20px; color: var(--secondary);">📅 JADWAL KELAS (Opsional)</h3>
-
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                        Hari Pelajaran
-                    </label>
-                    <select 
-                        name="day_of_week" 
-                        id="day_of_week"
-                        style="width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; transition: all 0.3s ease;"
-                    >
-                        <option value="">-- Pilih Hari --</option>
-                        <option value="monday" {{ old('day_of_week') == 'monday' ? 'selected' : '' }}>Senin</option>
-                        <option value="tuesday" {{ old('day_of_week') == 'tuesday' ? 'selected' : '' }}>Selasa</option>
-                        <option value="wednesday" {{ old('day_of_week') == 'wednesday' ? 'selected' : '' }}>Rabu</option>
-                        <option value="thursday" {{ old('day_of_week') == 'thursday' ? 'selected' : '' }}>Kamis</option>
-                        <option value="friday" {{ old('day_of_week') == 'friday' ? 'selected' : '' }}>Jumat</option>
-                        <option value="saturday" {{ old('day_of_week') == 'saturday' ? 'selected' : '' }}>Sabtu</option>
-                        <option value="sunday" {{ old('day_of_week') == 'sunday' ? 'selected' : '' }}>Minggu</option>
-                    </select>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                    <div class="form-group">
-                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                            Jam Mulai
-                        </label>
-                        <input 
-                            type="time" 
-                            name="start_time" 
-                            id="start_time" 
-                            value="{{ old('start_time') }}"
-                            style="width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; transition: all 0.3s ease;"
-                        >
-                    </div>
-                    <div class="form-group">
-                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                            Jam Selesai
-                        </label>
-                        <input 
-                            type="time" 
-                            name="end_time" 
-                            id="end_time" 
-                            value="{{ old('end_time') }}"
-                            style="width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; transition: all 0.3s ease;"
-                        >
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 25px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                        Ruangan
-                    </label>
-                    <input 
-                        type="text" 
-                        name="room" 
-                        id="room"
-                        value="{{ old('room') }}"
-                        placeholder="Misal: Ruang 101, Lab Komputer, dll"
-                        style="width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; transition: all 0.3s ease;"
-                    >
-                </div> -->
-
-                <div style="display: flex; gap: 10px;">
-                    <button 
-                        type="submit" 
-                        class="btn btn-primary"
-                        style="flex: 1; justify-content: center;"
-                    >
-                        <i class="fas fa-save"></i> Buat Kelas
-                    </button>
-                    <a 
-                        href="{{ route('admin.classes.index') }}" 
-                        class="btn btn-secondary"
-                        style="flex: 1; justify-content: center; text-decoration: none;"
-                    >
-                        <i class="fas fa-arrow-left"></i> Batal
-                    </a>
-                </div>
-            </form>
-        </div>
+            <!-- Buttons -->
+            <div class="flex flex-wrap gap-3 pt-6 border-t-2 border-gray-200 mt-6">
+                <a href="{{ route('admin.classes.index') }}" class="inline-flex items-center gap-2 bg-white border-2 border-gray-300 text-gray-900 px-6 py-2 rounded-lg font-semibold text-sm hover:bg-gray-50 transition">
+                    <i class="fas fa-xmark"></i> Batal
+                </a>
+                <button type="submit" class="ml-auto inline-flex items-center gap-2 bg-red-500 text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition">
+                    <i class="fas fa-save"></i> Buat Kelas
+                </button>
+            </div>
+        </form>
     </div>
+</div>
 
-    <style>
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-    </style>
 @endsection

@@ -1,69 +1,60 @@
 @extends('layouts.admin')
 
 @section('title', 'Kelola Siswa - ' . $class->name)
-@section('icon', 'users')
+@section('icon', 'fas fa-users')
 
 @section('content')
-<div class="content-area">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Header Section -->
+    <div class="flex justify-between items-start mb-8">
         <div>
-            <h1 style="color: #4A4A4A; margin: 0;">👥 Kelola Siswa Kelas</h1>
-            <p style="color: #999; margin: 0.5rem 0 0 0;"><strong>{{ $class->name }}</strong> - {{ $class->subject->name ?? 'N/A' }}</p>
+            <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                <span class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+                    <i class="fas fa-users"></i>
+                </span>
+                Kelola Siswa
+            </h1>
+            <p class="text-gray-600 mt-2">Kelas: <strong>{{ $class->name }}</strong></p>
         </div>
-        <a href="{{ route('admin.classes.index') }}" class="btn" style="
-            background: #6c757d;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 6px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        " onmouseover="this.style.background='#5a6268'" onmouseout="this.style.background='#6c757d'">
+        <a href="{{ route('admin.classes.index') }}" class="inline-flex items-center gap-2 bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-gray-600 transition">
             <i class="fas fa-arrow-left"></i> Kembali
         </a>
     </div>
 
-    {{-- Alert Messages --}}
+    <!-- Alert Messages -->
     @if(session('success'))
-        <div class="alert alert-success">
-            <i class="fas fa-check-circle"></i> {{ session('success') }}
+        <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded">
+            <div class="flex">
+                <i class="fas fa-check-circle text-green-600 mr-3"></i>
+                <p class="text-green-800">{{ session('success') }}</p>
+            </div>
         </div>
     @endif
+    
     @if(session('warning'))
-        <div class="alert alert-warning">
-            <i class="fas fa-info-circle"></i> {{ session('warning') }}
+        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6 rounded">
+            <div class="flex">
+                <i class="fas fa-info-circle text-yellow-600 mr-3"></i>
+                <p class="text-yellow-800">{{ session('warning') }}</p>
+            </div>
         </div>
     @endif
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
-        {{-- Section 1: Tambah Siswa --}}
-        <div class="card" style="
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-top: 4px solid #28a745;
-        ">
-            <h3 style="color: #4A4A4A; margin: 0 0 1.5rem 0;">
-                <i class="fas fa-plus-circle"></i> Tambah Siswa Baru
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Section 1: Tambah Siswa -->
+        <div class="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
+                    <i class="fas fa-plus-circle"></i>
+                </span>
+                Tambah Siswa Baru
             </h3>
 
-            <form method="POST" action="{{ route('admin.classes.students.store', $class) }}">
+            <form method="POST" action="{{ route('admin.classes.students.store', $class) }}" class="space-y-4">
                 @csrf
-                <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label style="
-                        display: block;
-                        color: #4A4A4A;
-                        font-weight: 600;
-                        margin-bottom: 0.5rem;
-                    ">Pilih Siswa:</label>
-                    <select name="student_id" style="
-                        width: 100%;
-                        padding: 10px;
-                        border: 2px solid #e0e0e0;
-                        border-radius: 6px;
-                        font-size: 0.95rem;
-                        cursor: pointer;
-                    " required>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">Pilih Siswa:</label>
+                    <select name="student_id" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition" required>
                         <option value="">-- Pilih Siswa --</option>
                         @foreach($allStudents as $student)
                             @if(!in_array($student->id, $enrolledStudentIds))
@@ -74,106 +65,68 @@
                         @endforeach
                     </select>
                 </div>
-                <button type="submit" class="btn" style="
-                    width: 100%;
-                    padding: 10px;
-                    background: #28a745;
-                    color: white;
-                    border: none;
-                    border-radius: 6px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                " onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
+                <button type="submit" class="w-full inline-flex items-center justify-center gap-2 bg-green-500 text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-green-600 transition">
                     <i class="fas fa-plus"></i> Tambah Siswa
                 </button>
             </form>
         </div>
 
-        {{-- Section 2: Info Kelas --}}
-        <div class="card" style="
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-top: 4px solid #C41E3A;
-        ">
-            <h3 style="color: #4A4A4A; margin: 0 0 1.5rem 0;">
-                <i class="fas fa-info-circle"></i> Informasi Kelas
+        <!-- Section 2: Info Kelas -->
+        <div class="bg-white rounded-lg shadow-sm border border-red-200 p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+                    <i class="fas fa-info-circle"></i>
+                </span>
+                Info Kelas
             </h3>
 
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div class="space-y-3">
                 <div>
-                    <p style="color: #999; margin: 0; font-size: 0.9rem;"><strong>Nama Kelas:</strong></p>
-                    <p style="color: #4A4A4A; margin: 0.3rem 0 0 0;">{{ $class->name }}</p>
+                    <p class="text-sm text-gray-600 font-semibold">Nama Kelas</p>
+                    <p class="text-gray-900">{{ $class->name }}</p>
                 </div>
                 <div>
-                    <p style="color: #999; margin: 0; font-size: 0.9rem;"><strong>Mata Pelajaran:</strong></p>
-                    <p style="color: #4A4A4A; margin: 0.3rem 0 0 0;">{{ $class->subject->name ?? 'N/A' }}</p>
-                </div>
-                <div>
-                    <p style="color: #999; margin: 0; font-size: 0.9rem;"><strong>Guru Pengampu:</strong></p>
-                    <p style="color: #4A4A4A; margin: 0.3rem 0 0 0;">{{ $class->teacher->name }}</p>
-                </div>
-                <div>
-                    <p style="color: #999; margin: 0; font-size: 0.9rem;"><strong>Total Siswa:</strong></p>
-                    <p style="color: #4A4A4A; margin: 0.3rem 0 0 0; font-size: 1.5rem; font-weight: bold;">{{ $students->total() }}</p>
+                    <p class="text-sm text-gray-600 font-semibold">Total Siswa</p>
+                    <p class="text-2xl font-bold text-red-600">{{ $students->total() }}</p>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- Daftar Siswa --}}
-    <div class="card" style="
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        overflow: hidden;
-    ">
-        <div style="padding: 1.5rem; border-bottom: 2px solid #e0e0e0;">
-            <h3 style="color: #4A4A4A; margin: 0;">
-                <i class="fas fa-list"></i> Daftar Siswa ({{ $students->total() }})
+    <!-- Daftar Siswa -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-bold text-gray-900">
+                <i class="fas fa-list mr-2"></i>Daftar Siswa ({{ $students->total() }})
             </h3>
         </div>
 
         @if($students->count() > 0)
-            <div class="table-responsive">
-                <table class="table" style="width: 100%; border-collapse: collapse;">
+            <div class="overflow-x-auto">
+                <table class="w-full">
                     <thead>
-                        <tr style="background: #f8f9fa; border-bottom: 2px solid #e0e0e0;">
-                            <th style="padding: 15px; text-align: left; font-weight: 600; color: #4A4A4A;">No.</th>
-                            <th style="padding: 15px; text-align: left; font-weight: 600; color: #4A4A4A;">Nama Siswa</th>
-                            <th style="padding: 15px; text-align: left; font-weight: 600; color: #4A4A4A;">Email</th>
-                            <th style="padding: 15px; text-align: center; font-weight: 600; color: #4A4A4A;">Aksi</th>
+                        <tr class="bg-gray-50 border-b-2 border-gray-200">
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">No.</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Nama Siswa</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Email</th>
+                            <th class="px-6 py-4 text-center text-sm font-semibold text-gray-900">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($students as $index => $student)
-                            <tr style="border-bottom: 1px solid #e0e0e0; transition: background 0.2s ease;" 
-                                onmouseover="this.style.background='#f8f9fa'" 
-                                onmouseout="this.style.background='white'">
-                                <td style="padding: 15px; color: #666;">{{ ($students->currentPage() - 1) * $students->perPage() + $loop->iteration }}</td>
-                                <td style="padding: 15px;">
-                                    <strong style="color: #4A4A4A;">{{ $student->name }}</strong>
+                            <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
+                                <td class="px-6 py-4 text-sm text-gray-600">{{ ($students->currentPage() - 1) * $students->perPage() + $loop->iteration }}</td>
+                                <td class="px-6 py-4">
+                                    <strong class="text-gray-900">{{ $student->name }}</strong>
                                 </td>
-                                <td style="padding: 15px; color: #666;">{{ $student->email }}</td>
-                                <td style="padding: 15px; text-align: center;">
+                                <td class="px-6 py-4 text-sm text-gray-600">{{ $student->email }}</td>
+                                <td class="px-6 py-4 text-center">
                                     <form method="POST" action="{{ route('admin.classes.students.destroy', [$class, $student]) }}" 
                                         style="display: inline;" 
                                         onsubmit="return confirm('Hapus {{ $student->name }} dari kelas ini?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn-sm" style="
-                                            padding: 6px 12px;
-                                            background: #dc3545;
-                                            color: white;
-                                            border: none;
-                                            border-radius: 4px;
-                                            cursor: pointer;
-                                            font-weight: 600;
-                                            font-size: 0.85rem;
-                                            transition: all 0.3s ease;
-                                        " onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
+                                        <button type="submit" class="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-xs hover:bg-red-700 transition">
                                             <i class="fas fa-trash"></i> Hapus
                                         </button>
                                     </form>
@@ -184,65 +137,17 @@
                 </table>
             </div>
 
-            {{-- Pagination --}}
-            <div style="padding: 1.5rem; border-top: 1px solid #e0e0e0; display: flex; justify-content: center;">
+            <!-- Pagination -->
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-center">
                 {{ $students->links() }}
             </div>
         @else
-            <div style="padding: 3rem; text-align: center; color: #999;">
-                <i class="fas fa-inbox" style="font-size: 2rem; display: block; margin-bottom: 1rem; opacity: 0.5;"></i>
-                <p>Belum ada siswa di kelas ini. Silakan tambahkan siswa terlebih dahulu!</p>
+            <div class="px-6 py-16 text-center">
+                <i class="fas fa-inbox text-6xl text-gray-300 mb-4 inline-block"></i>
+                <p class="text-gray-600">Belum ada siswa di kelas ini. Silakan tambahkan siswa terlebih dahulu!</p>
             </div>
         @endif
     </div>
-
 </div>
 
-<style>
-    .alert {
-        padding: 15px 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .alert-success {
-        background-color: #d4edda;
-        color: #155724;
-        border-left: 4px solid #28a745;
-    }
-
-    .alert-warning {
-        background-color: #fff3cd;
-        color: #856404;
-        border-left: 4px solid #ffc107;
-    }
-
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    @media (max-width: 768px) {
-        [style*="grid-template-columns"] {
-            grid-template-columns: 1fr !important;
-        }
-
-        th, td {
-            padding: 10px !important;
-            font-size: 0.9rem;
-        }
-
-        .btn-sm {
-            display: block;
-            width: 100%;
-        }
-    }
-</style>
 @endsection

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
 use App\Models\EClass;
+use App\Models\ClassSubject;
 use Illuminate\Http\Request;
 
 class ClassController extends Controller
@@ -13,11 +14,13 @@ class ClassController extends Controller
      */
     public function index()
     {
-        $classes = EClass::whereHas('classSubjects', fn($q) => $q->where('teacher_id', auth()->id()))
-            ->with(['subject', 'students', 'materials', 'assignments'])
+        // Get classSubjects directly to create one card per subject per class
+        $classSubjects = ClassSubject::where('teacher_id', auth()->id())
+            ->with(['eClass' => fn($q) => $q->with('students', 'materials', 'assignments'), 'subject'])
+            ->orderBy('e_class_id')
             ->get();
 
-        return view('guru.classes.index', compact('classes'));
+        return view('guru.classes.index', compact('classSubjects'));
     }
 
     /**
@@ -30,9 +33,14 @@ class ClassController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $class->load(['subject', 'students', 'materials', 'assignments' => function ($query) {
-            $query->orderBy('deadline', 'desc');
-        }]);
+        $class->load([
+            'classSubjects' => fn($q) => $q->where('teacher_id', auth()->id())->with('subject'),
+            'students',
+            'materials',
+            'assignments' => function ($query) {
+                $query->orderBy('deadline', 'desc');
+            }
+        ]);
 
         return view('guru.classes.show', compact('class'));
     }

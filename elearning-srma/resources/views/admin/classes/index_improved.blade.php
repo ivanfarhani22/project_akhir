@@ -4,116 +4,115 @@
 @section('icon', 'fas fa-chalkboard')
 
 @section('content')
+<div class="max-w-7xl mx-auto px-4 py-8">
     <!-- Header Section -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <div class="flex justify-between items-start mb-8">
         <div>
-            <h1 class="page-title">
-                <i class="fas fa-chalkboard"></i>
+            <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                <span class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+                    <i class="fas fa-chalkboard"></i>
+                </span>
                 Kelola Kelas
             </h1>
-            <p class="page-description">Atur kelas, mata pelajaran, guru, dan siswa dengan mudah</p>
+            <p class="text-gray-600 mt-2">Atur kelas, mata pelajaran, guru, dan siswa dengan mudah</p>
         </div>
-        <a href="{{ route('admin.classes.create') }}" class="btn btn-primary" style="text-decoration: none;">
+        <a href="{{ route('admin.classes.create') }}" class="inline-flex items-center gap-2 bg-red-500 text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition">
             <i class="fas fa-plus"></i> Tambah Kelas
         </a>
     </div>
 
     <!-- Search & Filter Bar -->
-    <div class="card" style="margin-bottom: 25px;">
-        <div class="card-body" style="padding: 20px;">
-            <form method="GET" action="{{ route('admin.classes.index') }}" style="display: flex; gap: 15px; align-items: flex-end;">
-                <!-- Search Input -->
-                <div style="flex: 1;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary); font-size: 13px;">
-                        <i class="fas fa-search"></i> Cari Kelas
-                    </label>
-                    <input type="text" name="search" placeholder="Cari nama kelas..." 
-                           value="{{ request('search') }}"
-                           style="width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px;">
-                </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+        <form method="GET" action="{{ route('admin.classes.index') }}" class="flex flex-col md:flex-row gap-4 items-end">
+            <!-- Search Input -->
+            <div class="flex-1">
+                <label class="block text-sm font-semibold text-gray-900 mb-2">
+                    <i class="fas fa-search"></i> Cari Kelas
+                </label>
+                <input type="text" name="search" placeholder="Cari nama kelas..." 
+                       value="{{ request('search') }}"
+                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition">
+            </div>
 
-                <!-- Search Button -->
-                <button type="submit" class="btn btn-primary" style="border: none; cursor: pointer;">
-                    <i class="fas fa-search"></i> Cari
-                </button>
+            <!-- Search Button -->
+            <button type="submit" class="inline-flex items-center gap-2 bg-red-500 text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition">
+                <i class="fas fa-search"></i> Cari
+            </button>
 
-                <!-- Reset Button -->
-                <a href="{{ route('admin.classes.index') }}" class="btn btn-secondary" style="text-decoration: none; border: none; cursor: pointer;">
-                    <i class="fas fa-redo"></i> Reset
-                </a>
-            </form>
+            <!-- Reset Button -->
+            <a href="{{ route('admin.classes.index') }}" class="inline-flex items-center gap-2 bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-gray-500 transition">
+                <i class="fas fa-redo"></i> Reset
+            </a>
+        </form>
 
-            <!-- Info Text -->
-            <small style="color: #999; margin-top: 10px; display: block;">
-                Menampilkan {{ $classes->count() }} dari {{ $classes->total() }} kelas
-            </small>
-        </div>
+        <!-- Info Text -->
+        <p class="text-gray-600 text-xs mt-4">
+            Menampilkan {{ $classes->count() }} dari {{ $classes->total() }} kelas
+        </p>
     </div>
 
     <!-- No Results Message -->
     @if($classes->isEmpty())
-        <div style="text-align: center; padding: 60px 20px;">
-            <i class="fas fa-inbox" style="font-size: 48px; color: #ccc; margin-bottom: 15px; display: block;"></i>
-            <h3 style="color: #999; margin-bottom: 10px;">Tidak ada kelas ditemukan</h3>
-            <p style="color: #bbb; margin-bottom: 20px;">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-16 text-center">
+            <i class="fas fa-inbox text-6xl text-gray-300 mb-4 inline-block"></i>
+            <h3 class="text-gray-600 mb-2 text-lg font-semibold">Tidak ada kelas ditemukan</h3>
+            <p class="text-gray-500 mb-6">
                 @if(request('search'))
-                    Coba ubah pencarian Anda atau <a href="{{ route('admin.classes.index') }}" style="color: var(--primary); text-decoration: none;">reset filter</a>
+                    Coba ubah pencarian Anda atau <a href="{{ route('admin.classes.index') }}" class="text-red-600 font-semibold hover:underline">reset filter</a>
                 @else
-                    Mulai dengan <a href="{{ route('admin.classes.create') }}" style="color: var(--primary); text-decoration: none;">membuat kelas baru</a>
+                    Mulai dengan <a href="{{ route('admin.classes.create') }}" class="text-red-600 font-semibold hover:underline">membuat kelas baru</a>
                 @endif
             </p>
         </div>
     @else
         <!-- Classes Grid -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             @foreach($classes as $class)
-                <div class="card" style="display: flex; flex-direction: column; transition: all 0.3s ease; cursor: pointer;" 
-                     onmouseover="this.style.boxShadow='0 10px 30px rgba(0,0,0,0.2)'" 
-                     onmouseout="this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)'">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition flex flex-col">
                     <!-- Header -->
-                    <div style="padding: 20px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border-radius: 8px 8px 0 0;">
-                        <h3 style="margin: 0; font-size: 18px;">
+                    <div class="bg-gradient-to-r from-red-500 to-red-600 p-6 text-white">
+                        <h3 class="text-lg font-bold m-0">
                             <i class="fas fa-chalkboard"></i> {{ $class->name }}
                         </h3>
-                        <small style="color: rgba(255,255,255,0.8); margin-top: 5px; display: block;">
+                        <p class="text-red-100 mt-2 mb-0 text-sm">
                             {{ $class->day_of_week }} • {{ date('H:i', strtotime($class->start_time)) }} - {{ date('H:i', strtotime($class->end_time)) }}
-                        </small>
+                        </p>
                     </div>
 
                     <!-- Body -->
-                    <div style="flex: 1; padding: 20px;">
+                    <div class="flex-1 p-6">
                         <!-- Stats -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                                <div style="font-size: 24px; font-weight: 700; color: var(--primary);">
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                <div class="text-2xl font-bold text-red-600">
                                     {{ $class->subjects()->count() }}
                                 </div>
-                                <small style="color: #999; font-size: 12px; display: block; margin-top: 5px;">
+                                <p class="text-gray-600 text-xs mt-2 m-0">
                                     <i class="fas fa-book"></i> Mata Pelajaran
-                                </small>
+                                </p>
                             </div>
-                            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                                <div style="font-size: 24px; font-weight: 700; color: var(--secondary);">
+                            <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                <div class="text-2xl font-bold text-red-600">
                                     {{ $class->students()->count() }}
                                 </div>
-                                <small style="color: #999; font-size: 12px; display: block; margin-top: 5px;">
+                                <p class="text-gray-600 text-xs mt-2 m-0">
                                     <i class="fas fa-users"></i> Siswa
-                                </small>
+                                </p>
                             </div>
                         </div>
 
                         <!-- Description -->
-                        <p style="color: #666; font-size: 13px; line-height: 1.5; margin: 0;">
+                        <p class="text-gray-600 text-sm leading-relaxed m-0">
                             {{ Str::limit($class->description, 60) ?? 'Tidak ada deskripsi' }}
                         </p>
                     </div>
 
                     <!-- Footer -->
-                    <div style="padding: 15px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px;">
-                        <a href="{{ route('admin.classes.show', $class) }}" class="btn btn-primary" style="flex: 1; text-align: center; text-decoration: none; font-size: 13px;">
+                    <div class="px-6 py-4 border-t border-gray-200 flex gap-3">
+                        <a href="{{ route('admin.classes.show', $class) }}" class="flex-1 inline-flex items-center justify-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg font-semibold text-xs hover:bg-red-600 transition">
                             <i class="fas fa-eye"></i> Kelola
                         </a>
-                        <a href="{{ route('admin.classes.edit', $class) }}" class="btn btn-secondary" style="flex: 1; text-align: center; text-decoration: none; font-size: 13px;">
+                        <a href="{{ route('admin.classes.edit', $class) }}" class="flex-1 inline-flex items-center justify-center gap-2 bg-gray-300 text-gray-900 px-4 py-2 rounded-lg font-semibold text-xs hover:bg-gray-400 transition">
                             <i class="fas fa-edit"></i> Edit
                         </a>
                     </div>
@@ -123,109 +122,36 @@
 
         <!-- Pagination -->
         @if($classes->hasPages())
-            <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 40px;">
+            <div class="flex justify-center items-center gap-3 mt-8">
                 <!-- Previous Button -->
                 @if($classes->onFirstPage())
-                    <button disabled class="btn btn-secondary" style="opacity: 0.5; cursor: not-allowed;">
+                    <button disabled class="inline-flex items-center gap-2 bg-gray-300 text-gray-500 px-4 py-2 rounded-lg font-semibold text-sm cursor-not-allowed opacity-50">
                         <i class="fas fa-chevron-left"></i> Sebelumnya
                     </button>
                 @else
-                    <a href="{{ $classes->previousPageUrl() }}" class="btn btn-secondary" style="text-decoration: none;">
+                    <a href="{{ $classes->previousPageUrl() }}" class="inline-flex items-center gap-2 bg-gray-400 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gray-500 transition">
                         <i class="fas fa-chevron-left"></i> Sebelumnya
                     </a>
                 @endif
 
                 <!-- Page Info -->
-                <div style="padding: 8px 16px; background: #f5f5f5; border-radius: 8px; font-size: 13px; color: #666;">
+                <div class="px-4 py-2 bg-gray-50 rounded-lg text-sm text-gray-700 font-semibold">
                     Halaman {{ $classes->currentPage() }} dari {{ $classes->lastPage() }}
                 </div>
 
                 <!-- Next Button -->
                 @if($classes->hasMorePages())
-                    <a href="{{ $classes->nextPageUrl() }}" class="btn btn-primary" style="text-decoration: none;">
+                    <a href="{{ $classes->nextPageUrl() }}" class="inline-flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition">
                         Selanjutnya <i class="fas fa-chevron-right"></i>
                     </a>
                 @else
-                    <button disabled class="btn btn-primary" style="opacity: 0.5; cursor: not-allowed;">
+                    <button disabled class="inline-flex items-center gap-2 bg-gray-300 text-gray-500 px-4 py-2 rounded-lg font-semibold text-sm cursor-not-allowed opacity-50">
                         Selanjutnya <i class="fas fa-chevron-right"></i>
                     </button>
                 @endif
             </div>
         @endif
     @endif
+</div>
 
-    <style>
-        .card {
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .card-body {
-            padding: 20px;
-        }
-
-        .card-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .page-title {
-            margin: 0 0 5px 0;
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--secondary);
-        }
-
-        .page-description {
-            margin: 0;
-            color: #999;
-            font-size: 14px;
-        }
-
-        .btn {
-            padding: 10px 16px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark, #5a5fd8);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-secondary {
-            background: #e5e7eb;
-            color: #374151;
-        }
-
-        .btn-secondary:hover {
-            background: #d1d5db;
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-            transform: translateY(-2px);
-        }
-    </style>
 @endsection

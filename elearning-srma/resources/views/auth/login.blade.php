@@ -5,482 +5,337 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - E-Learning SRMA</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --color-primary: #C41E3A; /* Merah */
-            --color-secondary: #4A4A4A; /* Abu-abu gelap */
-            --color-accent: #6B6B6B; /* Abu-abu sedang */
+        * {
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f8f8;
         }
 
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .bg-primary {
-            background-color: var(--color-primary);
-        }
-
-        .bg-secondary {
-            background-color: var(--color-secondary);
-        }
-
-        .bg-accent {
-            background-color: var(--color-accent);
-        }
-
-        .text-primary {
-            color: var(--color-primary);
-        }
-
-        .border-primary {
-            border-color: var(--color-primary);
-        }
-
-        .focus-primary:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
-            border-color: var(--color-primary);
-        }
-
-        .btn-primary {
-            background-color: var(--color-primary);
-            transition: background-color 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background-color: #a01a31;
-        }
-
-        .login-container {
-            min-height: 100vh;
-            display: flex;
-        }
-
-        .banner-section {
-            flex: 1;
-            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .banner-carousel {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
+        /* Banner Carousel */
         .banner-slide {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
             opacity: 0;
-            transition: opacity 0.8s ease-in-out;
+            transition: opacity 0.9s ease-in-out;
         }
 
         .banner-slide.active {
             opacity: 1;
         }
 
-        .banner-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .banner-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.35) 0%, rgba(196, 30, 58, 0.40) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-
-        .banner-dots {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            z-index: 20;
-        }
-
+        /* Dot indicator */
         .banner-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
+            width: 8px;
+            height: 8px;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.45);
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
         }
 
         .banner-dot.active {
-            background: white;
-            transform: scale(1.2);
+            background: #ffffff;
+            width: 24px;
         }
 
-        .banner-dot:hover {
-            background: rgba(255, 255, 255, 0.8);
-        }
-
-        .form-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 2rem;
-            background-color: #f8f9fa;
-        }
-
-        .form-container {
-            max-width: 450px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .logo-section {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .logo-img {
-            height: 80px;
-            margin: 0 auto 1rem auto;
-            display: block;
-        }
-
-        .form-title {
-            color: var(--color-primary);
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-subtitle {
-            color: var(--color-accent);
-            font-size: 0.9rem;
-            margin-bottom: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            color: var(--color-secondary);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 0.95rem;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 0.5rem;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-        }
-
+        /* Form focus ring */
         .form-input:focus {
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
+            outline: none;
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
         }
 
-        .form-submit {
-            width: 100%;
-            padding: 0.875rem;
-            border: none;
-            border-radius: 0.5rem;
-            font-size: 1rem;
-            font-weight: 600;
-            color: white;
+        /* Animasi masuk */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.55s cubic-bezier(.22,1,.36,1) both;
+        }
+
+        .delay-1 { animation-delay: 0.08s; }
+        .delay-2 { animation-delay: 0.16s; }
+        .delay-3 { animation-delay: 0.24s; }
+        .delay-4 { animation-delay: 0.32s; }
+
+        /* Tombol submit hover */
+        .btn-submit {
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+        }
+
+        .btn-submit:hover {
+            background: #b91c1c;
+            box-shadow: 0 4px 20px rgba(185, 28, 28, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98) translateY(0);
+        }
+
+        /* Password toggle */
+        .toggle-password {
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: color 0.2s;
         }
 
-        .error-message {
+        .toggle-password:hover {
             color: #dc2626;
-            font-size: 0.85rem;
-            margin-top: 0.25rem;
         }
 
-        .alert-error {
-            background-color: #fee2e2;
-            border-left: 4px solid #dc2626;
-            color: #991b1b;
-            padding: 1rem;
-            border-radius: 0.375rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .test-credentials {
-            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
-            color: white;
-            padding: 1.25rem;
-            border-radius: 0.5rem;
-            margin-top: 1.5rem;
-            font-size: 0.85rem;
-        }
-
-        .test-credentials-title {
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-            font-size: 0.9rem;
-        }
-
-        .test-credentials-item {
-            margin-bottom: 0.5rem;
-            line-height: 1.5;
-        }
-
-        .test-credentials-item strong {
-            display: inline-block;
-            min-width: 70px;
-        }
-
-        @media (max-width: 768px) {
-            .login-container {
-                flex-direction: column;
-            }
-
-            .banner-section {
-                display: none;
-            }
-
-            .form-section {
-                padding: 1.5rem;
-            }
-
-            .form-container {
-                max-width: 100%;
-            }
+        /* Scrollbar kiri tersembunyi */
+        .left-panel {
+            scrollbar-width: none;
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <!-- Banner Section (Sebelah Kiri) -->
-        <div class="banner-section">
-            <div class="banner-carousel" id="bannerCarousel">
-                @if($banners && $banners->count() > 0)
-                    @foreach($banners as $index => $banner)
-                    <div class="banner-slide {{ $index === 0 ? 'active' : '' }}" data-index="{{ $index }}">
-                        <img src="{{ asset($banner->image_path) }}" alt="Banner {{ $index + 1 }}" class="banner-image">
-                    </div>
-                    @endforeach
-                @else
-                    <div class="banner-slide active" data-index="0">
-                        <img src="https://via.placeholder.com/600x800/C41E3A/ffffff?text=Banner+E-Learning" alt="Default Banner" class="banner-image">
-                    </div>
-                @endif
-            </div>
-            
-            <div class="banner-overlay">
-                <div style="text-align: center; color: white; z-index: 10;">
-                    <h2 style="
-                        font-size: 3.5rem; 
-                        font-weight: 900; 
-                        margin-bottom: 1rem;
-                        text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7), 0 0 30px rgba(255, 255, 255, 0.2);
-                        letter-spacing: 1px;
-                        animation: fadeInDown 0.8s ease-out;
-                    ">
-                        Selamat Datang
-                    </h2>
-                    <p style="
-                        font-size: 1.25rem; 
-                        opacity: 1;
-                        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
-                        font-weight: 600;
-                        line-height: 1.6;
-                        animation: fadeInUp 0.8s ease-out 0.2s both;
-                    ">
-                        Platform Pembelajaran Online<br>SRMA 25 Lamongan
-                    </p>
-                </div>
-            </div>
+<div class="min-h-screen flex">
 
-            @if($banners && $banners->count() > 1)
-            <div class="banner-dots" id="bannerDots">
+    {{-- ========================================= --}}
+    {{-- PANEL KIRI – Banner Carousel (Desktop)    --}}
+    {{-- ========================================= --}}
+    <div class="left-panel hidden lg:flex lg:w-[52%] xl:w-1/2 relative overflow-hidden bg-red-700">
+
+        {{-- Slides --}}
+        <div class="absolute inset-0" id="bannerCarousel">
+            @if($banners && $banners->count() > 0)
                 @foreach($banners as $index => $banner)
-                <div class="banner-dot {{ $index === 0 ? 'active' : '' }}" data-index="{{ $index }}"></div>
+                    <div class="banner-slide {{ $index === 0 ? 'active' : '' }} absolute inset-0"
+                         data-index="{{ $index }}">
+                        <img src="{{ asset($banner->image_path) }}"
+                             alt="Banner {{ $index + 1 }}"
+                             class="w-full h-full object-cover">
+                    </div>
                 @endforeach
-            </div>
+            @else
+                <div class="banner-slide active absolute inset-0" data-index="0">
+                    <img src="https://via.placeholder.com/800x1000/C41E3A/ffffff?text=E-Learning+SRMA"
+                         alt="Default Banner"
+                         class="w-full h-full object-cover">
+                </div>
             @endif
         </div>
 
-        <!-- Form Section (Sebelah Kanan) -->
-        <div class="form-section">
-            <div class="form-container">
-                <!-- Logo -->
-                <div class="logo-section">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo SRMA" class="logo-img">
-                    <h1 class="form-title">E-Learning</h1>
-                    <p class="form-subtitle">SRMA 25 Lamongan</p>
+        {{-- Overlay gradient --}}
+        <div class="absolute inset-0 bg-gradient-to-t from-red-900/80 via-red-800/30 to-transparent z-10"></div>
+
+        {{-- Teks overlay --}}
+        <div class="absolute bottom-0 left-0 right-0 z-20 px-10 pb-12">
+            <p class="text-white/70 text-sm font-semibold uppercase tracking-widest mb-2">
+                Platform Pembelajaran
+            </p>
+            <h2 class="text-white text-4xl xl:text-5xl font-extrabold leading-tight mb-2"
+                style="text-shadow: 0 2px 16px rgba(0,0,0,0.4);">
+                Belajar Lebih<br>Menyenangkan
+            </h2>
+            <p class="text-white/80 text-base font-medium mt-3">
+                SRMA 25 Lamongan
+            </p>
+
+            {{-- Dots --}}
+            @if($banners && $banners->count() > 1)
+                <div class="flex gap-2 mt-6" id="bannerDots">
+                    @foreach($banners as $index => $banner)
+                        <div class="banner-dot {{ $index === 0 ? 'active' : '' }}"
+                             data-index="{{ $index }}"></div>
+                    @endforeach
                 </div>
-
-                <!-- Error Messages -->
-                @if ($errors->any())
-                    <div class="alert-error">
-                        @foreach ($errors->all() as $error)
-                            <div>{{ $error }}</div>
-                        @endforeach
-                    </div>
-                @endif
-
-                <!-- Login Form -->
-                <form method="POST" action="{{ route('login') }}">
-                    @csrf
-
-                    <div class="form-group">
-                        <label for="email" class="form-label">  Email</label>
-                        <input 
-                            type="email" 
-                            id="email" 
-                            name="email" 
-                            value="{{ old('email') }}"
-                            class="form-input focus-primary"
-                            placeholder="Masukkan email Anda" 
-                            required
-                            autocomplete="email"
-                        >
-                        @error('email')
-                            <div class="error-message">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password" class="form-label">  Password</label>
-                        <input 
-                            type="password" 
-                            id="password" 
-                            name="password"
-                            class="form-input focus-primary"
-                            placeholder="Masukkan password" 
-                            required
-                            autocomplete="current-password"
-                        >
-                        @error('password')
-                            <div class="error-message">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <button type="submit" class="form-submit btn-primary">
-                        Masuk ke E-Learning
-                    </button>
-                </form>
-
-            </div>
+            @endif
         </div>
     </div>
 
-    <script>
-        // Banner Carousel JavaScript
-        const bannerCarousel = document.getElementById('bannerCarousel');
-        const bannerDots = document.getElementById('bannerDots');
-        const slides = bannerCarousel ? Array.from(bannerCarousel.querySelectorAll('.banner-slide')) : [];
-        const dots = bannerDots ? Array.from(bannerDots.querySelectorAll('.banner-dot')) : [];
-        
-        let currentSlide = 0;
-        let autoplayInterval = null;
+    {{-- ========================================= --}}
+    {{-- PANEL KANAN – Form Login                  --}}
+    {{-- ========================================= --}}
+    <div class="w-full lg:w-[48%] xl:w-1/2 flex flex-col justify-center
+                px-6 sm:px-10 md:px-16 lg:px-12 xl:px-16 py-10 bg-white min-h-screen">
 
-        function showSlide(index) {
-            if (slides.length === 0) return;
+        <div class="w-full max-w-[400px] mx-auto">
 
-            // Ensure index is within bounds
-            index = index % slides.length;
-            if (index < 0) index = slides.length + index;
+            {{-- Logo --}}
+            <div class="animate-slide-up mb-8 flex flex-col items-center lg:items-start">
+                <img src="{{ asset('images/logo.png') }}"
+                     alt="Logo SRMA"
+                     class="h-16 sm:h-20 mb-4 object-contain">
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-red-600 tracking-tight">
+                    E-Learning
+                </h1>
+                <p class="text-sm text-gray-500 mt-1 font-medium">
+                    SRMA 25 Lamongan
+                </p>
+            </div>
 
-            // Update slides
-            slides.forEach(slide => slide.classList.remove('active'));
-            slides[index].classList.add('active');
+            {{-- Heading form --}}
+            <div class="animate-slide-up delay-1 mb-7">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-800">
+                    Masuk ke akun Anda
+                </h2>
+                <p class="text-sm text-gray-400 mt-1">
+                    Silakan masukkan email dan password untuk melanjutkan
+                </p>
+            </div>
 
-            // Update dots
-            dots.forEach(dot => dot.classList.remove('active'));
-            if (dots[index]) {
-                dots[index].classList.add('active');
-            }
+            {{-- Alert error --}}
+            @if ($errors->any())
+                <div class="animate-slide-up mb-5 p-4 bg-red-50 border border-red-200 rounded-xl">
+                    @foreach ($errors->all() as $error)
+                        <div class="flex items-start gap-2 text-red-600 text-sm">
+                            <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+                            <span>{{ $error }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
 
-            currentSlide = index;
-        }
+            {{-- Form --}}
+            <form method="POST" action="{{ route('login') }}" class="space-y-5">
+                @csrf
 
-        function nextSlide() {
-            showSlide(currentSlide + 1);
-        }
+                {{-- Email --}}
+                <div class="animate-slide-up delay-2">
+                    <label for="email"
+                           class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
+                        Email
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                            <i class="fas fa-envelope text-sm"></i>
+                        </span>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value="{{ old('email') }}"
+                            placeholder="contoh@email.com"
+                            required
+                            autocomplete="email"
+                            class="form-input w-full pl-11 pr-4 py-3.5 bg-gray-50 border
+                                   {{ $errors->has('email') ? 'border-red-400 bg-red-50' : 'border-gray-200' }}
+                                   rounded-xl text-sm text-gray-800 placeholder-gray-400
+                                   transition duration-200"
+                        >
+                    </div>
+                    @error('email')
+                        <p class="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+                            <i class="fas fa-circle-exclamation"></i>{{ $message }}
+                        </p>
+                    @enderror
+                </div>
 
-        function prevSlide() {
-            showSlide(currentSlide - 1);
-        }
+                {{-- Password --}}
+                <div class="animate-slide-up delay-3">
+                    <label for="password"
+                           class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">
+                        Password
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
+                            <i class="fas fa-lock text-sm"></i>
+                        </span>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Masukkan password"
+                            required
+                            autocomplete="current-password"
+                            class="form-input w-full pl-11 pr-12 py-3.5 bg-gray-50 border
+                                   {{ $errors->has('password') ? 'border-red-400 bg-red-50' : 'border-gray-200' }}
+                                   rounded-xl text-sm text-gray-800 placeholder-gray-400
+                                   transition duration-200"
+                        >
+                        <button type="button"
+                                onclick="togglePassword()"
+                                class="toggle-password absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400">
+                            <i class="fas fa-eye text-sm" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                    @error('password')
+                        <p class="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+                            <i class="fas fa-circle-exclamation"></i>{{ $message }}
+                        </p>
+                    @enderror
+                </div>
 
-        function startAutoplay() {
-            if (slides.length > 1) {
-                autoplayInterval = setInterval(nextSlide, 3000); // Auto-rotate every 3 seconds
-            }
-        }
+                {{-- Tombol submit --}}
+                <div class="animate-slide-up delay-4 pt-2">
+                    <button type="submit"
+                            class="btn-submit w-full py-3.5 bg-red-600 text-white
+                                   font-bold text-sm rounded-xl flex items-center justify-center gap-2.5">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Masuk ke E-Learning
+                    </button>
+                </div>
+            </form>
 
-        function stopAutoplay() {
-            if (autoplayInterval) {
-                clearInterval(autoplayInterval);
-            }
-        }
+            {{-- Footer --}}
+            <p class="animate-slide-up text-center text-gray-400 text-xs mt-8 flex items-center justify-center gap-1.5">
+                <i class="fas fa-shield-halved text-red-400"></i>
+                Halaman ini aman dan terlindungi
+            </p>
+        </div>
+    </div>
 
-        function resetAutoplay() {
-            stopAutoplay();
-            startAutoplay();
-        }
+</div>
 
-        // Click handlers for dots
-        if (dots.length > 0) {
-            dots.forEach((dot, index) => {
-                dot.addEventListener('click', () => {
-                    showSlide(index);
-                    resetAutoplay();
-                });
-            });
-        }
+<script>
+    // ── Toggle password visibility ────────────────────────────
+    function togglePassword() {
+        const input   = document.getElementById('password');
+        const icon    = document.getElementById('eyeIcon');
+        const visible = input.type === 'text';
+        input.type    = visible ? 'password' : 'text';
+        icon.className = visible ? 'fas fa-eye text-sm' : 'fas fa-eye-slash text-sm';
+    }
 
-        // Start autoplay on page load
-        if (slides.length > 1) {
-            startAutoplay();
+    // ── Banner Carousel ───────────────────────────────────────
+    const carousel = document.getElementById('bannerCarousel');
+    const dotsWrap = document.getElementById('bannerDots');
+    const slides   = carousel  ? Array.from(carousel.querySelectorAll('.banner-slide'))  : [];
+    const dots     = dotsWrap  ? Array.from(dotsWrap.querySelectorAll('.banner-dot'))    : [];
 
-            // Pause on hover, resume on mouse leave
-            if (bannerCarousel) {
-                bannerCarousel.addEventListener('mouseenter', stopAutoplay);
-                bannerCarousel.addEventListener('mouseleave', startAutoplay);
-            }
-        }
-    </script>
+    let current  = 0;
+    let interval = null;
+
+    function goTo(index) {
+        if (!slides.length) return;
+        index = ((index % slides.length) + slides.length) % slides.length;
+
+        slides.forEach(s => s.classList.remove('active'));
+        slides[index].classList.add('active');
+
+        dots.forEach(d => d.classList.remove('active'));
+        if (dots[index]) dots[index].classList.add('active');
+
+        current = index;
+    }
+
+    function startAutoplay() {
+        if (slides.length > 1) interval = setInterval(() => goTo(current + 1), 5000);
+    }
+
+    function stopAutoplay() {
+        clearInterval(interval);
+    }
+
+    dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => { goTo(i); stopAutoplay(); startAutoplay(); });
+    });
+
+    if (carousel) {
+        carousel.addEventListener('mouseenter', stopAutoplay);
+        carousel.addEventListener('mouseleave', startAutoplay);
+    }
+
+    startAutoplay();
+</script>
 </body>
 </html>

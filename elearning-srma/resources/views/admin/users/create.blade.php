@@ -4,84 +4,89 @@
 @section('icon', 'user-plus')
 
 @section('content')
-    <div style="margin-bottom: 30px;">
-        <p style="color: #999; font-size: 14px; margin-bottom: 5px;">Tambah Data</p>
-        <h1 class="page-title">
-            <i class="fas fa-user-plus"></i>
+    <!-- Header -->
+    <div class="mb-8">
+        <p class="text-gray-500 text-sm mb-2">Tambah Data</p>
+        <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
+            <i class="fas fa-user-plus text-red-500"></i>
             Tambah Pengguna Baru
         </h1>
     </div>
 
-    <div style="max-width: 600px;">
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">Formulir Pendaftaran Pengguna</div>
+    <div class="max-w-2xl">
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-bold text-gray-900">Formulir Pendaftaran Pengguna</h2>
             </div>
-            <div class="card-body">
-                <form method="POST" action="{{ route('admin.users.store') }}">
+            <div class="p-6">
+                <form method="POST" action="{{ route('admin.users.store') }}" class="space-y-6">
                     @csrf
 
-                    <div style="margin-bottom: 20px;">
-                        <label for="name" style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                            Nama Lengkap <span style="color: var(--primary);">*</span>
+                    <!-- Nama Lengkap -->
+                    <div>
+                        <label for="name" class="block text-sm font-semibold text-gray-900 mb-2">
+                            Nama Lengkap <span class="text-red-500">*</span>
                         </label>
                         <input 
                             type="text" 
                             name="name" 
                             id="name" 
                             placeholder="Masukkan nama lengkap"
-                            style="width: 100%; padding: 10px 12px; border: 2px solid @error('name') var(--danger) @else var(--border) @enderror; border-radius: 6px; font-size: 14px;"
+                            class="w-full px-4 py-2 border-2 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('name') border-red-500 @else border-gray-300 @enderror"
                             value="{{ old('name') }}" 
                             required
                         >
                         @error('name')
-                            <span style="color: var(--danger); font-size: 12px; margin-top: 5px; display: block;">❌ {{ $message }}</span>
+                            <span class="text-red-500 text-xs mt-2 block">❌ {{ $message }}</span>
                         @enderror
                     </div>
 
-                    <div style="margin-bottom: 20px;">
-                        <label for="email" style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                            Email <span style="color: var(--primary);">*</span>
+                    <!-- Email -->
+                    <div>
+                        <label for="email" class="block text-sm font-semibold text-gray-900 mb-2">
+                            Email <span class="text-red-500">*</span>
                         </label>
                         <input 
                             type="email" 
                             name="email" 
                             id="email" 
                             placeholder="nama@sekolah.sch.id"
-                            style="width: 100%; padding: 10px 12px; border: 2px solid @error('email') var(--danger) @else var(--border) @enderror; border-radius: 6px; font-size: 14px;"
+                            class="w-full px-4 py-2 border-2 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('email') border-red-500 @else border-gray-300 @enderror"
                             value="{{ old('email') }}" 
                             required
                         >
                         @error('email')
-                            <span style="color: var(--danger); font-size: 12px; margin-top: 5px; display: block;">❌ {{ $message }}</span>
+                            <span class="text-red-500 text-xs mt-2 block">❌ {{ $message }}</span>
                         @enderror
                     </div>
 
-                    <div style="margin-bottom: 20px;">
-                        <label for="password" style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                            Password <span style="color: var(--primary);">*</span>
+                    <!-- Password -->
+                    <div>
+                        <label for="password" class="block text-sm font-semibold text-gray-900 mb-2">
+                            Password <span class="text-red-500">*</span>
                         </label>
                         <input 
                             type="password" 
                             name="password" 
                             id="password" 
                             placeholder="Masukkan password (minimal 6 karakter)"
-                            style="width: 100%; padding: 10px 12px; border: 2px solid @error('password') var(--danger) @else var(--border) @enderror; border-radius: 6px; font-size: 14px;"
+                            class="w-full px-4 py-2 border-2 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('password') border-red-500 @else border-gray-300 @enderror"
                             required
                         >
                         @error('password')
-                            <span style="color: var(--danger); font-size: 12px; margin-top: 5px; display: block;">❌ {{ $message }}</span>
+                            <span class="text-red-500 text-xs mt-2 block">❌ {{ $message }}</span>
                         @enderror
                     </div>
 
-                    <div style="margin-bottom: 30px;">
-                        <label for="role" style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--secondary);">
-                            Role / Peran <span style="color: var(--primary);">*</span>
+                    <!-- Role -->
+                    <div>
+                        <label for="role" class="block text-sm font-semibold text-gray-900 mb-2">
+                            Role / Peran <span class="text-red-500">*</span>
                         </label>
                         <select 
                             name="role" 
                             id="role" 
-                            style="width: 100%; padding: 10px 12px; border: 2px solid @error('role') var(--danger) @else var(--border) @enderror; border-radius: 6px; font-size: 14px;"
+                            class="w-full px-4 py-2 border-2 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('role') border-red-500 @else border-gray-300 @enderror"
                             required
                         >
                             <option value="">-- Pilih Role --</option>
@@ -90,18 +95,19 @@
                             <option value="siswa" @selected(old('role') === 'siswa')>Siswa</option>
                         </select>
                         @error('role')
-                            <span style="color: var(--danger); font-size: 12px; margin-top: 5px; display: block;">❌ {{ $message }}</span>
+                            <span class="text-red-500 text-xs mt-2 block">❌ {{ $message }}</span>
                         @enderror
                     </div>
 
-                    <div style="display: flex; gap: 10px;">
+                    <!-- Buttons -->
+                    <div class="flex gap-3 pt-4">
                         <button 
                             type="submit" 
-                            class="btn btn-primary"
+                            class="inline-flex items-center gap-2 bg-red-500 text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition"
                         >
                             <i class="fas fa-save"></i> Simpan Pengguna
                         </button>
-                        <a href="{{ route('admin.users.index') }}" class="btn btn-secondary" style="text-decoration: none;">
+                        <a href="{{ route('admin.users.index') }}" class="inline-flex items-center gap-2 bg-gray-300 text-gray-900 px-6 py-2 rounded-lg font-semibold text-sm hover:bg-gray-400 transition">
                             <i class="fas fa-times"></i> Batal
                         </a>
                     </div>

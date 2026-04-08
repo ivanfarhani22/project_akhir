@@ -11,288 +11,350 @@
 @endphp
 
 @section('content')
-<nav class="breadcrumb">
-    <a href="{{ route('admin.classes.index') }}"><i class="fas fa-chalkboard"></i> Kelola Kelas</a>
-    <span class="sep">/</span>
-    <span class="current">{{ $class->name }}</span>
-</nav>
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 mb-8 text-sm text-gray-600">
+        <a href="{{ route('admin.dashboard') }}" class="hover:text-red-600 transition">Dashboard</a>
+        <span class="text-gray-400">/</span>
+        <a href="{{ route('admin.classes.index') }}" class="hover:text-red-600 transition">Kelas</a>
+        <span class="text-gray-400">/</span>
+        <span class="text-red-600 font-semibold">{{ $class->name }}</span>
+    </nav>
 
-<!-- Page Header -->
-<div class="page-header">
-    <div>
-        <h1 class="page-title"><i class="fas fa-chalkboard"></i> {{ $class->name }}</h1>
-        <p class="page-description">Kelola mata pelajaran, guru, dan siswa dalam kelas</p>
+    <!-- Header with Actions -->
+    <div class="flex justify-between items-start mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                <span class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600">
+                    <i class="fas fa-chalkboard"></i>
+                </span>
+                {{ $class->name }}
+            </h1>
+            <p class="text-gray-600 mt-2">Kelola mata pelajaran, guru, dan siswa dalam kelas</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ route('admin.classes.edit', $class) }}" class="inline-flex items-center gap-2 bg-gray-500 text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-gray-600 transition">
+                <i class="fas fa-edit"></i> Edit Kelas
+            </a>
+            <form method="POST" action="{{ route('admin.classes.destroy', $class) }}" onsubmit="return confirm('Yakin ingin menghapus kelas ini?')">
+                @csrf @method('DELETE')
+                <button type="submit" class="inline-flex items-center gap-2 bg-red-600 text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-red-700 transition">
+                    <i class="fas fa-trash"></i> Hapus Kelas
+                </button>
+            </form>
+        </div>
     </div>
-    <div class="header-actions">
-        <a href="{{ route('admin.classes.edit', $class) }}" class="btn btn-secondary">
-            <i class="fas fa-edit"></i> Edit Kelas
-        </a>
-        <form method="POST" action="{{ route('admin.classes.destroy', $class) }}"
-              onsubmit="return confirm('Yakin ingin menghapus kelas ini?')">
-            @csrf @method('DELETE')
-            <button class="btn btn-danger"><i class="fas fa-trash"></i> Hapus Kelas</button>
-        </form>
-    </div>
-</div>
 
-<!-- Info Cards -->
-<div class="info-grid">
-    <div class="card">
-        <div class="card-header"><div class="card-title"><i class="fas fa-info-circle"></i> Deskripsi</div></div>
-        <div class="card-body"><p class="text-muted">{{ $class->description ?? '—' }}</p></div>
-    </div>
+    <!-- Info Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Deskripsi Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
+                    <i class="fas fa-info-circle"></i>
+                </span>
+                Deskripsi
+            </h3>
+            <p class="text-gray-600 text-sm">{{ $class->description ?? '—' }}</p>
+        </div>
 
-    <div class="card">
-        <div class="card-header"><div class="card-title"><i class="fas fa-calendar"></i> Jadwal</div></div>
-        <div class="card-body">
-            @if ($class->day_of_week || $class->start_time || $class->end_time || $class->room)
-                <p class="text-muted">
-                    <strong>Hari:</strong> {{ $class->day_of_week ? ucfirst($class->day_of_week) : '—' }}<br>
-                    <strong>Waktu:</strong>
-                    @if ($class->start_time && $class->end_time)
-                        {{ \Carbon\Carbon::createFromFormat('H:i', $class->start_time)->format('H:i') }} –
-                        {{ \Carbon\Carbon::createFromFormat('H:i', $class->end_time)->format('H:i') }}
-                    @else —
-                    @endif
-                    <br>
-                    <strong>Ruangan:</strong> {{ $class->room ?? '—' }}
+        <!-- Jadwal Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-600">
+                    <i class="fas fa-calendar"></i>
+                </span>
+                Jadwal
+            </h3>
+            <div class="space-y-2 text-sm">
+                <p>
+                    <span class="font-semibold text-gray-700">Hari:</span>
+                    <span class="text-gray-600">{{ $class->day_of_week ? ucfirst($class->day_of_week) : '—' }}</span>
                 </p>
+                <p>
+                    <span class="font-semibold text-gray-700">Waktu:</span>
+                    @if ($class->start_time && $class->end_time)
+                        <span class="text-gray-600">{{ \Carbon\Carbon::createFromFormat('H:i', $class->start_time)->format('H:i') }} – {{ \Carbon\Carbon::createFromFormat('H:i', $class->end_time)->format('H:i') }}</span>
+                    @else
+                        <span class="text-gray-600">—</span>
+                    @endif
+                </p>
+                <p>
+                    <span class="font-semibold text-gray-700">Ruangan:</span>
+                    <span class="text-gray-600">{{ $class->room ?? '—' }}</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Statistik Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
+                    <i class="fas fa-chart-bar"></i>
+                </span>
+                Statistik
+            </h3>
+            <div class="space-y-3">
+                <div>
+                    <p class="text-sm text-gray-600">📖 Mata Pelajaran</p>
+                    <p class="text-2xl font-bold text-red-600">{{ $class->classSubjects->count() }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">👥 Siswa</p>
+                    <p class="text-2xl font-bold text-red-600">{{ $class->students->count() }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mata Pelajaran Section -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-8">
+        <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4 text-white flex justify-between items-center">
+            <h3 class="text-lg font-bold flex items-center gap-2 m-0">
+                <i class="fas fa-book"></i>
+                Mata Pelajaran
+                <span class="bg-red-700 px-3 py-1 rounded-full text-sm">{{ $class->classSubjects->count() }}</span>
+            </h3>
+            <a href="{{ route('admin.class-subjects.create', $class) }}" class="inline-flex items-center gap-2 bg-white text-red-600 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-red-50 transition">
+                <i class="fas fa-plus"></i> Tambah
+            </a>
+        </div>
+
+        <div class="p-6">
+            @if ($class->classSubjects->isEmpty())
+                <div class="text-center py-12">
+                    <i class="fas fa-inbox text-6xl text-gray-300 mb-4 inline-block"></i>
+                    <p class="text-gray-600 font-semibold mb-4">Belum ada mata pelajaran di kelas ini</p>
+                    <a href="{{ route('admin.class-subjects.create', $class) }}" class="inline-flex items-center gap-2 bg-red-500 text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition">
+                        <i class="fas fa-plus"></i> Tambah Mata Pelajaran
+                    </a>
+                </div>
             @else
-                <p class="text-muted">Belum ada jadwal yang diatur</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach ($class->classSubjects as $cs)
+                        <div class="bg-gray-50 border-2 border-gray-200 rounded-lg p-5 hover:shadow-md transition">
+                            <div class="pb-4 border-b-2 border-gray-200 mb-4">
+                                <h4 class="text-base font-bold text-gray-900 m-0 mb-1">📖 {{ $cs->subject->name }}</h4>
+                                <p class="text-xs text-gray-600 m-0">Kode: {{ $cs->subject->code }}</p>
+                            </div>
+                            <div class="mb-4">
+                                <p class="text-xs text-gray-600 font-semibold mb-1">Guru Pengajar</p>
+                                <p class="text-sm font-semibold text-gray-900 m-0">👤 {{ $cs->teacher->name }}</p>
+                            </div>
+                            @if ($cs->description)
+                                <p class="text-sm text-gray-600 mb-4">{{ Str::limit($cs->description, 60) }}</p>
+                            @endif
+                            <div class="flex gap-2 pt-4 border-t-2 border-gray-200">
+                                <a href="{{ route('admin.class-subjects.edit', [$class, $cs]) }}"
+                                   class="flex-1 inline-flex items-center justify-center gap-2 bg-blue-500 text-white px-3 py-2 rounded-lg font-semibold text-xs hover:bg-blue-600 transition">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <form method="POST"
+                                      action="{{ route('admin.class-subjects.destroy', [$class, $cs]) }}"
+                                      class="flex-1" onsubmit="return confirm('Hapus mata pelajaran ini?')">
+                                    @csrf @method('DELETE')
+                                    <button class="w-full inline-flex items-center justify-center gap-2 bg-red-600 text-white px-3 py-2 rounded-lg font-semibold text-xs hover:bg-red-700 transition">
+                                        <i class="fas fa-trash"></i> Hapus
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             @endif
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header"><div class="card-title"><i class="fas fa-chart-bar"></i> Statistik</div></div>
-        <div class="card-body">
-            <p class="text-muted">
-                📖 Mata Pelajaran: <strong class="text-primary">{{ $class->classSubjects->count() }}</strong><br>
-                👥 Siswa: <strong class="text-success">{{ $class->students->count() }}</strong>
-            </p>
-        </div>
-    </div>
-</div>
-
-<!-- Mata Pelajaran -->
-<div class="card mb-30">
-    <div class="card-header">
-        <div class="card-title">
-            <i class="fas fa-book"></i> Mata Pelajaran
-            <span class="badge badge-primary">{{ $class->classSubjects->count() }}</span>
-        </div>
-        <a href="{{ route('admin.class-subjects.create', $class) }}" class="btn btn-primary btn-sm">
-            <i class="fas fa-plus"></i> Tambah
-        </a>
-    </div>
-    <div class="card-body">
-        @if ($class->classSubjects->isEmpty())
-            <div class="empty-state">
-                <i class="fas fa-inbox"></i>
-                <p>Belum ada mata pelajaran di kelas ini</p>
-                <a href="{{ route('admin.class-subjects.create', $class) }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Tambah Mata Pelajaran
-                </a>
-            </div>
-        @else
-            <div class="subject-grid">
-                @foreach ($class->classSubjects as $cs)
-                    <div class="subject-card">
-                        <div class="subject-card__header">
-                            <h4>📖 {{ $cs->subject->name }}</h4>
-                            <p class="text-muted text-sm">Kode: {{ $cs->subject->code }}</p>
-                        </div>
-                        <div class="subject-card__teacher">
-                            <span class="label">Guru Pengajar</span>
-                            <p>👤 {{ $cs->teacher->name }}</p>
-                        </div>
-                        @if ($cs->description)
-                            <p class="text-muted text-sm">{{ Str::limit($cs->description, 60) }}</p>
-                        @endif
-                        <div class="subject-card__actions">
-                            <a href="{{ route('admin.class-subjects.edit', [$class, $cs]) }}"
-                               class="btn btn-secondary btn-sm flex-1">
-                                <i class="fas fa-edit"></i> Edit
-                            </a>
-                            <form method="POST"
-                                  action="{{ route('admin.class-subjects.destroy', [$class, $cs]) }}"
-                                  class="flex-1" onsubmit="return confirm('Hapus mata pelajaran ini?')">
-                                @csrf @method('DELETE')
-                                <button class="btn btn-danger btn-sm w-full">
-                                    <i class="fas fa-trash"></i> Hapus
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        @endif
-    </div>
-</div>
-
-<!-- Jadwal Pelajaran -->
-<div class="card mb-30">
-    <div class="card-header">
-        <div class="card-title">
-            <i class="fas fa-calendar-alt"></i> Jadwal Pelajaran
-            <span class="badge badge-warning">{{ $class->schedules->count() }}</span>
-        </div>
-        @if ($class->classSubjects->isNotEmpty())
-            <a href="{{ route('admin.schedules.create', $class) }}" class="btn btn-primary btn-sm">
+    <!-- Jadwal Pelajaran Section -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-8">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-gray-900 m-0 flex items-center gap-2">
+                <i class="fas fa-calendar-alt"></i> Jadwal Pelajaran
+                <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">{{ $class->schedules->count() }}</span>
+            </h3>
+            <a href="{{ route('admin.schedules.create', $class) }}" class="inline-flex items-center gap-2 bg-yellow-500 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-yellow-600 transition">
                 <i class="fas fa-plus"></i> Tambah Jadwal
             </a>
-        @endif
-    </div>
-    <div class="card-body">
-        @if ($class->schedules->isEmpty())
-            <div class="empty-state">
-                <i class="fas fa-calendar"></i>
-                <p>Belum ada jadwal pelajaran</p>
-                @if ($class->classSubjects->isNotEmpty())
-                    <a href="{{ route('admin.schedules.create', $class) }}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Buat Jadwal
-                    </a>
-                @else
-                    <p class="text-muted text-sm">Tambahkan mata pelajaran terlebih dahulu</p>
-                @endif
-            </div>
-        @else
-            <div class="table-wrapper">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Hari</th><th>Waktu</th><th>Mata Pelajaran</th>
-                            <th>Guru</th><th>Ruangan</th><th class="text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($class->schedules as $schedule)
-                            <tr>
-                                <td class="fw-500">{{ $dayTranslate[$schedule->day_of_week] ?? $schedule->day_of_week }}</td>
-                                <td><strong>{{ $schedule->start_time }} – {{ $schedule->end_time }}</strong></td>
-                                <td>{{ $schedule->classSubject->subject->name }}</td>
-                                <td>{{ $schedule->classSubject->teacher->name }}</td>
-                                <td>{{ $schedule->room ?? '—' }}</td>
-                                <td class="text-center">
-                                    <div class="action-group">
-                                        <a href="{{ route('admin.schedules.edit', [$class, $schedule]) }}"
-                                           class="btn btn-secondary btn-xs"><i class="fas fa-edit"></i></a>
-                                        <form method="POST"
-                                              action="{{ route('admin.schedules.destroy', [$class, $schedule]) }}"
-                                              onsubmit="return confirm('Hapus jadwal ini?')">
-                                            @csrf @method('DELETE')
-                                            <button class="btn btn-danger btn-xs"><i class="fas fa-trash"></i></button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endif
-    </div>
-</div>
-
-<!-- Daftar Siswa -->
-<div class="card">
-    <div class="card-header">
-        <div class="card-title">
-            <i class="fas fa-users"></i> Daftar Siswa
-            <span class="badge badge-success">{{ $class->students->count() }}</span>
         </div>
-        <button type="button" onclick="StudentModal.open()" class="btn btn-primary btn-sm">
-            <i class="fas fa-user-plus"></i> Tambah Siswa
-        </button>
-    </div>
-    <div class="card-body">
-        @if ($class->students->isEmpty())
-            <div class="empty-state">
-                <i class="fas fa-users"></i>
-                <p>Belum ada siswa di kelas ini</p>
-                <button type="button" onclick="StudentModal.open()" class="btn btn-primary">
-                    <i class="fas fa-user-plus"></i> Tambah Siswa
-                </button>
-            </div>
-        @else
-            <div class="table-wrapper">
-                <table class="data-table">
-                    <thead>
-                        <tr><th>No</th><th>Nama Siswa</th><th>Email</th><th class="text-center">Aksi</th></tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($class->students as $i => $student)
-                            <tr>
-                                <td>{{ $i + 1 }}</td>
-                                <td class="fw-500">{{ $student->name }}</td>
-                                <td class="text-muted">{{ $student->email }}</td>
-                                <td class="text-center">
-                                    <form method="POST"
-                                          action="{{ route('admin.classes.students.destroy', [$class, $student]) }}"
-                                          onsubmit="return confirm('Yakin ingin menghapus siswa ini dari kelas?')">
-                                        @csrf @method('DELETE')
-                                        <button class="btn btn-danger btn-xs"><i class="fas fa-trash"></i> Hapus</button>
-                                    </form>
-                                </td>
+
+        <div class="p-6">
+            @if ($class->schedules->isEmpty())
+                <div class="text-center py-12">
+                    <i class="fas fa-calendar text-6xl text-gray-300 mb-4 inline-block"></i>
+                    <p class="text-gray-600 font-semibold">Belum ada jadwal pelajaran</p>
+                    <p class="text-gray-500 text-sm">Jadwal akan ditampilkan ketika ada data</p>
+                </div>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 border-b-2 border-gray-200">
+                                <th class="px-6 py-3 text-left font-semibold text-gray-900">Hari</th>
+                                <th class="px-6 py-3 text-left font-semibold text-gray-900">Waktu</th>
+                                <th class="px-6 py-3 text-left font-semibold text-gray-900">Mata Pelajaran</th>
+                                <th class="px-6 py-3 text-left font-semibold text-gray-900">Guru</th>
+                                <th class="px-6 py-3 text-left font-semibold text-gray-900">Ruangan</th>
+                                <th class="px-6 py-3 text-center font-semibold text-gray-900">Aksi</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endif
+                        </thead>
+                        <tbody>
+                            @foreach ($class->schedules as $schedule)
+                                <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
+                                    <td class="px-6 py-3 font-semibold text-gray-900">{{ $dayTranslate[$schedule->day_of_week] ?? $schedule->day_of_week }}</td>
+                                    <td class="px-6 py-3 text-gray-700"><strong>{{ $schedule->start_time }} – {{ $schedule->end_time }}</strong></td>
+                                    <td class="px-6 py-3 text-gray-700">{{ $schedule->classSubject->subject->name }}</td>
+                                    <td class="px-6 py-3 text-gray-700">{{ $schedule->classSubject->teacher->name }}</td>
+                                    <td class="px-6 py-3 text-gray-700">{{ $schedule->room ?? '—' }}</td>
+                                    <td class="px-6 py-3 text-center">
+                                        <div class="flex gap-2 justify-center">
+                                            <a href="{{ route('admin.schedules.edit', [$class, $schedule]) }}" class="inline-flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-blue-600 transition">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            <form method="POST" action="{{ route('admin.schedules.destroy', [$class, $schedule]) }}" class="inline" onsubmit="return confirm('Hapus jadwal ini?')">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="inline-flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-red-700 transition">
+                                                    <i class="fas fa-trash"></i> Hapus
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    <!-- Daftar Siswa Section -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4 text-white flex justify-between items-center">
+            <h3 class="text-lg font-bold flex items-center gap-2 m-0">
+                <i class="fas fa-users"></i>
+                Daftar Siswa
+                <span class="bg-red-700 px-3 py-1 rounded-full text-sm">{{ $class->students->count() }}</span>
+            </h3>
+            <button type="button" onclick="StudentModal.open()" class="inline-flex items-center gap-2 bg-white text-red-600 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-red-50 transition">
+                <i class="fas fa-user-plus"></i> Tambah Siswa
+            </button>
+        </div>
+
+        <div class="p-6">
+            @if ($class->students->isEmpty())
+                <div class="text-center py-12">
+                    <i class="fas fa-users text-6xl text-gray-300 mb-4 inline-block"></i>
+                    <p class="text-gray-600 font-semibold mb-4">Belum ada siswa di kelas ini</p>
+                    <button type="button" onclick="StudentModal.open()" class="inline-flex items-center gap-2 bg-red-500 text-white px-6 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition">
+                        <i class="fas fa-user-plus"></i> Tambah Siswa
+                    </button>
+                </div>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 border-b-2 border-gray-200">
+                                <th class="px-6 py-3 text-left font-semibold text-gray-900">No</th>
+                                <th class="px-6 py-3 text-left font-semibold text-gray-900">Nama Siswa</th>
+                                <th class="px-6 py-3 text-left font-semibold text-gray-900">Email</th>
+                                <th class="px-6 py-3 text-center font-semibold text-gray-900">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($class->students as $i => $student)
+                                <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
+                                    <td class="px-6 py-3 text-gray-600">{{ $i + 1 }}</td>
+                                    <td class="px-6 py-3 font-semibold text-gray-900">{{ $student->name }}</td>
+                                    <td class="px-6 py-3 text-gray-600">{{ $student->email }}</td>
+                                    <td class="px-6 py-3 text-center">
+                                        <form method="POST"
+                                              action="{{ route('admin.classes.students.destroy', [$class, $student]) }}"
+                                              onsubmit="return confirm('Yakin ingin menghapus siswa ini dari kelas?')"
+                                              style="display: inline;">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-xs hover:bg-red-700 transition">
+                                                <i class="fas fa-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
     </div>
 </div>
 
 <!-- Modal Tambah Siswa -->
-<div id="addStudentModal" class="modal-backdrop" hidden aria-modal="true" role="dialog">
-    <div class="modal-box">
-        <div class="modal-header">
-            <h2><i class="fas fa-user-plus"></i> Tambah Siswa ke {{ $class->name }}</h2>
-            <button type="button" onclick="StudentModal.close()" class="btn-close" aria-label="Tutup">✕</button>
+<div id="addStudentModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg max-w-2xl w-full max-h-96 flex flex-col overflow-hidden">
+        <!-- Modal Header -->
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2 m-0">
+                <i class="fas fa-user-plus"></i> Tambah Siswa ke {{ $class->name }}
+            </h2>
+            <button type="button" onclick="StudentModal.close()" class="text-gray-500 hover:text-gray-700 text-2xl leading-none w-8 h-8 flex items-center justify-center">
+                ✕
+            </button>
         </div>
 
-        <form method="POST" action="{{ route('admin.classes.students.store', $class) }}" id="addStudentForm" onsubmit="disableSubmitButton()">
+        <!-- Modal Body -->
+        <form method="POST" action="{{ route('admin.classes.students.store', $class) }}" id="addStudentForm" class="flex-1 overflow-y-auto p-6">
             @csrf
             @if ($availableStudents->isEmpty())
-                <p class="text-muted text-center p-20">
-                    <i class="fas fa-check-circle"></i> Semua siswa sudah terdaftar di kelas ini.
-                </p>
-            @else
-                <input type="text" id="studentSearch" placeholder="🔍 Cari nama atau email..."
-                       class="input-search" autocomplete="off">
-
-                <div class="student-list-wrap">
-                    <div id="studentList" class="student-list"></div>
-                    <p id="noResults" class="empty-search" hidden>
-                        <i class="fas fa-search"></i><br>Tidak ada siswa yang cocok
-                    </p>
+                <div class="text-center py-12">
+                    <i class="fas fa-check-circle text-4xl text-green-500 mb-3 inline-block"></i>
+                    <p class="text-gray-600">Semua siswa sudah terdaftar di kelas ini.</p>
                 </div>
+            @else
+                <div class="space-y-4">
+                    <!-- Search Input -->
+                    <input type="text" id="studentSearch" placeholder="🔍 Cari nama atau email..." 
+                           class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition"
+                           autocomplete="off">
 
-                <div id="pagination" class="pagination-bar">
-                    <span id="pageInfo" class="page-info">Halaman 1 dari 1</span>
-                    <div class="page-btns">
-                        <button type="button" id="prevBtn" onclick="StudentModal.prev()" class="btn btn-outline btn-xs">
-                            <i class="fas fa-chevron-left"></i> Sebelumnya
-                        </button>
-                        <button type="button" id="nextBtn" onclick="StudentModal.next()" class="btn btn-outline btn-xs">
-                            Selanjutnya <i class="fas fa-chevron-right"></i>
-                        </button>
+                    <!-- Student List -->
+                    <div class="border-2 border-gray-200 rounded-lg bg-gray-50 max-h-48 overflow-y-auto">
+                        <div id="studentList" class="space-y-2 p-3"></div>
+                        <div id="noResults" class="text-center py-8 text-gray-500 hidden">
+                            <i class="fas fa-search text-3xl mb-2 inline-block"></i><br>
+                            Tidak ada siswa yang cocok
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div id="pagination" class="flex justify-between items-center text-sm bg-gray-50 p-3 rounded-lg hidden">
+                        <span id="pageInfo" class="text-gray-600">Halaman 1 dari 1</span>
+                        <div class="flex gap-2">
+                            <button type="button" id="prevBtn" onclick="StudentModal.prev()" class="px-3 py-1 border border-gray-300 rounded text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button type="button" id="nextBtn" onclick="StudentModal.next()" class="px-3 py-1 border border-gray-300 rounded text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Selected Count -->
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded text-sm text-blue-800">
+                        <i class="fas fa-info-circle"></i>
+                        Dipilih: <strong id="selectedCount">0</strong> dari
+                        <strong>{{ $availableStudents->count() }}</strong> siswa
                     </div>
                 </div>
-
-                <p class="selected-info">
-                    <i class="fas fa-info-circle"></i>
-                    Dipilih: <strong id="selectedCount">0</strong> dari
-                    <strong>{{ $availableStudents->count() }}</strong> siswa
-                </p>
             @endif
 
-            <div class="modal-footer">
-                <button type="button" onclick="StudentModal.close()" class="btn btn-secondary">
+            <!-- Modal Footer -->
+            <div class="flex gap-3 pt-6 border-t border-gray-200 mt-6">
+                <button type="button" onclick="StudentModal.close()" class="flex-1 inline-flex items-center justify-center gap-2 bg-gray-300 text-gray-900 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gray-400 transition">
                     <i class="fas fa-times"></i> Batal
                 </button>
                 @if ($availableStudents->isNotEmpty())
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Tambahkan Siswa</button>
+                    <button type="submit" class="flex-1 inline-flex items-center justify-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-red-600 transition">
+                        <i class="fas fa-save"></i> Tambahkan Siswa
+                    </button>
                 @endif
             </div>
         </form>
@@ -300,15 +362,6 @@
 </div>
 
 <script>
-// Prevent double form submission
-function disableSubmitButton() {
-    const submitBtn = document.querySelector('#addStudentForm button[type="submit"]');
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
-    }
-}
-
 const StudentModal = (() => {
     const STUDENTS = @json($availableStudents->map(fn($s) => ['id'=>$s->id,'name'=>$s->name,'email'=>$s->email])->values()->toArray());
     const PER_PAGE = 8;
@@ -329,30 +382,31 @@ const StudentModal = (() => {
         if (filteredStudents.length === 0) {
             listEl.innerHTML = '';
             const noResults = getElement('noResults');
-            if (noResults) noResults.hidden = false;
+            if (noResults) noResults.classList.remove('hidden');
             const pagination = getElement('pagination');
-            if (pagination) pagination.hidden = true;
+            if (pagination) pagination.classList.add('hidden');
             return;
         }
 
         const noResults = getElement('noResults');
-        if (noResults) noResults.hidden = true;
+        if (noResults) noResults.classList.add('hidden');
         
         const pagination = getElement('pagination');
-        if (pagination) pagination.hidden = filteredStudents.length <= PER_PAGE;
+        if (pagination) pagination.classList.toggle('hidden', filteredStudents.length <= PER_PAGE);
 
         const start = (currentPage - 1) * PER_PAGE;
         const end = start + PER_PAGE;
         const pageStudents = filteredStudents.slice(start, end);
 
         listEl.innerHTML = pageStudents.map(student => `
-            <label class="student-item ${selectedIds.has(student.id) ? 'is-checked' : ''}">
+            <label class="flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-100 ${selectedIds.has(student.id) ? 'bg-blue-100' : ''}">
                 <input type="checkbox" name="student_ids[]" value="${student.id}"
                        ${selectedIds.has(student.id) ? 'checked' : ''}
-                       onchange="StudentModal.toggleStudent(${student.id}, this.checked)">
-                <div class="student-item__info">
-                    <p class="student-item__name">${student.name}</p>
-                    <p class="student-item__email">${student.email}</p>
+                       onchange="StudentModal.toggleStudent(${student.id}, this.checked)"
+                       class="w-4 h-4 accent-red-600">
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-gray-900 truncate">${student.name}</p>
+                    <p class="text-xs text-gray-600 truncate">${student.email}</p>
                 </div>
             </label>
         `).join('');
@@ -377,7 +431,8 @@ const StudentModal = (() => {
     function openModal() {
         const modal = getElement('addStudentModal');
         if (modal) {
-            modal.hidden = false;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
             document.body.style.overflow = 'hidden';
         }
         const search = getElement('studentSearch');
@@ -390,8 +445,11 @@ const StudentModal = (() => {
 
     function closeModal() {
         const modal = getElement('addStudentModal');
-        if (modal) modal.hidden = true;
-        document.body.style.overflow = '';
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
     }
 
     function toggleStudent(id, checked) {
@@ -400,10 +458,7 @@ const StudentModal = (() => {
         } else {
             selectedIds.delete(id);
         }
-        const checkbox = document.querySelector(`input[value="${id}"]`);
-        if (checkbox) {
-            checkbox.closest('label')?.classList.toggle('is-checked', checked);
-        }
+        renderStudents();
         updateSelectedCount();
     }
 
@@ -449,12 +504,15 @@ const StudentModal = (() => {
         const modal = getElement('addStudentModal');
         if (modal) {
             modal.addEventListener('click', (e) => {
-                if (e.target === modal) closeModal();
+                if (e.target === modal) {
+                    closeModal();
+                }
             });
         }
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !getElement('addStudentModal').hidden) {
+            const modal = getElement('addStudentModal');
+            if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
                 closeModal();
             }
         });
@@ -469,415 +527,5 @@ const StudentModal = (() => {
     };
 })();
 </script>
-
-<style>
-    /* ========== UTILITIES ========== */
-    .mb-30 { margin-bottom: 30px; }
-    .text-muted { color: #666; }
-    .text-sm { font-size: 12px; }
-    .text-center { text-align: center; }
-    .fw-500 { font-weight: 500; }
-    .flex-1 { flex: 1; }
-    .w-full { width: 100%; }
-    .p-20 { padding: 20px; }
-
-    /* ========== BREADCRUMB ========== */
-    .breadcrumb {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 20px;
-        font-size: 14px;
-    }
-    .breadcrumb a {
-        color: var(--primary);
-        text-decoration: none;
-    }
-    .breadcrumb a:hover {
-        text-decoration: underline;
-    }
-    .breadcrumb .sep {
-        color: #bbb;
-    }
-    .breadcrumb .current {
-        color: var(--secondary);
-        font-weight: 600;
-    }
-
-    /* ========== PAGE HEADER ========== */
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 30px;
-        flex-wrap: wrap;
-        gap: 15px;
-    }
-    .header-actions {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-
-    /* ========== ALERTS ========== */
-    .alert {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 14px 16px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        font-size: 14px;
-    }
-    .alert-success {
-        background: #eff9ef;
-        border: 1px solid #c3e6c3;
-        color: #276727;
-    }
-
-    /* ========== GRIDS ========== */
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-    .subject-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 16px;
-    }
-
-    /* ========== BADGES ========== */
-    .badge {
-        border-radius: 20px;
-        padding: 2px 10px;
-        font-size: 12px;
-        font-weight: 600;
-        color: #fff;
-        margin-left: 8px;
-    }
-    .badge-primary { background: var(--primary); }
-    .badge-success { background: var(--success); }
-    .badge-warning { background: var(--warning); }
-
-    /* ========== BUTTONS ========== */
-    .btn-sm { font-size: 13px; padding: 7px 14px; }
-    .btn-xs { font-size: 11px; padding: 5px 10px; }
-    .btn-outline {
-        background: #fff;
-        border: 1px solid var(--border);
-        color: var(--secondary);
-    }
-    .btn-outline:disabled {
-        opacity: 0.45;
-        cursor: not-allowed;
-    }
-
-    /* ========== EMPTY STATE ========== */
-    .empty-state {
-        text-align: center;
-        padding: 50px 20px;
-        color: #aaa;
-    }
-    .empty-state i {
-        font-size: 34px;
-        margin-bottom: 14px;
-        display: block;
-    }
-    .empty-state p {
-        margin: 0 0 16px;
-    }
-
-    /* ========== SUBJECT CARDS ========== */
-    .subject-card {
-        border: 1.5px solid var(--border);
-        border-radius: 10px;
-        padding: 16px;
-        transition: box-shadow 0.2s;
-    }
-    .subject-card:hover {
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.09);
-    }
-    .subject-card__header {
-        padding-bottom: 12px;
-        border-bottom: 1.5px solid var(--border);
-        margin-bottom: 12px;
-    }
-    .subject-card__header h4 {
-        margin: 0 0 4px;
-        font-size: 15px;
-        color: var(--secondary);
-    }
-    .subject-card__teacher {
-        margin-bottom: 10px;
-    }
-    .subject-card__teacher .label {
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-weight: 600;
-        color: #aaa;
-    }
-    .subject-card__teacher p {
-        margin: 5px 0 0;
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--secondary);
-    }
-    .subject-card__actions {
-        display: flex;
-        gap: 8px;
-        padding-top: 12px;
-        border-top: 1px solid var(--border);
-    }
-
-    /* ========== TABLE ========== */
-    .table-wrapper {
-        overflow-x: auto;
-    }
-    .data-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-    }
-    .data-table th {
-        padding: 12px;
-        text-align: left;
-        font-weight: 600;
-        color: var(--secondary);
-        background: #f8f9fa;
-        border-bottom: 2px solid var(--border);
-    }
-    .data-table td {
-        padding: 12px;
-        color: #555;
-        border-bottom: 1px solid var(--border);
-    }
-    .data-table tr:last-child td {
-        border-bottom: none;
-    }
-    .action-group {
-        display: flex;
-        gap: 6px;
-        justify-content: center;
-    }
-
-    /* ========== MODAL ========== */
-    .modal-backdrop[hidden] {
-        display: none;
-    }
-    .modal-backdrop {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.48);
-        z-index: 1000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 16px;
-    }
-    .modal-box {
-        background: #fff;
-        border-radius: 14px;
-        width: 100%;
-        max-width: 580px;
-        max-height: 90vh;
-        display: flex;
-        flex-direction: column;
-        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
-        overflow: hidden;
-    }
-    .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 20px 24px 16px;
-        border-bottom: 1.5px solid var(--border);
-        flex-shrink: 0;
-    }
-    .modal-header h2 {
-        margin: 0;
-        font-size: 18px;
-        color: var(--secondary);
-    }
-    .btn-close {
-        background: none;
-        border: none;
-        font-size: 22px;
-        cursor: pointer;
-        color: #aaa;
-        line-height: 1;
-        padding: 0 4px;
-        transition: color 0.15s;
-    }
-    .btn-close:hover {
-        color: var(--secondary);
-    }
-
-    /* ========== MODAL FORM ========== */
-    #addStudentForm {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-        overflow: hidden;
-        padding: 20px 24px;
-        gap: 14px;
-    }
-    .input-search {
-        width: 100%;
-        padding: 10px 14px;
-        border: 1.5px solid var(--border);
-        border-radius: 8px;
-        font-size: 13px;
-        outline: none;
-        transition: border-color 0.2s, box-shadow 0.2s;
-        flex-shrink: 0;
-        box-sizing: border-box;
-    }
-    .input-search:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
-    }
-    .student-list-wrap {
-        flex: 1;
-        overflow-y: auto;
-        border: 1.5px solid var(--border);
-        border-radius: 8px;
-        background: #fafafa;
-        min-height: 0;
-    }
-    .student-list {
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-    }
-    .student-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 11px 14px;
-        border-radius: 7px;
-        cursor: pointer;
-        background: #fff;
-        border: 1.5px solid transparent;
-        transition: background 0.15s, border-color 0.15s;
-    }
-    .student-item:hover {
-        background: #f3f4f6;
-    }
-    .student-item.is-checked {
-        background: #eef2ff;
-        border-color: var(--primary);
-    }
-    .student-item input[type="checkbox"] {
-        width: 17px;
-        height: 17px;
-        flex-shrink: 0;
-        cursor: pointer;
-        accent-color: var(--primary);
-    }
-    .student-item__info {
-        flex: 1;
-        min-width: 0;
-    }
-    .student-item__name {
-        margin: 0;
-        font-weight: 600;
-        font-size: 14px;
-        color: var(--secondary);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .student-item__email {
-        margin: 2px 0 0;
-        font-size: 12px;
-        color: #999;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .empty-search {
-        text-align: center;
-        padding: 40px 20px;
-        color: #bbb;
-        font-size: 13px;
-        margin: 0;
-    }
-    .empty-search i {
-        font-size: 28px;
-        margin-bottom: 10px;
-        display: block;
-    }
-
-    /* ========== PAGINATION ========== */
-    .pagination-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-shrink: 0;
-        padding: 10px 14px;
-        background: #fff;
-        border: 1.5px solid var(--border);
-        border-radius: 8px;
-        font-size: 12px;
-    }
-    .page-info {
-        color: #666;
-    }
-    .page-btns {
-        display: flex;
-        gap: 8px;
-    }
-
-    /* ========== SELECTED INFO ========== */
-    .selected-info {
-        font-size: 12px;
-        color: #1565c0;
-        background: #e3f2fd;
-        border-radius: 6px;
-        padding: 10px 14px;
-        margin: 0;
-        flex-shrink: 0;
-    }
-
-    /* ========== MODAL FOOTER ========== */
-    .modal-footer {
-        display: flex;
-        gap: 10px;
-        justify-content: flex-end;
-        padding-top: 4px;
-        flex-shrink: 0;
-    }
-
-    /* ========== RESPONSIVE ========== */
-    @media (max-width: 600px) {
-        .page-header {
-            flex-direction: column;
-        }
-        .modal-box {
-            max-height: 95vh;
-            border-radius: 10px 10px 0 0;
-            align-self: flex-end;
-        }
-        .modal-backdrop {
-            align-items: flex-end;
-            padding: 0;
-        }
-        .modal-header h2 {
-            font-size: 16px;
-        }
-        .subject-grid,
-        .info-grid {
-            grid-template-columns: 1fr;
-        }
-        .pagination-bar {
-            flex-direction: column;
-            gap: 8px;
-        }
-    }
-</style>
 
 @endsection
