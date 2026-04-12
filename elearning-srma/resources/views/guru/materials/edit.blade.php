@@ -1,7 +1,7 @@
 @extends('layouts.guru')
 
 @section('title', 'Edit Materi')
-@section('icon', 'fas fa-book')
+@section('icon', 'fas fa-edit')
 
 @section('content')
     <!-- PAGE HEADER -->
@@ -102,16 +102,14 @@
                     </div>
 
                     <!-- ACTION BUTTONS -->
-                    <div class="flex gap-3">
-                        <button 
-                            type="submit" 
-                            class="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-flex items-center gap-2"
-                        >
-                            <i class="fas fa-save"></i> Simpan Perubahan
-                        </button>
-                        <a href="{{ route('guru.materials.index', ['class_id' => $material->eClass->id]) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-6 rounded-lg text-sm transition inline-flex items-center gap-2">
-                            <i class="fas fa-times"></i> Batal
+                    <div class="flex flex-col sm:flex-row gap-3 mt-8">
+                        <a href="{{ url()->previous() ?? route('guru.materials.index') }}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-6 rounded-lg text-sm transition inline-flex justify-center items-center gap-2">
+                            <i class="fas fa-arrow-left"></i> Kembali
                         </a>
+                        <button type="submit"
+                            class="flex-1 bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-flex justify-center items-center gap-2">
+                            <i class="fas fa-save"></i> Update Materi
+                        </button>
                     </div>
                 </form>
             </div>

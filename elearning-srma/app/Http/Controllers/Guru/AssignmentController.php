@@ -16,16 +16,17 @@ class AssignmentController extends Controller
     public function index()
     {
         $classId = request('class_id');
-        
+
         if ($classId) {
             // View assignments untuk kelas tertentu
             $class = EClass::findOrFail($classId);
-            
+
             if (!$class->isTeachedBy(auth()->id())) {
                 abort(403, 'Unauthorized');
             }
 
             $assignments = Assignment::where('e_class_id', $classId)
+                ->with(['classSubject' => fn($q) => $q->with(['subject', 'teacher', 'eClass']), 'submissions'])
                 ->orderBy('deadline', 'desc')
                 ->get();
 
@@ -34,7 +35,7 @@ class AssignmentController extends Controller
             // View semua assignments untuk guru
             $classes = EClass::whereHas('classSubjects', fn($q) => $q->where('teacher_id', auth()->id()))->get();
             $assignments = Assignment::whereHas('eClass', fn($q) => $q->whereHas('classSubjects', fn($q2) => $q2->where('teacher_id', auth()->id())))
-                ->with('eClass')
+                ->with(['eClass', 'classSubject' => fn($q) => $q->with(['subject', 'teacher', 'eClass']), 'submissions', 'submissions.student'])
                 ->orderBy('deadline', 'desc')
                 ->get();
 
@@ -48,15 +49,18 @@ class AssignmentController extends Controller
     public function create()
     {
         $classId = request('class_id');
-        
+
         if ($classId) {
-            $class = EClass::findOrFail($classId);
-            
+            $class = EClass::with(['classSubjects' => fn($q) => $q->where('teacher_id', auth()->id())])->findOrFail($classId);
+
             if (!$class->isTeachedBy(auth()->id())) {
                 abort(403, 'Unauthorized');
             }
-            
-            return view('guru.assignments.create', compact('class'));
+
+            // For consistency with admin assignment schema
+            $classSubjectId = optional($class->classSubjects->first())->id;
+
+            return view('guru.assignments.create', compact('class', 'classSubjectId'));
         } else {
             // Show form untuk pilih kelas dulu
             $classes = EClass::whereHas('classSubjects', fn($q) => $q->where('teacher_id', auth()->id()))->get();
@@ -71,10 +75,12 @@ class AssignmentController extends Controller
     {
         $validated = $request->validate([
             'e_class_id' => 'required|exists:e_classes,id',
+            'class_subject_id' => 'required|exists:class_subjects,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'deadline' => 'required|date|after:now',
-            'file' => 'nullable|file',
+            'max_score' => 'required|numeric|min:1',
+            'file' => 'nullable|file|max:10240', // 10MB
         ]);
 
         $class = EClass::findOrFail($validated['e_class_id']);
@@ -89,22 +95,30 @@ class AssignmentController extends Controller
             if (!$filePath) {
                 return back()->withErrors('File upload failed')->withInput();
             }
+            // Normalize to storage/... (consistent with admin)
+            $filePath = str_starts_with($filePath, 'storage/') ? $filePath : ('storage/' . ltrim($filePath, '/'));
         }
 
         // Create assignment
         $assignment = Assignment::create([
             'e_class_id' => $validated['e_class_id'],
+            'class_subject_id' => $validated['class_subject_id'],
             'title' => $validated['title'],
             'description' => $validated['description'],
             'file_path' => $filePath,
             'deadline' => $validated['deadline'],
+            'max_score' => $validated['max_score'],
+            'created_by' => auth()->id(),
         ]);
 
-        // Log activity
-        activity()
-            ->performedOn($assignment)
-            ->causedBy(auth()->user())
-            ->log('Assignment created: ' . $assignment->title);
+        // Log activity (use internal ActivityLog model, same style as admin)
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'create_assignment',
+            'description' => "Guru buat tugas '{$assignment->title}' untuk kelas {$class->name}",
+            'ip_address' => $request->ip(),
+            'timestamp' => now(),
+        ]);
 
         return redirect()
             ->route('guru.assignments.index', ['class_id' => $class->id])
@@ -155,7 +169,8 @@ class AssignmentController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'deadline' => 'required|date|after:now',
-            'file' => 'nullable|file',
+            'max_score' => 'required|numeric|min:1',
+            'file' => 'nullable|file|max:10240', // 10MB
         ]);
 
         // If new file provided
@@ -169,15 +184,18 @@ class AssignmentController extends Controller
                 FileUploadService::deleteFile($assignment->file_path);
             }
 
-            $validated['file_path'] = $filePath;
+            $validated['file_path'] = str_starts_with($filePath, 'storage/') ? $filePath : ('storage/' . ltrim($filePath, '/'));
         }
 
         $assignment->update($validated);
 
-        activity()
-            ->performedOn($assignment)
-            ->causedBy(auth()->user())
-            ->log('Assignment updated: ' . $assignment->title);
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'update_assignment',
+            'description' => "Guru update tugas '{$assignment->title}' untuk kelas {$class->name}",
+            'ip_address' => $request->ip(),
+            'timestamp' => now(),
+        ]);
 
         return redirect()
             ->route('guru.assignments.show', $assignment)
@@ -198,10 +216,13 @@ class AssignmentController extends Controller
             FileUploadService::deleteFile($assignment->file_path);
         }
 
-        activity()
-            ->performedOn($assignment)
-            ->causedBy(auth()->user())
-            ->log('Assignment deleted: ' . $assignment->title);
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'delete_assignment',
+            'description' => "Guru hapus tugas '{$assignment->title}' dari kelas {$class->name}",
+            'ip_address' => request()->ip(),
+            'timestamp' => now(),
+        ]);
 
         $assignment->delete();
 

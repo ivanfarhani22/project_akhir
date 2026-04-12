@@ -1,16 +1,18 @@
 @extends('layouts.guru')
 
-@section('title', 'Nilai Siswa')
+@section('title', 'Penilaian')
 @section('icon', 'fas fa-star')
 
 @section('content')
     <!-- PAGE HEADER -->
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3 mb-2">
-            <i class="fas fa-star text-yellow-500"></i>
-            Nilai Siswa
-        </h1>
-        <p class="text-gray-600 text-sm">Kelola nilai dan penilaian siswa</p>
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div>
+            <p class="text-gray-600 text-sm mb-2">Kelola Nilai</p>
+            <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                <i class="fas fa-star text-yellow-500"></i>
+                Penilaian
+            </h1>
+        </div>
     </div>
 
     <!-- ASSIGNMENT FILTER -->
@@ -18,7 +20,7 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-8">
             <p class="text-gray-700 text-sm mb-4 font-medium">Filter berdasarkan tugas:</p>
             <div class="flex flex-wrap gap-2">
-                <a href="{{ route('guru.grades.index') }}" class="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1.5 px-4 rounded text-sm transition inline-flex items-center gap-2">
+                <a href="{{ route('guru.grades.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 px-4 rounded text-sm transition inline-flex items-center gap-2">
                     <i class="fas fa-list"></i> Semua Penilaian
                 </a>
                 @foreach($assignments as $assignment)
@@ -86,8 +88,9 @@
                                     {{ $grade && $grade->graded_at ? $grade->graded_at->format('d M Y') : '-' }}
                                 </td>
                                 <td class="px-6 py-4 text-center">
+                                    {{-- tombol edit nilai (aksi khusus penilaian) tetap kuning --}}
                                     <a href="{{ route('guru.grades.edit', $submission) }}" class="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1.5 px-3 rounded text-xs transition inline-flex items-center gap-1">
-                                        <i class="fas fa-edit"></i> Nilai
+                                        <i class="fas fa-pen"></i> Nilai
                                     </a>
                                 </td>
                             </tr>

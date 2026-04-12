@@ -1,20 +1,21 @@
 @extends('layouts.guru')
 
-@section('title', 'Presensi - ' . $class->name)
+@section('title', 'Presensi')
 @section('icon', 'fas fa-clipboard-list')
 
 @section('content')
     <!-- PAGE HEADER -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
+            <p class="text-gray-600 text-sm mb-2">Kelola Presensi</p>
             <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3 mb-2">
                 <i class="fas fa-clipboard-list text-green-500"></i>
                 Presensi
             </h1>
-            <p class="text-gray-600 text-sm">{{ $class->name }}</p>
+            <p class="text-gray-600 text-sm">Kelas: <strong>{{ $class->name }}</strong></p>
         </div>
-        <a href="{{ route('guru.attendance.create', ['class_id' => $class->id]) }}" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-6 rounded-lg text-sm transition whitespace-nowrap inline-flex items-center gap-2">
-            <i class="fas fa-plus"></i> Buka Presensi
+        <a href="{{ route('guru.attendance.create', ['class_id' => $class->id]) }}" class="bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-2 px-6 rounded-lg text-sm transition whitespace-nowrap inline-flex items-center gap-2">
+            <i class="fas fa-plus"></i> Buat Sesi Presensi
         </a>
     </div>
 
@@ -72,8 +73,9 @@
 
                     <!-- ACTIONS -->
                     <div class="flex gap-2">
-                        <a href="{{ route('guru.attendance.show', $session) }}" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1.5 px-4 rounded text-sm transition inline-flex items-center gap-2">
-                            <i class="fas fa-eye"></i> Lihat Detail
+                        {{-- tombol lihat: sekunder (biru) --}}
+                        <a href="{{ route('guru.attendance.show', $session) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 px-4 rounded text-sm transition inline-flex items-center gap-2">
+                            <i class="fas fa-eye"></i> Lihat
                         </a>
                         @if($session->isOpen())
                             <form action="{{ route('guru.attendance.close', $session) }}" method="POST" class="inline attendance-form">
@@ -97,11 +99,18 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-12 text-center">
             <i class="fas fa-inbox text-gray-300 text-5xl mb-4 block"></i>
             <p class="text-gray-600 text-base mb-4">Belum ada presensi untuk kelas ini</p>
-            <a href="{{ route('guru.attendance.create', ['class_id' => $class->id]) }}" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-flex items-center gap-2">
+            <a href="{{ route('guru.attendance.create', ['class_id' => $class->id]) }}" class="bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-flex items-center gap-2">
                 <i class="fas fa-plus"></i> Buka Presensi Sekarang
             </a>
         </div>
     @endif
+
+    {{-- CTA bawah: hanya tampilkan jika ingin akses cepat (opsional). Kalau mau lebih bersih, bisa dihapus. --}}
+    <div class="mt-6">
+        <a href="{{ route('guru.attendance.create', ['class_id' => $class->id]) }}" class="bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-flex items-center gap-2">
+            <i class="fas fa-plus"></i> Buat Sesi Presensi
+        </a>
+    </div>
 @endsection
 
 @push('scripts')

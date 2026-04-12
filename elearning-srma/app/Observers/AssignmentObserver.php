@@ -3,7 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Assignment;
-use App\Models\Notification;
+use App\Services\NotificationService;
 
 class AssignmentObserver
 {
@@ -12,21 +12,15 @@ class AssignmentObserver
      */
     public function created(Assignment $assignment): void
     {
-        // Notify all admin users
-        $admins = \App\Models\User::where('role', 'admin_elearning')->get();
-        
-        foreach ($admins as $admin) {
-            Notification::create([
-                'user_id' => $admin->id,
-                'title' => 'Tugas Baru Dibuat',
-                'message' => "Tugas \"{$assignment->title}\" telah dibuat untuk kelas {$assignment->eClass->name}",
-                'type' => 'assignment',
-                'icon' => 'fas fa-tasks',
-                'related_model' => Assignment::class,
-                'related_id' => $assignment->id,
-                'action_url' => route('admin.assignments.show', $assignment),
-            ]);
-        }
+        NotificationService::notifyClassStudents($assignment->eClass, [
+            'title' => 'Tugas Baru',
+            'message' => "Tugas \"{$assignment->title}\" dibuat untuk kelas {$assignment->eClass->name}",
+            'type' => 'assignment',
+            'icon' => 'fas fa-tasks',
+            'related_model' => Assignment::class,
+            'related_id' => $assignment->id,
+            'action_url' => route('siswa.assignments.show', $assignment),
+        ]);
     }
 
     /**
@@ -34,21 +28,15 @@ class AssignmentObserver
      */
     public function updated(Assignment $assignment): void
     {
-        // Notify all admin users when assignment is updated
-        $admins = \App\Models\User::where('role', 'admin_elearning')->get();
-        
-        foreach ($admins as $admin) {
-            Notification::create([
-                'user_id' => $admin->id,
-                'title' => 'Tugas Diperbarui',
-                'message' => "Tugas \"{$assignment->title}\" telah diperbarui",
-                'type' => 'assignment',
-                'icon' => 'fas fa-sync-alt',
-                'related_model' => Assignment::class,
-                'related_id' => $assignment->id,
-                'action_url' => route('admin.assignments.show', $assignment),
-            ]);
-        }
+        NotificationService::notifyClassStudents($assignment->eClass, [
+            'title' => 'Tugas Diperbarui',
+            'message' => "Tugas \"{$assignment->title}\" diperbarui",
+            'type' => 'assignment',
+            'icon' => 'fas fa-sync-alt',
+            'related_model' => Assignment::class,
+            'related_id' => $assignment->id,
+            'action_url' => route('siswa.assignments.show', $assignment),
+        ]);
     }
 
     /**
@@ -56,19 +44,13 @@ class AssignmentObserver
      */
     public function deleted(Assignment $assignment): void
     {
-        // Notify all admin users
-        $admins = \App\Models\User::where('role', 'admin_elearning')->get();
-        
-        foreach ($admins as $admin) {
-            Notification::create([
-                'user_id' => $admin->id,
-                'title' => 'Tugas Dihapus',
-                'message' => "Tugas \"{$assignment->title}\" telah dihapus dari sistem",
-                'type' => 'assignment',
-                'icon' => 'fas fa-trash',
-                'related_model' => Assignment::class,
-                'related_id' => $assignment->id,
-            ]);
-        }
+        NotificationService::notifyClassStudents($assignment->eClass, [
+            'title' => 'Tugas Dihapus',
+            'message' => "Tugas \"{$assignment->title}\" dihapus dari kelas {$assignment->eClass->name}",
+            'type' => 'assignment',
+            'icon' => 'fas fa-trash',
+            'related_model' => Assignment::class,
+            'related_id' => $assignment->id,
+        ]);
     }
 }

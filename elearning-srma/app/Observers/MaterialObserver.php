@@ -3,7 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Material;
-use App\Models\Notification;
+use App\Services\NotificationService;
 
 class MaterialObserver
 {
@@ -12,21 +12,16 @@ class MaterialObserver
      */
     public function created(Material $material): void
     {
-        // Notify all admin users
-        $admins = \App\Models\User::where('role', 'admin_elearning')->get();
-        
-        foreach ($admins as $admin) {
-            Notification::create([
-                'user_id' => $admin->id,
-                'title' => 'Materi Baru Ditambahkan',
-                'message' => "Materi \"{$material->title}\" telah ditambahkan ke kelas {$material->eClass->name}",
-                'type' => 'material',
-                'icon' => 'fas fa-book',
-                'related_model' => Material::class,
-                'related_id' => $material->id,
-                'action_url' => route('admin.materials.show', $material),
-            ]);
-        }
+        // Guru -> Siswa: notify students in the class
+        NotificationService::notifyClassStudents($material->eClass, [
+            'title' => 'Materi Baru',
+            'message' => "Materi \"{$material->title}\" ditambahkan pada kelas {$material->eClass->name}",
+            'type' => 'material',
+            'icon' => 'fas fa-book',
+            'related_model' => Material::class,
+            'related_id' => $material->id,
+            'action_url' => route('siswa.subjects.show', $material->e_class_id),
+        ]);
     }
 
     /**
@@ -34,21 +29,15 @@ class MaterialObserver
      */
     public function updated(Material $material): void
     {
-        // Notify all admin users when material is updated
-        $admins = \App\Models\User::where('role', 'admin_elearning')->get();
-        
-        foreach ($admins as $admin) {
-            Notification::create([
-                'user_id' => $admin->id,
-                'title' => 'Materi Diperbarui',
-                'message' => "Materi \"{$material->title}\" telah diperbarui",
-                'type' => 'material',
-                'icon' => 'fas fa-sync-alt',
-                'related_model' => Material::class,
-                'related_id' => $material->id,
-                'action_url' => route('admin.materials.show', $material),
-            ]);
-        }
+        NotificationService::notifyClassStudents($material->eClass, [
+            'title' => 'Materi Diperbarui',
+            'message' => "Materi \"{$material->title}\" diperbarui pada kelas {$material->eClass->name}",
+            'type' => 'material',
+            'icon' => 'fas fa-sync-alt',
+            'related_model' => Material::class,
+            'related_id' => $material->id,
+            'action_url' => route('siswa.subjects.show', $material->e_class_id),
+        ]);
     }
 
     /**
@@ -56,19 +45,13 @@ class MaterialObserver
      */
     public function deleted(Material $material): void
     {
-        // Notify all admin users
-        $admins = \App\Models\User::where('role', 'admin_elearning')->get();
-        
-        foreach ($admins as $admin) {
-            Notification::create([
-                'user_id' => $admin->id,
-                'title' => 'Materi Dihapus',
-                'message' => "Materi \"{$material->title}\" telah dihapus dari sistem",
-                'type' => 'material',
-                'icon' => 'fas fa-trash',
-                'related_model' => Material::class,
-                'related_id' => $material->id,
-            ]);
-        }
+        NotificationService::notifyClassStudents($material->eClass, [
+            'title' => 'Materi Dihapus',
+            'message' => "Materi \"{$material->title}\" dihapus dari kelas {$material->eClass->name}",
+            'type' => 'material',
+            'icon' => 'fas fa-trash',
+            'related_model' => Material::class,
+            'related_id' => $material->id,
+        ]);
     }
 }

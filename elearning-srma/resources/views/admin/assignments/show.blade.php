@@ -56,21 +56,27 @@
                 </div>
                 <div class="p-6">
                     <div class="space-y-4">
+                        @php
+                            $className = $assignment->classSubject?->eClass?->name ?? $assignment->eClass?->name;
+                            $subjectName = $assignment->classSubject?->subject?->name;
+                            $teacherName = $assignment->classSubject?->teacher?->name;
+                        @endphp
+
                         <div class="flex justify-between items-start pb-4 border-b border-gray-200">
                             <span class="text-gray-700 font-semibold">Kelas:</span>
                             <span class="inline-block px-4 py-2 bg-red-100 text-red-700 rounded-full font-semibold">
-                                {{ $assignment->classSubject->eClass->name }}
+                                {{ $className ?? '-' }}
                             </span>
                         </div>
 
                         <div class="flex justify-between items-start pb-4 border-b border-gray-200">
                             <span class="text-gray-700 font-semibold">Mata Pelajaran:</span>
-                            <span class="text-gray-900">{{ $assignment->classSubject->subject->name }}</span>
+                            <span class="text-gray-900">{{ $subjectName ?? '-' }}</span>
                         </div>
 
                         <div class="flex justify-between items-start pb-4 border-b border-gray-200">
                             <span class="text-gray-700 font-semibold">Guru:</span>
-                            <span class="text-gray-900">{{ $assignment->classSubject->teacher->name }}</span>
+                            <span class="text-gray-900">{{ $teacherName ?? '-' }}</span>
                         </div>
 
                         <div class="pb-4 border-b border-gray-200">

@@ -1,7 +1,7 @@
 @extends('layouts.guru')
 
-@section('title', 'Buat Tugas Baru')
-@section('icon', 'fas fa-plus-circle')
+@section('title', 'Buat Tugas')
+@section('icon', 'fas fa-tasks')
 
 @section('content')
     <!-- PAGE HEADER -->
@@ -13,6 +13,15 @@
         </h1>
         <p class="text-gray-600 text-sm">Kelas: <strong>{{ $class->name }}</strong> • {{ $class->subject->name }}</p>
     </div>
+
+    @if(empty($classSubjectId))
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <p class="text-yellow-900 font-semibold flex items-center gap-2">
+                <i class="fas fa-exclamation-triangle"></i>
+                Mapel (class subject) untuk kelas ini belum terhubung ke guru Anda, sehingga tugas tidak bisa dibuat.
+            </p>
+        </div>
+    @endif
 
     <!-- ERROR ALERT -->
     @if ($errors->any())
@@ -43,6 +52,7 @@
                     @csrf
 
                     <input type="hidden" name="e_class_id" value="{{ $class->id }}">
+                    <input type="hidden" name="class_subject_id" value="{{ $classSubjectId }}">
 
                     <!-- TITLE FIELD -->
                     <div class="mb-6">
@@ -92,10 +102,27 @@
                         <p class="text-gray-600 text-xs mt-2">Tentukan kapan siswa harus mengumpulkan tugas</p>
                     </div>
 
+                    <!-- MAX SCORE FIELD -->
+                    <div class="mb-6">
+                        <label class="block font-semibold text-gray-900 mb-2">
+                            Nilai Maksimal <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="number"
+                            name="max_score"
+                            id="max_score"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                            value="{{ old('max_score', 100) }}"
+                            min="1"
+                            required
+                        >
+                        <p class="text-gray-600 text-xs mt-2">Default 100</p>
+                    </div>
+
                     <!-- FILE UPLOAD FIELD -->
                     <div class="mb-8">
                         <label class="block font-semibold text-gray-900 mb-3">
-                            File Tugas (Opsional)
+                            File Soal (Opsional)
                         </label>
                         <div class="relative border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 hover:border-blue-400 hover:bg-blue-50 transition cursor-pointer" id="dropzone">
                             <i class="fas fa-cloud-upload-alt text-blue-500 text-5xl mb-4 block"></i>
@@ -116,19 +143,19 @@
                     </div>
 
                     <!-- ACTION BUTTONS -->
-                    <div class="flex gap-3">
-                        <button 
-                            type="submit" 
-                            class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-flex justify-center items-center gap-2"
-                        >
-                            <i class="fas fa-save"></i> Buat Tugas
-                        </button>
+                    <div class="flex flex-col sm:flex-row gap-3 mt-8">
                         <a 
-                            href="{{ route('guru.assignments.index', ['class_id' => $class->id]) }}" 
+                            href="{{ url()->previous() ?? route('guru.assignments.index') }}" 
                             class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-6 rounded-lg text-sm transition inline-flex justify-center items-center gap-2"
                         >
-                            <i class="fas fa-arrow-left"></i> Batal
+                            <i class="fas fa-arrow-left"></i> Kembali
                         </a>
+                        <button 
+                            type="submit" 
+                            class="flex-1 bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-flex justify-center items-center gap-2"
+                        >
+                            <i class="fas fa-save"></i> Simpan Tugas
+                        </button>
                     </div>
                 </form>
             </div>

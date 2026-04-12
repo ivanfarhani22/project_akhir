@@ -8,6 +8,7 @@ use App\Models\AttendanceRecord;
 use App\Models\ClassSubject;
 use App\Models\EClass;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AttendanceController extends Controller
 {
@@ -104,32 +105,67 @@ class AttendanceController extends Controller
     /**
      * Show attendance session details
      */
-    public function show(AttendanceSession $session)
+    public function show(AttendanceSession $attendance)
     {
-        // Check if classSubject exists and teacher is authorized
-        if (!$session->classSubject || $session->classSubject->teacher_id !== auth()->id()) {
+        $route = request()->route();
+        $routeName = $route?->getName();
+        $routeUri = method_exists($route, 'uri') ? $route->uri() : null;
+        $routeParams = $route?->parameters() ?? null;
+
+        Log::info('HIT guru.attendance.show', [
+            'auth_id' => auth()->id(),
+            'session_id' => $attendance->id,
+            'opened_by' => $attendance->opened_by,
+            'class_subject_id' => $attendance->class_subject_id,
+            'path' => request()->path(),
+            'route_name' => $routeName,
+            'route_uri' => $routeUri,
+            'route_params' => $routeParams,
+        ]);
+
+        $teacherId = auth()->id();
+
+        // If relation is missing (data drift), still allow the teacher who opened the session to VIEW it.
+        // This prevents false 403 due to class_subject relation resolution issues.
+        if (!$attendance->classSubject) {
+            if ((int) $attendance->opened_by !== (int) $teacherId) {
+                abort(403, 'Unauthorized');
+            }
+
+            // Load only what doesn't depend on classSubject to avoid null access in view
+            $attendance->load(['records.student']);
+
+            return view('guru.attendance.show', ['session' => $attendance]);
+        }
+
+        // Normal authorization: teacher for the subject OR opened_by
+        $subjectTeacherId = $attendance->classSubject?->teacher_id;
+        if ($subjectTeacherId !== $teacherId && (int) $attendance->opened_by !== (int) $teacherId) {
             abort(403, 'Unauthorized');
         }
 
-        $session->load(['records.student', 'classSubject.eClass', 'classSubject.subject']);
+        $attendance->load(['records.student', 'classSubject.eClass', 'classSubject.subject']);
 
-        return view('guru.attendance.show', compact('session'));
+        return view('guru.attendance.show', ['session' => $attendance]);
     }
 
     /**
      * Close attendance session
      */
-    public function close(AttendanceSession $session)
+    public function close(AttendanceSession $attendance)
     {
-        if (!$session->classSubject || $session->classSubject->teacher_id !== auth()->id()) {
+        $teacherId = auth()->id();
+        $subjectTeacherId = $attendance->classSubject?->teacher_id;
+
+        if (!$attendance->classSubject || ($subjectTeacherId !== $teacherId && (int)$attendance->opened_by !== (int)$teacherId)) {
             abort(403, 'Unauthorized');
         }
 
-        if (!$session->isOpen()) {
+        if (!$attendance->isOpen()) {
             return back()->withErrors('Presensi sudah ditutup atau dibatalkan');
         }
 
-        $session->update([
+        $attendance->update([
             'status' => 'closed',
             'closed_at' => now()->format('H:i'),
         ]);
@@ -140,17 +176,18 @@ class AttendanceController extends Controller
     /**
      * Cancel attendance session
      */
-    public function cancel(AttendanceSession $session)
+    public function cancel(AttendanceSession $attendance)
     {
-        if (!$session->classSubject || $session->classSubject->teacher_id !== auth()->id()) {
+        $teacherId = auth()->id();
+        $subjectTeacherId = $attendance->classSubject?->teacher_id;
+
+        if (!$attendance->classSubject || ($subjectTeacherId !== $teacherId && (int)$attendance->opened_by !== (int)$teacherId)) {
             abort(403, 'Unauthorized');
         }
 
-        $session->update([
+        $attendance->update([
             'status' => 'cancelled',
         ]);
-
-        return back()->with('success', 'Presensi dibatalkan');
 
         return back()->with('success', 'Presensi dibatalkan');
     }

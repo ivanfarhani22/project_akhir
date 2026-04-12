@@ -110,7 +110,7 @@
                                     {{ $material->created_at->diffForHumans() }}
                                 </p>
                             </div>
-                            <a href="#" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg text-sm transition whitespace-nowrap inline-flex items-center gap-2">
+                            <a href="{{ route('siswa.materials.download', $material) }}" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg text-sm transition whitespace-nowrap inline-flex items-center gap-2">
                                 <i class="fas fa-download"></i> Buka
                             </a>
                         </div>

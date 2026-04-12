@@ -575,34 +575,7 @@
                 <button class="icon-btn" id="search-toggle" title="Pencarian" onclick="toggleSearchBar()" style="transition: all 0.3s ease;">
                     <i class="fas fa-search" style="font-size:13px;"></i>
                 </button>
-                
-                <!-- Notification Button -->
-                <div style="position: relative;">
-                    <button class="icon-btn" id="notif-toggle" title="Notifikasi" onclick="toggleNotifications()">
-                        <i class="fas fa-bell" style="font-size:13px;"></i>
-                        <span class="notif-dot" id="notif-badge" style="display: none;"></span>
-                    </button>
-                    
-                    <!-- Notification Dropdown -->
-                    <div id="notif-dropdown" style="display: none; position: absolute; top: 45px; right: 0; width: 320px; background: white; border: 1px solid #E5E7EB; border-radius: 11px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 1000;">
-                        <div style="padding: 12px 16px; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center;">
-                            <strong style="font-size: 14px; color: var(--text-1);">Notifikasi</strong>
-                            <button onclick="clearNotifications()" style="background: none; border: none; color: var(--text-2); cursor: pointer; font-size: 12px;">Hapus Semua</button>
-                        </div>
-                        <div id="notif-list" style="max-height: 400px; overflow-y: auto;">
-                            <div style="padding: 20px; text-align: center; color: var(--text-2); font-size: 13px;">
-                                <i class="fas fa-inbox" style="display: block; font-size: 24px; margin-bottom: 8px; opacity: 0.5;"></i>
-                                Tidak ada notifikasi baru
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Dark Mode Toggle Button -->
-                <button class="icon-btn" id="dark-mode-toggle" title="Toggle dark mode" onclick="toggleDarkMode()">
-                    <i class="fas fa-moon" style="font-size:13px;"></i>
-                </button>
-                
+
                 <div class="user-chip" onclick="toggleProfileCard()" style="cursor: pointer;">
                     <div class="uc-avatar">{{ substr(auth()->user()->name, 0, 1) }}</div>
                     <div>
@@ -728,17 +701,6 @@
 </script>
 <script>
 (function () {
-    /* Dark mode */
-    fetch('/api/settings/dark-mode', { headers: { Accept: 'application/json' } })
-        .then(r => r.json())
-        .then(d => {
-            if (d.dark_mode === 'true') document.documentElement.classList.add('dark');
-        })
-        .catch(() => {
-            if (localStorage.getItem('darkMode') === 'true')
-                document.documentElement.classList.add('dark');
-        });
-
     /* Sidebar toggle */
     const toggle  = document.getElementById('sb-toggle');
     const sidebar = document.getElementById('sidebar');
@@ -900,81 +862,10 @@
         card.classList.remove('active');
     };
 
-    /* Notification Functions */
-    window.toggleNotifications = function() {
-        const dropdown = document.getElementById('notif-dropdown');
-        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-        if (dropdown.style.display === 'block') {
-            loadNotifications();
-        }
-    };
-
-    window.loadNotifications = function() {
-        fetch('/api/notifications', {
-            headers: { 'Accept': 'application/json' }
-        })
-        .then(r => r.json())
-        .then(data => {
-            const notifList = document.getElementById('notif-list');
-            const badge = document.getElementById('notif-badge');
-            
-            if (data.notifications && data.notifications.length > 0) {
-                const html = data.notifications.map(notif => `
-                    <div style="padding: 12px 16px; border-bottom: 1px solid #F3F4F6; cursor: pointer; transition: background 0.15s;" 
-                         onclick="${notif.url ? `window.location.href='${notif.url}'` : `markNotificationRead('${notif.id}')`}" 
-                         onmouseover="this.style.background = '#F9FAFB'" 
-                         onmouseout="this.style.background = 'transparent'">
-                        <div style="display: flex; gap: 10px;">
-                            <i class="${notif.icon}" style="color: var(--red); flex-shrink: 0; margin-top: 2px;"></i>
-                            <div style="flex: 1; min-width: 0;">
-                                <div style="font-size: 13px; font-weight: 600; color: var(--text-1); word-break: break-word;">${notif.title}</div>
-                                <div style="font-size: 12px; color: var(--text-2); margin-top: 2px;">${notif.message}</div>
-                                <div style="font-size: 11px; color: #9CA3AF; margin-top: 4px;">${notif.time}</div>
-                            </div>
-                            ${notif.unread ? '<div style="width: 8px; height: 8px; background: var(--red); border-radius: 50%; flex-shrink: 0; margin-top: 6px;"></div>' : ''}
-                        </div>
-                    </div>
-                `).join('');
-                notifList.innerHTML = html;
-                badge.style.display = data.unread_count > 0 ? 'block' : 'none';
-            } else {
-                notifList.innerHTML = `
-                    <div style="padding: 20px; text-align: center; color: var(--text-2); font-size: 13px;">
-                        <i class="fas fa-inbox" style="display: block; font-size: 24px; margin-bottom: 8px; opacity: 0.5;"></i>
-                        Tidak ada notifikasi baru
-                    </div>
-                `;
-                badge.style.display = 'none';
-            }
-        })
-        .catch(err => console.error('Notification error:', err));
-    };
-
-    window.markNotificationRead = function(notificationId) {
-        fetch(`/api/notifications/${notificationId}/read`, {
-            method: 'POST',
-            headers: { 'Accept': 'application/json' }
-        })
-        .then(() => loadNotifications())
-        .catch(err => console.error('Mark read error:', err));
-    };
-
-    window.clearNotifications = function() {
-        showConfirmation('Hapus semua notifikasi?', 'Konfirmasi Penghapusan', function() {
-            fetch('/api/notifications/clear', {
-                method: 'POST',
-                headers: { 'Accept': 'application/json' }
-            })
-            .then(() => loadNotifications())
-            .catch(err => console.error('Clear error:', err));
-        });
-    };
-
     // Close search bar and dropdowns on escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeSearchBar();
-            document.getElementById('notif-dropdown').style.display = 'none';
             document.getElementById('search-results-dropdown').style.display = 'none';
         }
     });
@@ -984,73 +875,11 @@
         if (!e.target.closest('#search-container') && !e.target.closest('#search-toggle') && !e.target.closest('#search-results-dropdown')) {
             closeSearchBar();
         }
-        if (!e.target.closest('#notif-toggle') && !e.target.closest('#notif-dropdown')) {
-            document.getElementById('notif-dropdown').style.display = 'none';
-        }
         if (!e.target.closest('.user-chip') && !e.target.closest('#profile-card')) {
             closeProfileCard();
         }
     });
-
-    // Load notifications on page load
-    loadNotifications();
 })();
-
-/* ════ DARK MODE FUNCTIONS ════ */
-window.initializeDarkMode = function() {
-    // Check localStorage first, then system preference
-    const savedMode = localStorage.getItem('darkMode');
-    const isDark = savedMode !== null ? 
-                   savedMode === 'true' : 
-                   (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    
-    // Apply dark mode
-    if (isDark) {
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-    
-    // Update icon
-    updateDarkModeIcon(isDark);
-};
-
-window.updateDarkModeIcon = function(isDark) {
-    const button = document.getElementById('dark-mode-toggle');
-    if (button) {
-        const icon = button.querySelector('i');
-        if (icon) {
-            // Sun icon saat dark mode ON, Moon icon saat dark mode OFF
-            icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-        }
-    }
-};
-
-window.toggleDarkMode = function() {
-    const htmlElement = document.documentElement;
-    const isDarkNow = htmlElement.classList.contains('dark');
-    const willBeDark = !isDarkNow;
-    
-    // Toggle class
-    if (willBeDark) {
-        htmlElement.classList.add('dark');
-    } else {
-        htmlElement.classList.remove('dark');
-    }
-    
-    // Save to localStorage
-    localStorage.setItem('darkMode', willBeDark ? 'true' : 'false');
-    
-    // Update icon
-    updateDarkModeIcon(willBeDark);
-};
-
-// Initialize dark mode on page load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeDarkMode);
-} else {
-    initializeDarkMode();
-}
 </script>
 </body>
 </html>

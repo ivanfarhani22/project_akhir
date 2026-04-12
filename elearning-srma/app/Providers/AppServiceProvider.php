@@ -7,10 +7,12 @@ use App\Models\Material;
 use App\Models\Assignment;
 use App\Models\Grade;
 use App\Models\AttendanceSession;
+use App\Models\Submission;
 use App\Observers\MaterialObserver;
 use App\Observers\AssignmentObserver;
 use App\Observers\GradeObserver;
 use App\Observers\AttendanceSessionObserver;
+use App\Observers\SubmissionObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
         Assignment::observe(AssignmentObserver::class);
         Grade::observe(GradeObserver::class);
         AttendanceSession::observe(AttendanceSessionObserver::class);
+        Submission::observe(SubmissionObserver::class);
     }
 }
 

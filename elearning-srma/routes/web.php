@@ -24,7 +24,6 @@ Route::get('/', function () {
 })->name('home');
 
 // API Routes (no auth required)
-Route::get('/api/settings/dark-mode', [\App\Http\Controllers\Admin\SettingController::class, 'getDarkMode']);
 
 // API Routes (authenticated)
 Route::middleware(['auth'])->prefix('api')->group(function () {
@@ -171,9 +170,21 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
     
     // Tugas (Assignments)
     Route::get('/assignments', function () {
-        return view('siswa.assignments.index', ['assignments' => auth()->user()->submissions]);
+        $myClassIds = auth()->user()->classes()->pluck('e_classes.id');
+
+        $assignments = \App\Models\Assignment::query()
+            ->whereIn('e_class_id', $myClassIds)
+            ->with([
+                'eClass',
+                'classSubject.subject',
+                'classSubject.teacher',
+            ])
+            ->orderBy('deadline', 'desc')
+            ->get();
+
+        return view('siswa.assignments.index', compact('assignments'));
     })->name('assignments.index');
-    
+
     Route::get('/assignments/{assignment}', function (\App\Models\Assignment $assignment) {
         abort_if(!auth()->user()->classes->contains($assignment->eClass), 403);
         return view('siswa.assignments.show', compact('assignment'));
@@ -196,5 +207,35 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
     Route::get('/grades', function () {
         return view('siswa.grades.index', ['grades' => auth()->user()->grades]);
     })->name('grades.index');
+    
+    // Materials (download/open)
+    Route::get('/materials/{material}/download', function (\App\Models\Material $material) {
+        abort_if(!auth()->user()->classes->contains($material->eClass), 403);
+
+        $relative = ltrim($material->file_path ?? '', '/');
+        abort_if($relative === '', 404);
+
+        // Many uploads store paths like: storage/materials/xxx.ext (public URL-ish)
+        // Prefer mapping that to storage/app/public/materials/xxx.ext
+        $normalized = preg_replace('#^storage/#', '', $relative);
+
+        $candidates = [
+            storage_path('app/public/' . $normalized),
+            storage_path('app/' . $relative),
+            storage_path('app/' . $normalized),
+        ];
+
+        $fullPath = null;
+        foreach ($candidates as $candidate) {
+            if (file_exists($candidate)) {
+                $fullPath = $candidate;
+                break;
+            }
+        }
+
+        abort_unless($fullPath, 404);
+
+        return response()->download($fullPath);
+    })->name('materials.download');
 });
 

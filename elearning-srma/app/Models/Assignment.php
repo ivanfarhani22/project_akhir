@@ -16,6 +16,12 @@ class Assignment extends Model
         return $this->belongsTo(EClass::class);
     }
 
+    // Optional relation (some controllers reference assignment->classSubject)
+    public function classSubject()
+    {
+        return $this->belongsTo(ClassSubject::class, 'class_subject_id');
+    }
+
     public function submissions()
     {
         return $this->hasMany(Submission::class);

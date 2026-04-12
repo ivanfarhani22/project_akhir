@@ -90,32 +90,6 @@
 .message-box { padding: 14px 16px; background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 10px; color: #991b1b; font-size: 12.5px; margin-top: 1.5rem; }
 .message-box i { margin-right: 8px; }
 
-/* DARK MODE */
-body.dark-mode .settings-header h1 { color: #e0e0e0; }
-body.dark-mode .settings-header p  { color: #9ca3af; }
-body.dark-mode .settings-header .label { color: #9ca3af; }
-body.dark-mode .card { background: #2d2d2d; border-color: #404040; }
-body.dark-mode .card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-body.dark-mode .card-header { background: linear-gradient(135deg, #262626, #1f1f1f); border-color: #404040; }
-body.dark-mode .card-header h5 { color: #e0e0e0; }
-body.dark-mode .card-header p   { color: #9ca3af; }
-body.dark-mode .section-title   { color: #9ca3af; border-color: #404040; }
-body.dark-mode .form-item label { color: #d1d5db; }
-body.dark-mode .form-control, body.dark-mode .form-select { background: #3d3d3d; color: #e0e0e0; border-color: #404040; }
-body.dark-mode .form-control:focus, body.dark-mode .form-select:focus { background: #454545; border-color: #c9354a; box-shadow: 0 0 0 3px rgba(201, 53, 74, 0.1); }
-body.dark-mode .switch-box { background: linear-gradient(135deg, #2d2d2d, #262626); border-color: #404040; }
-body.dark-mode .switch-box-label h4 { color: #e0e0e0; }
-body.dark-mode .action-buttons  { border-color: #404040; }
-body.dark-mode .btn-cancel { background: #3d3d3d; border-color: #505050; color: #d1d5db; }
-body.dark-mode .banner-item { background: linear-gradient(135deg, #3d3d3d, #353535); border-color: #404040; }
-body.dark-mode .upload-area { border-color: #404040; background: linear-gradient(135deg, #2d2d2d, #262626); }
-body.dark-mode .upload-area:hover { background: linear-gradient(135deg, #3d2d2d, #352626); border-color: #c9354a; }
-body.dark-mode .upload-icon { color: #f87171; }
-body.dark-mode .upload-text { color: #e0e0e0; }
-body.dark-mode .info-box { background: #3d3d3d; color: #d1d5db; border-left-color: #f87171; }
-body.dark-mode .info-box strong { color: #e0e0e0; }
-body.dark-mode .message-box { background: #3d2d2d; border-color: #5a3d3d; color: #fca5a5; }
-
 /* FONT SIZE */
 body.font-small  { font-size: 14px; }
 body.font-normal { font-size: 16px; }

@@ -60,18 +60,6 @@
             </button>
         </form>
     </div>
-                <option value="">Semua Kelas</option>
-                @foreach($classes as $class)
-                    <option value="{{ $class->id }}" @selected(request('class') == $class->id)>
-                        {{ $class->name }}
-                    </option>
-                @endforeach
-            </select>
-            <button type="submit" class="inline-flex items-center gap-2 px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition">
-                <i class="fas fa-search"></i> Cari
-            </button>
-        </form>
-    </div>
 
     <!-- Main Table Card -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
@@ -100,6 +88,10 @@
                     </thead>
                     <tbody>
                         @forelse($assignments as $assignment)
+                            @php
+                                $className = $assignment->classSubject?->eClass?->name ?? $assignment->eClass?->name;
+                                $teacherName = $assignment->classSubject?->teacher?->name;
+                            @endphp
                             <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
                                 <td class="px-2 sm:px-6 py-2 sm:py-4 text-gray-900 font-medium">{{ $loop->iteration }}</td>
                                 <td class="px-2 sm:px-6 py-2 sm:py-4">
@@ -108,10 +100,10 @@
                                 </td>
                                 <td class="px-2 sm:px-6 py-2 sm:py-4 hidden sm:table-cell">
                                     <span class="inline-block px-2 sm:px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold whitespace-nowrap">
-                                        {{ $assignment->classSubject->eClass->name }}
+                                        {{ $className ?? '-' }}
                                     </span>
                                 </td>
-                                <td class="px-2 sm:px-6 py-2 sm:py-4 hidden md:table-cell text-gray-700">{{ Str::limit($assignment->classSubject->teacher->name, 15) }}</td>
+                                <td class="px-2 sm:px-6 py-2 sm:py-4 hidden md:table-cell text-gray-700">{{ $teacherName ? Str::limit($teacherName, 15) : '-' }}</td>
                                 <td class="px-2 sm:px-6 py-2 sm:py-4 hidden lg:table-cell">
                                     @if($assignment->deadline)
                                         <span class="@if(now() > $assignment->deadline) text-red-600 font-semibold @else text-gray-700 @endif">

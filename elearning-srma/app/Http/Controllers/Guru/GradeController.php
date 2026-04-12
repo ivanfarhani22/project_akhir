@@ -7,6 +7,7 @@ use App\Models\Assignment;
 use App\Models\Grade;
 use App\Models\Submission;
 use Illuminate\Http\Request;
+use App\Models\ActivityLog;
 
 class GradeController extends Controller
 {
@@ -94,10 +95,14 @@ class GradeController extends Controller
             ]);
         }
 
-        activity()
-            ->performedOn($grade)
-            ->causedBy(auth()->user())
-            ->log('Grade given to ' . $submission->student->name . ': ' . $validated['score']);
+        // Log aktivitas (tanpa ketergantungan helper activity())
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'grade_saved',
+            'description' => 'Grade given to ' . $submission->student->name . ': ' . $validated['score'],
+            'model_type' => Grade::class,
+            'model_id' => $grade->id,
+        ]);
 
         return redirect()
             ->route('guru.grades.index', ['assignment_id' => $assignment->id])

@@ -512,11 +512,6 @@
                     </div>
                 </div>
                 
-                <!-- Dark Mode Toggle -->
-                <button class="icon-btn" id="dark-mode-toggle" title="Toggle dark mode" onclick="toggleDarkMode()">
-                    <i class="fas fa-moon" style="font-size:13px;"></i>
-                </button>
-                
                 <div class="user-chip" onclick="toggleProfileCard()" style="cursor: pointer;">
                     <div class="uc-avatar">{{ substr(auth()->user()->name, 0, 1) }}</div>
                     <div>
@@ -606,62 +601,6 @@
     window.alert = function(message) {
         showPopup('info', message, 'Pemberitahuan');
     };
-
-    // Dark mode toggle
-    const darkModeToggle = document.getElementById('dark-mode-toggle');
-    const htmlElement = document.documentElement;
-
-    function initializeDarkMode() {
-        // Check localStorage first, then system preference
-        const savedMode = localStorage.getItem('darkMode');
-        const isDark = savedMode !== null ? 
-                       savedMode === 'true' : 
-                       (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        
-        // Apply dark mode
-        if (isDark) {
-            htmlElement.classList.add('dark');
-        } else {
-            htmlElement.classList.remove('dark');
-        }
-        
-        // Update icon
-        updateDarkModeIcon(isDark);
-    }
-
-    function updateDarkModeIcon(isDark) {
-        const icon = darkModeToggle.querySelector('i');
-        if (icon) {
-            // Sun icon saat dark mode ON, Moon icon saat dark mode OFF
-            icon.classList.remove('fa-sun', 'fa-moon');
-            icon.classList.add(isDark ? 'fa-sun' : 'fa-moon');
-        }
-    }
-
-    window.toggleDarkMode = function() {
-        const isDarkNow = htmlElement.classList.contains('dark');
-        const willBeDark = !isDarkNow;
-        
-        // Toggle class
-        if (willBeDark) {
-            htmlElement.classList.add('dark');
-        } else {
-            htmlElement.classList.remove('dark');
-        }
-        
-        // Save to localStorage
-        localStorage.setItem('darkMode', willBeDark ? 'true' : 'false');
-        
-        // Update icon
-        updateDarkModeIcon(willBeDark);
-    };
-
-    // Initialize on page load - check if DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeDarkMode);
-    } else {
-        initializeDarkMode();
-    }
 </script>
 <script>
 (function () {
@@ -790,29 +729,18 @@
     };
 
     window.clearNotifications = function() {
-        showConfirmation('Hapus semua notifikasi?', 'Konfirmasi Penghapusan', function() {
-            fetch('/api/notifications/clear', {
-                method: 'POST',
-                headers: { 'Accept': 'application/json' }
-            })
-            .then(() => loadNotifications())
-            .catch(err => console.error('Clear error:', err));
-        });
-    };
-
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('#notif-toggle') && !e.target.closest('#notif-dropdown')) {
-            document.getElementById('notif-dropdown').style.display = 'none';
-        }
-        if (!e.target.closest('.user-chip') && !e.target.closest('#profile-card')) {
-            closeProfileCard();
-        }
-    });
-
-    // Load notifications on page load
-    loadNotifications();
-})();
-</script>
-</body>
-</html>
+        // No popup confirmation; clear immediately
+        fetch('/api/notifications/clear', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            }
+        })
+        .then(async (res) => {
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text || 'Failed to clear notifications');
+            }
+            const dd = document.getElementById('notif-dropdown');
+            if

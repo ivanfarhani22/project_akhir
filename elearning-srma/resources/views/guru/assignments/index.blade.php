@@ -1,6 +1,6 @@
 @extends('layouts.guru')
 
-@section('title', 'Manajemen Tugas')
+@section('title', 'Tugas')
 @section('icon', 'fas fa-tasks')
 
 @section('content')
@@ -10,11 +10,11 @@
             <p class="text-gray-600 text-sm mb-2">Kelola Tugas</p>
             <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3 mb-2">
                 <i class="fas fa-tasks text-blue-500"></i>
-                Manajemen Tugas Pembelajaran
+                Tugas
             </h1>
             <p class="text-gray-600 text-sm">Kelas: <strong>{{ $class->name }}</strong></p>
         </div>
-        <a href="{{ route('guru.assignments.create', ['class_id' => $class->id]) }}" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg text-sm transition whitespace-nowrap">
+        <a href="{{ route('guru.assignments.create', ['class_id' => $class->id]) }}" class="bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-2 px-6 rounded-lg text-sm transition whitespace-nowrap">
             <i class="fas fa-plus mr-2"></i> Buat Tugas
         </a>
     </div>
@@ -33,7 +33,7 @@
                 <div class="text-center py-12">
                     <i class="fas fa-inbox text-gray-300 text-5xl mb-4 block"></i>
                     <p class="text-gray-600 text-base mb-4">Belum ada tugas</p>
-                    <a href="{{ route('guru.assignments.create', ['class_id' => $class->id]) }}" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-block">
+                    <a href="{{ route('guru.assignments.create', ['class_id' => $class->id]) }}" class="bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-block">
                         <i class="fas fa-plus mr-2"></i> Buat Tugas Pertama
                     </a>
                 </div>
@@ -100,13 +100,13 @@
                                             <a href="{{ route('guru.assignments.show', $assignment) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 px-3 rounded text-xs transition">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ route('guru.assignments.edit', $assignment) }}" class="bg-amber-500 hover:bg-amber-600 text-white font-medium py-1.5 px-3 rounded text-xs transition">
+                                            <a href="{{ route('guru.assignments.edit', $assignment) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 px-3 rounded text-xs transition">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             <form method="POST" action="{{ route('guru.assignments.destroy', $assignment) }}" class="inline delete-form">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="button" class="bg-red-500 hover:bg-red-600 text-white font-medium py-1.5 px-3 rounded text-xs transition"
+                                                <button type="button" class="bg-red-600 hover:bg-red-700 text-white font-medium py-1.5 px-3 rounded text-xs transition"
                                                     onclick="confirmDelete(event, '{{ $assignment->title }}')">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
@@ -124,8 +124,8 @@
 
     <!-- BACK BUTTON -->
     <div class="mt-8">
-        <a href="{{ route('guru.dashboard') }}" class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-6 rounded-lg text-sm transition">
-            <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+        <a href="{{ url()->previous() ?? route('guru.dashboard') }}" class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-6 rounded-lg text-sm transition">
+            <i class="fas fa-arrow-left"></i> Kembali
         </a>
     </div>
 @endsection

@@ -96,10 +96,26 @@
                         >
                     </div>
 
+                    <!-- MAX SCORE FIELD -->
+                    <div class="mb-6">
+                        <label class="block font-semibold text-gray-900 mb-2">
+                            Nilai Maksimal <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="number"
+                            name="max_score"
+                            id="max_score"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                            value="{{ old('max_score', $assignment->max_score ?? 100) }}"
+                            min="1"
+                            required
+                        >
+                    </div>
+
                     <!-- FILE UPLOAD FIELD -->
                     <div class="mb-8">
                         <label class="block font-semibold text-gray-900 mb-3">
-                            File Tugas (Opsional)
+                            File Soal (Opsional)
                         </label>
                         
                         @if($assignment->file_path)
@@ -112,8 +128,13 @@
                                         {{ strtoupper(pathinfo($assignment->file_path, PATHINFO_EXTENSION)) }}
                                     </p>
                                 </div>
-                                <a href="{{ asset('storage/' . $assignment->file_path) }}" target="_blank" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1.5 px-3 rounded text-xs transition inline-flex items-center gap-1">
-                                    <i class="fas fa-download"></i> Download
+                                @php
+                                    $downloadUrl = str_starts_with($assignment->file_path, 'storage/')
+                                        ? asset($assignment->file_path)
+                                        : asset('storage/' . ltrim($assignment->file_path, '/'));
+                                @endphp
+                                <a href="{{ $downloadUrl }}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 px-3 rounded text-xs transition inline-flex items-center gap-1">
+                                    <i class="fas fa-download"></i> Download Lampiran
                                 </a>
                             </div>
                         @endif
@@ -137,19 +158,13 @@
                     </div>
 
                     <!-- ACTION BUTTONS -->
-                    <div class="flex gap-3">
-                        <button 
-                            type="submit" 
-                            class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-flex justify-center items-center gap-2"
-                        >
-                            <i class="fas fa-save"></i> Perbarui Tugas
-                        </button>
-                        <a 
-                            href="{{ route('guru.assignments.index', ['class_id' => $assignment->eClass->id]) }}" 
-                            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-6 rounded-lg text-sm transition inline-flex justify-center items-center gap-2"
-                        >
-                            <i class="fas fa-arrow-left"></i> Batal
+                    <div class="flex flex-col sm:flex-row gap-3 mt-8">
+                        <a href="{{ url()->previous() ?? route('guru.assignments.index') }}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-6 rounded-lg text-sm transition inline-flex justify-center items-center gap-2">
+                            <i class="fas fa-arrow-left"></i> Kembali
                         </a>
+                        <button type="submit" class="flex-1 bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-flex justify-center items-center gap-2">
+                            <i class="fas fa-save"></i> Update Tugas
+                        </button>
                     </div>
                 </form>
             </div>

@@ -25,8 +25,11 @@
             ->where('assignment_id', $assignment->id)
             ->first();
         $deadline = $assignment->deadline;
-        $isLate = $submission && $submission->submitted_at && $submission->submitted_at > $deadline;
-        $isOverdue = now() > $deadline && !$submission->submitted_at;
+        $isLate = $submission && $submission->submitted_at && $deadline && $submission->submitted_at > $deadline;
+        $isOverdue = $deadline && now() > $deadline && (!$submission || !$submission->submitted_at);
+
+        // Used by countdown
+        $deadlineIso = $deadline?->toIso8601String();
     @endphp
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -193,24 +196,21 @@
 
                     <div class="pb-4 border-b border-gray-200">
                         <p class="text-gray-600 text-xs font-semibold mb-2 uppercase">Deadline</p>
-                        <p class="text-gray-900 font-bold">{{ $deadline->format('d M Y') }}</p>
-                        <p class="text-gray-600 text-sm">{{ $deadline->format('H:i') }} WIB</p>
-                        <p class="text-sm font-bold mt-2 {{ now()->greaterThan($deadline) ? 'text-red-600' : 'text-amber-600' }}">
-                            @php
-                                $now = now();
-                                if ($now->greaterThan($deadline)) {
-                                    echo '✗ Sudah terlewat';
-                                } else {
-                                    $days = $now->diffInDays($deadline, false);
-                                    $hours = $now->diffInHours($deadline, false) % 24;
-                                    if ($days > 0) {
-                                        echo "⏰ " . $days . " hari " . $hours . " jam lagi";
-                                    } else {
-                                        echo "⏰ " . $hours . " jam lagi";
-                                    }
-                                }
-                            @endphp
-                        </p>
+                        @if($deadline)
+                            <p class="text-gray-900 font-bold">{{ $deadline->format('d M Y') }}</p>
+                            <p class="text-gray-600 text-sm">{{ $deadline->format('H:i') }} WIB</p>
+
+                            <p class="text-sm font-bold mt-2 {{ now()->greaterThan($deadline) ? 'text-red-600' : 'text-amber-600' }}">
+                                @if(now()->greaterThan($deadline))
+                                    ✗ Sudah terlewat
+                                @else
+                                    <span id="countdown-label">⏳ Sisa waktu:</span>
+                                    <span id="countdown" class="tabular-nums">-</span>
+                                @endif
+                            </p>
+                        @else
+                            <p class="text-gray-500">-</p>
+                        @endif
                     </div>
 
                     @if($submission && $submission->submitted_at)
@@ -218,7 +218,7 @@
                             <p class="text-gray-600 text-xs font-semibold mb-2 uppercase">Waktu Pengumpulan</p>
                             <p class="text-gray-900 font-bold">{{ $submission->submitted_at->format('d M Y') }}</p>
                             <p class="text-gray-600 text-sm">{{ $submission->submitted_at->format('H:i') }} WIB</p>
-                            @if($isLate)
+                            @if($isLate && $deadline)
                                 <p class="text-amber-600 text-xs font-bold mt-2">⚠️ Terlambat {{ $submission->submitted_at->diffInHours($deadline) }} jam</p>
                             @endif
                         </div>
@@ -254,3 +254,47 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    const deadlineIso = @json($deadlineIso);
+    if (!deadlineIso) return;
+
+    const el = document.getElementById('countdown');
+    if (!el) return;
+
+    const deadline = new Date(deadlineIso).getTime();
+
+    function pad2(n) { return String(n).padStart(2, '0'); }
+
+    function formatRemaining(ms) {
+        const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+        const days = Math.floor(totalSeconds / (24 * 3600));
+        const hours = Math.floor((totalSeconds % (24 * 3600)) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        if (days > 0) return `${days} hari ${pad2(hours)}:${pad2(minutes)}:${pad2(seconds)}`;
+        return `${pad2(hours)}:${pad2(minutes)}:${pad2(seconds)}`;
+    }
+
+    function tick() {
+        const now = Date.now();
+        const diff = deadline - now;
+
+        if (diff <= 0) {
+            el.textContent = '00:00:00';
+            // Optionally refresh status after deadline passes
+            return;
+        }
+
+        el.textContent = formatRemaining(diff);
+        requestAnimationFrame(() => {}); // noop to keep UI responsive
+    }
+
+    tick();
+    setInterval(tick, 1000);
+})();
+</script>
+@endpush

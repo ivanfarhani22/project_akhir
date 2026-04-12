@@ -11,6 +11,14 @@ class NotificationController extends Controller
     public function index()
     {
         $user = auth()->user();
+
+        // Only Guru & Siswa have notifications
+        if (!in_array($user->role, ['guru', 'siswa'], true)) {
+            return response()->json([
+                'notifications' => [],
+                'unread_count' => 0,
+            ]);
+        }
         
         // Get latest 10 notifications for current user
         $notifications = Notification::where('user_id', $user->id)
@@ -42,7 +50,19 @@ class NotificationController extends Controller
 
     public function markAsRead($id)
     {
-        $notification = Notification::find($id);
+        $user = auth()->user();
+
+        // Only Guru & Siswa have notifications
+        if (!in_array($user->role, ['guru', 'siswa'], true)) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'No notifications for this role'
+            ]);
+        }
+
+        $notification = Notification::where('id', $id)
+            ->where('user_id', $user->id)
+            ->first();
         
         if (!$notification) {
             return response()->json([
@@ -62,6 +82,14 @@ class NotificationController extends Controller
     public function clearAll()
     {
         $user = auth()->user();
+
+        // Only Guru & Siswa have notifications
+        if (!in_array($user->role, ['guru', 'siswa'], true)) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'No notifications for this role'
+            ]);
+        }
         
         Notification::where('user_id', $user->id)->delete();
 

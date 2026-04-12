@@ -8,6 +8,7 @@ use App\Models\Assignment;
 use App\Models\Submission;
 use App\Models\Grade;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AssignmentController extends Controller
 {
@@ -59,18 +60,29 @@ class AssignmentController extends Controller
     {
         $validated = $request->validate([
             'e_class_id' => 'required|exists:e_classes,id',
+            'class_subject_id' => 'required|exists:class_subjects,id',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'deadline' => 'required|date|after:now',
             'max_score' => 'required|numeric|min:1',
+            'file' => 'nullable|file|max:10240', // 10MB
         ]);
+
+        $filePath = null;
+        if ($request->hasFile('file')) {
+            $filePath = $request->file('file')->store('assignments', 'public');
+            // Store like 'storage/...' to match existing patterns elsewhere in project
+            $filePath = 'storage/' . ltrim($filePath, '/');
+        }
 
         $assignment = Assignment::create([
             'e_class_id' => $validated['e_class_id'],
+            'class_subject_id' => $validated['class_subject_id'],
             'title' => $validated['title'],
             'description' => $validated['description'],
             'deadline' => $validated['deadline'],
             'max_score' => $validated['max_score'],
+            'file_path' => $filePath,
             'created_by' => auth()->id(),
         ]);
 
@@ -91,17 +103,19 @@ class AssignmentController extends Controller
      */
     public function show(Assignment $assignment)
     {
-        $submissions = Submission::where('assignment_id', $assignment->id)
+        $submissionsQuery = Submission::where('assignment_id', $assignment->id)
             ->with('student', 'grade')
-            ->orderBy('submitted_at', 'desc')
-            ->get();
+            ->orderBy('submitted_at', 'desc');
+
+        $submissions = $submissionsQuery->get();
 
         $stats = [
-            'total' => $assignment->eClass->students->count(),
-            'submitted' => $submissions->whereNotNull('submitted_at')->count(),
-            'pending' => $submissions->whereNull('submitted_at')->count(),
-            'graded' => $submissions->whereHas('grade')->count(),
-            'ungraded' => $submissions->whereDoesntHave('grade')->count(),
+            // Prefer classSubject->eClass (current schema). Fallback to eClass if it exists.
+            'total' => optional(optional($assignment->classSubject)->eClass ?? $assignment->eClass)->students()->count() ?? 0,
+            'submitted' => (clone $submissionsQuery)->whereNotNull('submitted_at')->count(),
+            'pending' => (clone $submissionsQuery)->whereNull('submitted_at')->count(),
+            'graded' => (clone $submissionsQuery)->whereHas('grade')->count(),
+            'ungraded' => (clone $submissionsQuery)->whereNotNull('submitted_at')->whereDoesntHave('grade')->count(),
         ];
 
         return view('admin.assignments.show', compact('assignment', 'submissions', 'stats'));

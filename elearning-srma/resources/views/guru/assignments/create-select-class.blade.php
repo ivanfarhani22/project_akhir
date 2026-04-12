@@ -28,7 +28,7 @@
                             {{ $class->students->count() }} siswa
                         </p>
 
-                        <a href="{{ route('guru.assignments.create', ['class_id' => $class->id]) }}" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg text-sm transition inline-flex justify-center items-center gap-2">
+                        <a href="{{ route('guru.assignments.create', ['class_id' => $class->id]) }}" class="w-full bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-2 px-4 rounded-lg text-sm transition inline-flex justify-center items-center gap-2">
                             <i class="fas fa-plus"></i> Buat Tugas
                         </a>
                     </div>

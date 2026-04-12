@@ -207,28 +207,3 @@
         @apply text-xs text-gray-600;
     }
 }
-
-/* Dark Mode Adjustments */
-.dark .bg-white {
-    @apply bg-gray-800;
-}
-
-.dark .text-gray-900 {
-    @apply text-gray-100;
-}
-
-.dark .text-gray-700 {
-    @apply text-gray-300;
-}
-
-.dark .border-gray-200 {
-    @apply border-gray-700;
-}
-
-.dark .bg-gray-50 {
-    @apply bg-gray-900;
-}
-
-.dark .form-control {
-    @apply bg-gray-700 text-gray-100 border-gray-600;
-}

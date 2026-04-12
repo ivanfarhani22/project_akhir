@@ -24,7 +24,6 @@ class SettingController extends Controller
             'primary_color'   => $settings['primary_color']   ?? '#0066cc',
             'secondary_color' => $settings['secondary_color'] ?? '#666666',
             'accent_color'    => $settings['accent_color']    ?? '#ffc107',
-            'dark_mode'       => $settings['dark_mode']       ?? 'false',
             'font_size'       => $settings['font_size']       ?? 'normal',
             'school_name'     => $settings['school_name']     ?? 'E-Learning SRMA',
             'academic_year'   => $settings['academic_year']   ?? date('Y'),
@@ -41,7 +40,6 @@ class SettingController extends Controller
     {
         $settings = Setting::all()->pluck('value', 'key');
         return response()->json([
-            'dark_mode'     => $settings['dark_mode']     ?? 'false',
             'font_size'     => $settings['font_size']     ?? 'normal',
             'school_name'   => $settings['school_name']   ?? 'E-Learning SRMA',
             'academic_year' => $settings['academic_year'] ?? date('Y'),
@@ -62,17 +60,12 @@ class SettingController extends Controller
             'academic_year' => 'required|numeric|digits:4|min:2000|max:2100',
             'semester'      => 'required|in:1,2',
             'font_size'     => 'required|in:small,normal,large',
-            'dark_mode'     => 'nullable',
         ]);
 
         Setting::updateOrCreate(['key' => 'school_name'],   ['value' => $validated['school_name']]);
         Setting::updateOrCreate(['key' => 'academic_year'], ['value' => $validated['academic_year']]);
         Setting::updateOrCreate(['key' => 'semester'],      ['value' => $validated['semester']]);
         Setting::updateOrCreate(['key' => 'font_size'],     ['value' => $validated['font_size']]);
-
-        // Checkbox: ada = true, tidak ada = false
-        $darkMode = $request->has('dark_mode') ? 'true' : 'false';
-        Setting::updateOrCreate(['key' => 'dark_mode'], ['value' => $darkMode]);
 
         \App\Models\ActivityLog::create([
             'user_id'     => auth()->id(),
@@ -195,7 +188,6 @@ class SettingController extends Controller
             'primary_color'   => '#0066cc',
             'secondary_color' => '#666666',
             'accent_color'    => '#ffc107',
-            'dark_mode'       => 'false',
             'font_size'       => 'normal',
             'school_name'     => 'E-Learning SRMA',
             'academic_year'   => date('Y'),

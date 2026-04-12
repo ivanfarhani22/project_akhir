@@ -25,4 +25,9 @@ class Submission extends Model
     {
         return $this->hasOne(Grade::class);
     }
+
+    public function scopeSubmitted($query)
+    {
+        return $query->whereNotNull('submitted_at');
+    }
 }

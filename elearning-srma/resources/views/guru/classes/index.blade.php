@@ -48,12 +48,12 @@
                                 </div>
                             </div>
 
-                            <div class="flex gap-2">
-                                <a href="{{ route('guru.materials.index', ['class' => $cs->eClass->id]) }}" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-3 rounded-lg text-sm transition text-center">
-                                    <i class="fas fa-book mr-2"></i> Materi
+                            <div class="flex gap-2 mt-4">
+                                <a href="{{ route('guru.materials.index', ['class' => $cs->eClass->id]) }}" class="flex-1 bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-2 px-3 rounded-lg text-sm transition text-center">
+                                    <i class="fas fa-book mr-1"></i> Materi
                                 </a>
-                                <a href="{{ route('guru.assignments.index', ['class' => $cs->eClass->id]) }}" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-3 rounded-lg text-sm transition text-center">
-                                    <i class="fas fa-tasks mr-2"></i> Tugas
+                                <a href="{{ route('guru.assignments.index', ['class' => $cs->eClass->id]) }}" class="flex-1 bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-2 px-3 rounded-lg text-sm transition text-center">
+                                    <i class="fas fa-tasks mr-1"></i> Tugas
                                 </a>
                             </div>
                         </div>

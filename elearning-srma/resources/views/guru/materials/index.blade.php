@@ -14,7 +14,7 @@
             </h1>
             <p class="text-gray-600 text-sm">Kelas: <strong>{{ $class->name }}</strong></p>
         </div>
-        <a href="{{ route('guru.materials.create', ['class_id' => $class->id]) }}" class="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-6 rounded-lg text-sm transition whitespace-nowrap">
+        <a href="{{ route('guru.materials.create', ['class_id' => $class->id]) }}" class="bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-2 px-6 rounded-lg text-sm transition whitespace-nowrap">
             <i class="fas fa-plus mr-2"></i> Upload Materi
         </a>
     </div>
@@ -33,7 +33,7 @@
                 <div class="text-center py-12">
                     <i class="fas fa-inbox text-gray-300 text-5xl mb-4 block"></i>
                     <p class="text-gray-600 text-base mb-4">Belum ada materi</p>
-                    <a href="{{ route('guru.materials.create', ['class_id' => $class->id]) }}" class="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-block">
+                    <a href="{{ route('guru.materials.create', ['class_id' => $class->id]) }}" class="bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-block">
                         <i class="fas fa-plus mr-2"></i> Upload Materi Pertama
                     </a>
                 </div>
@@ -68,13 +68,13 @@
                                 </div>
 
                                 <div class="flex gap-2 mt-4">
-                                    <a href="{{ route('guru.materials.edit', $material) }}" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-3 rounded text-xs transition text-center">
+                                    <a href="{{ route('guru.materials.edit', $material) }}" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded text-xs transition text-center">
                                         <i class="fas fa-edit mr-1"></i> Edit
                                     </a>
                                     <form method="POST" action="{{ route('guru.materials.destroy', $material) }}" class="flex-1 delete-form">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="button" class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-3 rounded text-xs transition"
+                                        <button type="button" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-3 rounded text-xs transition"
                                             onclick="confirmDelete(event, '{{ $material->title }}')">
                                             <i class="fas fa-trash mr-1"></i> Hapus
                                         </button>
@@ -90,8 +90,8 @@
 
     <!-- BACK BUTTON -->
     <div class="mt-8">
-        <a href="{{ route('guru.dashboard') }}" class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-6 rounded-lg text-sm transition">
-            <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+        <a href="{{ url()->previous() ?? route('guru.dashboard') }}" class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-6 rounded-lg text-sm transition">
+            <i class="fas fa-arrow-left"></i> Kembali
         </a>
     </div>
 @endsection

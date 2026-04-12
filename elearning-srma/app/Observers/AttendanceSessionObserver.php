@@ -3,7 +3,7 @@
 namespace App\Observers;
 
 use App\Models\AttendanceSession;
-use App\Models\Notification;
+use App\Services\NotificationService;
 
 class AttendanceSessionObserver
 {
@@ -12,21 +12,19 @@ class AttendanceSessionObserver
      */
     public function created(AttendanceSession $session): void
     {
-        // Notify all admin users
-        $admins = \App\Models\User::where('role', 'admin_elearning')->get();
-        
-        foreach ($admins as $admin) {
-            Notification::create([
-                'user_id' => $admin->id,
-                'title' => 'Presensi Baru Dicatat',
-                'message' => "Presensi untuk kelas {$session->classSubject->eClass->name} telah dicatat pada " . $session->attendance_date->format('d M Y'),
-                'type' => 'attendance',
-                'icon' => 'fas fa-clipboard-list',
-                'related_model' => AttendanceSession::class,
-                'related_id' => $session->id,
-                'action_url' => route('admin.attendance.show', $session),
-            ]);
-        }
+        $class = $session->classSubject?->eClass;
+        if (!$class) return;
+
+        NotificationService::notifyClassStudents($class, [
+            'title' => 'Presensi Dibuka',
+            'message' => "Presensi {$class->name} dibuka untuk tanggal " . $session->attendance_date->format('d M Y'),
+            'type' => 'attendance',
+            'icon' => 'fas fa-clipboard-list',
+            'related_model' => AttendanceSession::class,
+            'related_id' => $session->id,
+            // Students go to attendance page per classSubject
+            'action_url' => route('siswa.attendance.show', $session->class_subject_id),
+        ]);
     }
 
     /**
@@ -34,21 +32,18 @@ class AttendanceSessionObserver
      */
     public function updated(AttendanceSession $session): void
     {
-        // Notify all admin users when attendance is updated
-        $admins = \App\Models\User::where('role', 'admin_elearning')->get();
-        
-        foreach ($admins as $admin) {
-            Notification::create([
-                'user_id' => $admin->id,
-                'title' => 'Presensi Diperbarui',
-                'message' => "Presensi untuk kelas {$session->classSubject->eClass->name} telah diperbarui",
-                'type' => 'attendance',
-                'icon' => 'fas fa-sync-alt',
-                'related_model' => AttendanceSession::class,
-                'related_id' => $session->id,
-                'action_url' => route('admin.attendance.show', $session),
-            ]);
-        }
+        $class = $session->classSubject?->eClass;
+        if (!$class) return;
+
+        NotificationService::notifyClassStudents($class, [
+            'title' => 'Presensi Diperbarui',
+            'message' => "Update presensi untuk kelas {$class->name}",
+            'type' => 'attendance',
+            'icon' => 'fas fa-sync-alt',
+            'related_model' => AttendanceSession::class,
+            'related_id' => $session->id,
+            'action_url' => route('siswa.attendance.show', $session->class_subject_id),
+        ]);
     }
 
     /**
@@ -56,19 +51,16 @@ class AttendanceSessionObserver
      */
     public function deleted(AttendanceSession $session): void
     {
-        // Notify all admin users
-        $admins = \App\Models\User::where('role', 'admin_elearning')->get();
-        
-        foreach ($admins as $admin) {
-            Notification::create([
-                'user_id' => $admin->id,
-                'title' => 'Presensi Dihapus',
-                'message' => "Presensi untuk kelas {$session->classSubject->eClass->name} telah dihapus",
-                'type' => 'attendance',
-                'icon' => 'fas fa-trash',
-                'related_model' => AttendanceSession::class,
-                'related_id' => $session->id,
-            ]);
-        }
+        $class = $session->classSubject?->eClass;
+        if (!$class) return;
+
+        NotificationService::notifyClassStudents($class, [
+            'title' => 'Presensi Dihapus',
+            'message' => "Presensi untuk kelas {$class->name} telah dihapus",
+            'type' => 'attendance',
+            'icon' => 'fas fa-trash',
+            'related_model' => AttendanceSession::class,
+            'related_id' => $session->id,
+        ]);
     }
 }

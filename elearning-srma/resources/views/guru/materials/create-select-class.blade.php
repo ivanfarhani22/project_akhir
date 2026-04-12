@@ -1,6 +1,6 @@
 @extends('layouts.guru')
 
-@section('title', 'Upload Materi Baru')
+@section('title', 'Upload Materi')
 @section('icon', 'fas fa-book')
 
 @section('content')
@@ -8,7 +8,7 @@
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3 mb-2">
             <i class="fas fa-book text-amber-500"></i>
-            Upload Materi Baru
+            Upload Materi
         </h1>
         <p class="text-gray-600 text-sm">Pilih kelas untuk upload materi pembelajaran</p>
     </div>
@@ -28,8 +28,8 @@
                             {{ $class->students->count() }} siswa
                         </p>
 
-                        <a href="{{ route('guru.materials.create', ['class_id' => $class->id]) }}" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-lg text-sm transition inline-flex justify-center items-center gap-2">
-                            <i class="fas fa-plus"></i> Upload Materi
+                        <a href="{{ route('guru.materials.index', ['class_id' => $class->id]) }}" class="w-full bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-2 px-4 rounded-lg text-sm transition inline-flex justify-center items-center gap-2">
+                            <i class="fas fa-eye"></i> Lihat Materi Kelas
                         </a>
                     </div>
                 </div>

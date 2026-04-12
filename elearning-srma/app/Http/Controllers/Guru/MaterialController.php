@@ -16,36 +16,28 @@ class MaterialController extends Controller
     public function index()
     {
         $classId = request('class_id');
-        
-        if ($classId) {
-            // View materials untuk kelas tertentu
-            $class = EClass::findOrFail($classId);
-            
-            // Check apakah guru mengajar kelas ini (via classSubjects)
-            $isTeacher = $class->classSubjects()->where('teacher_id', auth()->id())->exists();
-            if (!$isTeacher) {
-                abort(403, 'Unauthorized');
-            }
 
-            $materials = Material::where('e_class_id', $classId)
-                ->with('uploadedBy')
-                ->orderBy('created_at', 'desc')
-                ->get();
-
-            return view('guru.materials.index', compact('class', 'materials'));
-        } else {
-            // View semua materials untuk guru
-            // Ambil classes dimana guru mengajar (via classSubjects)
-            $classes = EClass::whereHas('classSubjects', fn($q) => $q->where('teacher_id', auth()->id()))
-                ->get();
-            
-            $materials = Material::whereIn('e_class_id', $classes->pluck('id'))
-                ->with('eClass', 'uploadedBy')
-                ->orderBy('created_at', 'desc')
-                ->get();
-
-            return view('guru.materials.index-all', compact('classes', 'materials'));
+        if (!$classId) {
+            // Tidak ada filter "semua kelas" untuk saat ini.
+            // Arahkan guru untuk memilih kelas terlebih dahulu.
+            return redirect()->route('guru.materials.create');
         }
+
+        // View materials untuk kelas tertentu
+        $class = EClass::findOrFail($classId);
+
+        // Check apakah guru mengajar kelas ini (via classSubjects)
+        $isTeacher = $class->classSubjects()->where('teacher_id', auth()->id())->exists();
+        if (!$isTeacher) {
+            abort(403, 'Unauthorized');
+        }
+
+        $materials = Material::where('e_class_id', $classId)
+            ->with('uploadedBy')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('guru.materials.index', compact('class', 'materials'));
     }
 
     /**

@@ -65,4 +65,9 @@ class AttendanceSession extends Model
         $present = $this->records->whereIn('status', ['present', 'late'])->count();
         return round(($present / $total) * 100, 2);
     }
+
+    public function getClassAttribute()
+    {
+        return $this->classSubject?->eClass;
+    }
 }

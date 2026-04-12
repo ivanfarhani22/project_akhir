@@ -80,7 +80,7 @@
                     <!-- File Download -->
                     <div>
                         <p class="text-xs text-gray-600 font-medium mb-2">File</p>
-                        <a href="{{ asset('storage/' . $submission->file_path) }}" target="_blank" class="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-medium py-1.5 px-3 rounded text-xs transition">
+                        <a href="{{ asset('storage/' . $submission->file_path) }}" target="_blank" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 px-3 rounded text-xs transition">
                             <i class="fas fa-download"></i> Download File
                         </a>
                     </div>
@@ -167,19 +167,13 @@
                     </div>
 
                     <!-- ACTION BUTTONS -->
-                    <div class="flex gap-3">
-                        <button 
-                            type="submit" 
-                            class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-flex justify-center items-center gap-2"
-                        >
-                            <i class="fas fa-save"></i> Simpan Nilai
-                        </button>
-                        <a 
-                            href="{{ route('guru.grades.index', ['assignment_id' => $assignment->id]) }}" 
-                            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-6 rounded-lg text-sm transition inline-flex justify-center items-center gap-2"
-                        >
+                    <div class="flex flex-col sm:flex-row gap-3 mt-8">
+                        <a href="{{ url()->previous() ?? route('guru.grades.index') }}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-6 rounded-lg text-sm transition inline-flex justify-center items-center gap-2">
                             <i class="fas fa-arrow-left"></i> Kembali
                         </a>
+                        <button type="submit" class="flex-1 bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-2 px-6 rounded-lg text-sm transition inline-flex justify-center items-center gap-2">
+                            <i class="fas fa-save"></i> Simpan Nilai
+                        </button>
                     </div>
                 </form>
             </div>

@@ -31,8 +31,9 @@
                         <h2 class="font-bold text-lg">{{ $classSubject->subject->name }}</h2>
                         <p class="text-green-100 text-sm mt-1"><i class="fas fa-door-open mr-1"></i> {{ $classSubject->eClass->name }}</p>
                     </div>
-                    <a href="{{ route('guru.attendance.create') }}" data-subject="{{ $classSubject->id }}" class="bg-green-400 hover:bg-green-300 text-green-900 font-medium py-1.5 px-3 rounded text-sm transition inline-flex items-center gap-2 btn-create-attendance">
-                        <i class="fas fa-plus"></i> Buka Presensi
+                    {{-- tombol buat sesi (utama) --}}
+                    <a href="{{ route('guru.attendance.create') }}" data-subject="{{ $classSubject->id }}" class="bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-1.5 px-3 rounded text-sm transition inline-flex items-center gap-2 btn-create-attendance">
+                        <i class="fas fa-plus"></i> Buat
                     </a>
                 </div>
 
@@ -88,14 +89,16 @@
                                         </span>
 
                                         <div class="flex gap-2">
-                                            <a href="{{ route('guru.attendance.show', $session) }}" class="bg-green-500 hover:bg-green-600 text-white font-medium py-1 px-2 rounded text-xs transition" title="Lihat">
+                                            {{-- tombol lihat (sekunder fungsional) --}}
+                                            <a href="{{ route('guru.attendance.show', $session) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-2 rounded text-xs transition" title="Lihat">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             @if($session->isOpen())
+                                                {{-- tombol tutup sesi (aksi khusus) --}}
                                                 <form action="{{ route('guru.attendance.close', $session) }}" method="POST" class="inline attendance-form">
                                                     @csrf
                                                     <button type="button" class="bg-orange-500 hover:bg-orange-600 text-white font-medium py-1 px-2 rounded text-xs transition" onclick="confirmAttendanceClose(event)" title="Tutup">
-                                                        <i class="fas fa-times-circle"></i>
+                                                        <i class="fas fa-door-closed"></i>
                                                     </button>
                                                 </form>
                                             @endif
