@@ -93,7 +93,7 @@
                             </a>
                             <br>
                             <small class="text-gray-500 text-xs">
-                                <i class="fas fa-database mr-1"></i>Ukuran: {{ formatFileSize($material->file_size ?? 0) }}
+                                <i class="fas fa-database mr-1"></i>Ukuran: {{ \App\Services\FileUploadService::formatFileSize((int) ($material->file_size ?? 0)) }}
                             </small>
                         @else
                             <span class="text-gray-400 italic text-xs sm:text-sm">File tidak tersedia</span>

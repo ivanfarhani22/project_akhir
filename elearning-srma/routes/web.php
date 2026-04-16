@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Models\AttendanceSession;
 
 // Auth Routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -53,7 +54,12 @@ Route::middleware(['auth', 'role:admin_elearning'])->prefix('admin')->name('admi
     
     // Assignments
     Route::get('/assignments/{assignment}/submissions', [\App\Http\Controllers\Admin\AssignmentController::class, 'submissions'])->name('assignments.submissions');
-    Route::post('/assignments/{assignment}/submissions/{submission}/grade', [\App\Http\Controllers\Admin\AssignmentController::class, 'gradeSubmission'])->name('assignments.gradeSubmission');
+
+    // Ensure proper implicit binding for nested params: (Assignment $assignment, Submission $submission)
+    Route::scopeBindings()->group(function () {
+        Route::post('/assignments/{assignment}/submissions/{submission}/grade', [\App\Http\Controllers\Admin\AssignmentController::class, 'gradeSubmission'])->name('assignments.gradeSubmission');
+    });
+
     Route::get('/assignments/statistics', [\App\Http\Controllers\Admin\AssignmentController::class, 'statistics'])->name('assignments.statistics');
     
     // Grades
@@ -95,6 +101,10 @@ Route::middleware(['auth', 'role:admin_elearning'])->prefix('admin')->name('admi
     Route::get('/classes/{class}/students', [\App\Http\Controllers\Admin\ClassStudentController::class, 'index'])->name('classes.students');
     Route::post('/classes/{class}/students', [\App\Http\Controllers\Admin\ClassStudentController::class, 'store'])->name('classes.students.store');
     Route::delete('/classes/{class}/students/{student}', [\App\Http\Controllers\Admin\ClassStudentController::class, 'destroy'])->name('classes.students.destroy');
+    
+    // Rekap Nilai (admin - semua kelas/mapel)
+    Route::get('/rekap-nilai', [\App\Http\Controllers\Admin\RekapNilaiController::class, 'index'])->name('rekap-nilai.index');
+    Route::get('/rekap-nilai/export', [\App\Http\Controllers\Admin\RekapNilaiController::class, 'export'])->name('rekap-nilai.export');
 });
 
 // Dashboard Guru
@@ -126,12 +136,60 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     
     Route::resource('materials', \App\Http\Controllers\Guru\MaterialController::class);
     Route::resource('assignments', \App\Http\Controllers\Guru\AssignmentController::class);
-    Route::resource('grades', \App\Http\Controllers\Guru\GradeController::class, ['only' => ['index', 'edit', 'update']]);
-    
+
+    // Grades (teacher grading is done on students submissions)
+    Route::resource('grades', \App\Http\Controllers\Guru\GradeController::class, ['only' => ['index', 'edit', 'update']])
+        ->parameters(['grades' => 'submission']);
+
     // Attendance Management
     Route::resource('attendance', \App\Http\Controllers\Guru\AttendanceController::class);
-    Route::post('attendance/{session}/close', [\App\Http\Controllers\Guru\AttendanceController::class, 'close'])->name('attendance.close');
-    Route::post('attendance/{session}/cancel', [\App\Http\Controllers\Guru\AttendanceController::class, 'cancel'])->name('attendance.cancel');
+    Route::post('attendance/{attendance}/close', [\App\Http\Controllers\Guru\AttendanceController::class, 'close'])->name('attendance.close');
+    Route::post('attendance/{attendance}/cancel', [\App\Http\Controllers\Guru\AttendanceController::class, 'cancel'])->name('attendance.cancel');
+    
+    // Backward-compatible URLs (if any old views still post to {session})
+    Route::model('session', AttendanceSession::class);
+    Route::post('attendance/{session}/close', [\App\Http\Controllers\Guru\AttendanceController::class, 'close']);
+    Route::post('attendance/{session}/cancel', [\App\Http\Controllers\Guru\AttendanceController::class, 'cancel']);
+    
+    // Download siswa submission file (for guru)
+    Route::get('/submissions/{submission}/download', function (\App\Models\Submission $submission) {
+        $assignment = $submission->assignment;
+        abort_unless($assignment, 404);
+
+        $class = $assignment->eClass;
+        abort_unless($class, 404);
+
+        // Only allow teacher that teaches this class (consistent with other guru checks)
+        abort_if(!$class->isTeachedBy(auth()->id()), 403);
+
+        $relative = ltrim($submission->file_path ?? '', '/');
+        abort_if($relative === '', 404);
+
+        // Normalize typical public path: storage/submissions/xxx.ext -> submissions/xxx.ext
+        $normalized = preg_replace('#^storage/#', '', $relative);
+
+        $candidates = [
+            storage_path('app/public/' . $normalized),
+            storage_path('app/' . $relative),
+            storage_path('app/' . $normalized),
+        ];
+
+        $fullPath = null;
+        foreach ($candidates as $candidate) {
+            if (file_exists($candidate)) {
+                $fullPath = $candidate;
+                break;
+            }
+        }
+
+        abort_unless($fullPath, 404);
+
+        return response()->download($fullPath);
+    })->name('submissions.download');
+
+    // Rekap Nilai (per kelas + mapel yang diajarkan guru)
+    Route::get('/rekap-nilai', [\App\Http\Controllers\Guru\RekapNilaiController::class, 'index'])->name('rekap-nilai.index');
+    Route::get('/rekap-nilai/export', [\App\Http\Controllers\Guru\RekapNilaiController::class, 'export'])->name('rekap-nilai.export');
 });
 
 // Dashboard Siswa
@@ -189,6 +247,71 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
         abort_if(!auth()->user()->classes->contains($assignment->eClass), 403);
         return view('siswa.assignments.show', compact('assignment'));
     })->name('assignments.show');
+
+    // Fallback: if any form still POSTs to the show URL, forward it to the submit handler
+    Route::post('/assignments/{assignment}', function (\Illuminate\Http\Request $request, \App\Models\Assignment $assignment) {
+        return redirect()->route('siswa.submissions.store', $assignment);
+    });
+
+    // Submission upload/update for an assignment
+    Route::post('/assignments/{assignment}/submit', function (\Illuminate\Http\Request $request, \App\Models\Assignment $assignment) {
+        abort_if(!auth()->user()->classes->contains($assignment->eClass), 403);
+
+        $request->validate([
+            'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,zip|max:10240',
+        ]);
+
+        $studentId = auth()->id();
+
+        $submission = \App\Models\Submission::firstOrNew([
+            'assignment_id' => $assignment->id,
+            'student_id' => $studentId,
+        ]);
+
+        // Store in public disk so it can also be downloaded later if needed
+        $stored = $request->file('file')->store('submissions', 'public');
+
+        $submission->file_path = 'storage/' . $stored;
+        $submission->submitted_at = now();
+
+        $submission->save();
+
+        return redirect()->route('siswa.assignments.show', $assignment)->with('success', 'Pengumpulan berhasil dikirim.');
+    })->name('submissions.store');
+
+    // If someone opens the submit URL directly, just go back to detail page
+    Route::get('/assignments/{assignment}/submit', function (\App\Models\Assignment $assignment) {
+        return redirect()->route('siswa.assignments.show', $assignment);
+    });
+
+    // Assignment file (download/open)
+    Route::get('/assignments/{assignment}/download', function (\App\Models\Assignment $assignment) {
+        abort_if(!auth()->user()->classes->contains($assignment->eClass), 403);
+
+        $relative = ltrim($assignment->file_path ?? '', '/');
+        abort_if($relative === '', 404);
+
+        // Normalize typical public path: storage/assignments/xxx.ext -> assignments/xxx.ext
+        $normalized = preg_replace('#^storage/#', '', $relative);
+
+        $candidates = [
+            storage_path('app/public/' . $normalized),
+            storage_path('app/' . $relative),
+            storage_path('app/' . $normalized),
+        ];
+
+        $fullPath = null;
+        foreach ($candidates as $candidate) {
+            if (file_exists($candidate)) {
+                $fullPath = $candidate;
+                break;
+            }
+        }
+
+        abort_unless($fullPath, 404);
+
+        return response()->download($fullPath);
+    })->name('assignments.download');
     
     // Quiz / Ujian
     Route::get('/quizzes', function () {

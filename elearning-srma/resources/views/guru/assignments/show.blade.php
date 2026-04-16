@@ -101,6 +101,7 @@
                                     <th class="px-6 py-3 text-left font-semibold text-gray-900">Siswa</th>
                                     <th class="px-6 py-3 text-left font-semibold text-gray-900">Status</th>
                                     <th class="px-6 py-3 text-left font-semibold text-gray-900">Waktu Submit</th>
+                                    <th class="px-6 py-3 text-left font-semibold text-gray-900">File</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
@@ -120,6 +121,16 @@
                                         </td>
                                         <td class="px-6 py-3 text-gray-700">
                                             {{ $submission->submitted_at?->format('d M Y H:i') ?? '-' }}
+                                        </td>
+                                        <td class="px-6 py-3">
+                                            @if($submission->file_path)
+                                                <a href="{{ route('guru.submissions.download', $submission) }}" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold" title="Download file">
+                                                    <i class="fas fa-download"></i>
+                                                    <span class="hidden sm:inline">Download</span>
+                                                </a>
+                                            @else
+                                                <span class="text-gray-400">-</span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach

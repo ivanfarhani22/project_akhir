@@ -48,14 +48,14 @@
                             Kelas
                         </label>
                         <input type="text" disabled class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm bg-gray-100 text-gray-600" 
-                            value="{{ $assignment->classSubject->eClass->name }}">
+                            value="{{ $assignment->classSubject->eClass->name ?? $assignment->eClass->name ?? '-' }}">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             Mata Pelajaran
                         </label>
                         <input type="text" disabled class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm bg-gray-100 text-gray-600" 
-                            value="{{ $assignment->classSubject->subject->name }}">
+                            value="{{ $assignment->classSubject->subject->name ?? $assignment->eClass->subject->name ?? '-' }}">
                     </div>
                 </div>
 

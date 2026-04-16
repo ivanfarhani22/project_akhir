@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Guru;
 use App\Http\Controllers\Controller;
 use App\Models\EClass;
 use App\Models\Material;
+use App\Models\ActivityLog;
 use App\Services\FileUploadService;
 use Illuminate\Http\Request;
 
@@ -96,11 +97,14 @@ class MaterialController extends Controller
             'uploaded_by' => auth()->id(),
         ]);
 
-        // Log activity
-        activity()
-            ->performedOn($material)
-            ->causedBy(auth()->user())
-            ->log('Material uploaded: ' . $material->title);
+        // Log activity (pakai tabel activity_logs bawaan project; tidak bergantung helper activity())
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'material_uploaded',
+            'description' => 'Material uploaded: ' . $material->title,
+            'ip_address' => $request->ip(),
+            'timestamp' => now(),
+        ]);
 
         return redirect()
             ->route('guru.materials.index', ['class_id' => $class->id])
@@ -167,20 +171,26 @@ class MaterialController extends Controller
                 'version' => $material->version + 1,
             ]);
 
-            activity()
-                ->performedOn($material)
-                ->causedBy(auth()->user())
-                ->log('Material versioned: ' . $material->title . ' (v' . $material->version . ')');
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'material_versioned',
+                'description' => 'Material versioned: ' . $material->title . ' (v' . $material->version . ')',
+                'ip_address' => $request->ip(),
+                'timestamp' => now(),
+            ]);
         } else {
             $material->update([
                 'title' => $validated['title'],
                 'description' => $validated['description'],
             ]);
 
-            activity()
-                ->performedOn($material)
-                ->causedBy(auth()->user())
-                ->log('Material updated: ' . $material->title);
+            ActivityLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'material_updated',
+                'description' => 'Material updated: ' . $material->title,
+                'ip_address' => $request->ip(),
+                'timestamp' => now(),
+            ]);
         }
 
         return redirect()
@@ -199,11 +209,14 @@ class MaterialController extends Controller
         }
 
         FileUploadService::deleteFile($material->file_path);
-        
-        activity()
-            ->performedOn($material)
-            ->causedBy(auth()->user())
-            ->log('Material deleted: ' . $material->title);
+
+        ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'material_deleted',
+            'description' => 'Material deleted: ' . $material->title,
+            'ip_address' => request()->ip(),
+            'timestamp' => now(),
+        ]);
 
         $material->delete();
 

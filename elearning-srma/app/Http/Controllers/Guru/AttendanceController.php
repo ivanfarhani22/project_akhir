@@ -155,9 +155,29 @@ class AttendanceController extends Controller
     public function close(AttendanceSession $attendance)
     {
         $teacherId = auth()->id();
-        $subjectTeacherId = $attendance->classSubject?->teacher_id;
 
-        if (!$attendance->classSubject || ($subjectTeacherId !== $teacherId && (int)$attendance->opened_by !== (int)$teacherId)) {
+        Log::info('HIT guru.attendance.close', [
+            'auth_id' => $teacherId,
+            'session_id' => $attendance->id,
+            'opened_by' => $attendance->opened_by,
+            'class_subject_id' => $attendance->class_subject_id,
+            'has_class_subject' => (bool) $attendance->classSubject,
+            'subject_teacher_id' => $attendance->classSubject?->teacher_id,
+            'path' => request()->path(),
+            'method' => request()->method(),
+            'route_params' => request()->route()?->parameters(),
+        ]);
+
+        // Allow closing if teacher is the subject teacher OR the one who opened this session.
+        // Do not hard-fail when classSubject relation is missing (data drift / eager load issues).
+        $subjectTeacherId = $attendance->classSubject?->teacher_id;
+        if ($subjectTeacherId !== $teacherId && (int) $attendance->opened_by !== (int) $teacherId) {
+            Log::warning('DENY guru.attendance.close', [
+                'auth_id' => $teacherId,
+                'session_id' => $attendance->id,
+                'opened_by' => $attendance->opened_by,
+                'subject_teacher_id' => $subjectTeacherId,
+            ]);
             abort(403, 'Unauthorized');
         }
 
@@ -179,9 +199,9 @@ class AttendanceController extends Controller
     public function cancel(AttendanceSession $attendance)
     {
         $teacherId = auth()->id();
-        $subjectTeacherId = $attendance->classSubject?->teacher_id;
 
-        if (!$attendance->classSubject || ($subjectTeacherId !== $teacherId && (int)$attendance->opened_by !== (int)$teacherId)) {
+        $subjectTeacherId = $attendance->classSubject?->teacher_id;
+        if ($subjectTeacherId !== $teacherId && (int) $attendance->opened_by !== (int) $teacherId) {
             abort(403, 'Unauthorized');
         }
 

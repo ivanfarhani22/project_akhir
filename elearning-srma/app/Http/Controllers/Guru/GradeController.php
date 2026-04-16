@@ -51,7 +51,12 @@ class GradeController extends Controller
     public function edit(Submission $submission)
     {
         $assignment = $submission->assignment;
-        if (!$assignment->eClass->isTeachedBy(auth()->id())) {
+        abort_unless($assignment, 404);
+
+        $class = $assignment->eClass;
+        abort_unless($class, 404);
+
+        if (!$class->isTeachedBy(auth()->id())) {
             abort(403, 'Unauthorized');
         }
 
@@ -66,7 +71,12 @@ class GradeController extends Controller
     public function update(Request $request, Submission $submission)
     {
         $assignment = $submission->assignment;
-        if (!$assignment->eClass->isTeachedBy(auth()->id())) {
+        abort_unless($assignment, 404);
+
+        $class = $assignment->eClass;
+        abort_unless($class, 404);
+
+        if (!$class->isTeachedBy(auth()->id())) {
             abort(403, 'Unauthorized');
         }
 

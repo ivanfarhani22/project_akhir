@@ -90,19 +90,27 @@
                         @forelse($grades as $grade)
                             <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
                                 <td class="px-6 py-4 text-sm text-gray-600 font-semibold">{{ $loop->iteration }}</td>
-                                <td class="px-6 py-4 text-sm font-semibold text-gray-800">{{ $grade->submission->student->name }}</td>
+                                <td class="px-6 py-4 text-sm font-semibold text-gray-800">{{ $grade->submission->student->name ?? '-' }}</td>
                                 <td class="px-6 py-4">
+                                    @php
+                                        $className = $grade->submission?->assignment?->classSubject?->eClass?->name
+                                            ?? $grade->submission?->assignment?->eClass?->name
+                                            ?? '-';
+                                    @endphp
                                     <span class="inline-block px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-semibold">
-                                        {{ $grade->submission->assignment->classSubject->eClass->name }}
+                                        {{ $className }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-700">{{ Str::limit($grade->submission->assignment->title, 20) }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-700">{{ Str::limit($grade->submission?->assignment?->title ?? '-', 20) }}</td>
                                 <td class="px-6 py-4 text-sm">
-                                    <span class="font-bold text-gray-800">{{ $grade->score }}</span> / {{ $grade->submission->assignment->max_score }}
+                                    @php
+                                        $maxScore = $grade->submission?->assignment?->max_score ?? 100;
+                                    @endphp
+                                    <span class="font-bold text-gray-800">{{ $grade->score }}</span> / {{ $maxScore }}
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     @php
-                                        $percentage = ($grade->score / $grade->submission->assignment->max_score) * 100;
+                                        $percentage = $maxScore > 0 ? ($grade->score / $maxScore) * 100 : 0;
                                         $badgeClass = match(true) {
                                             $percentage >= 80 => 'bg-green-100 text-green-700',
                                             $percentage >= 70 => 'bg-blue-100 text-blue-700',

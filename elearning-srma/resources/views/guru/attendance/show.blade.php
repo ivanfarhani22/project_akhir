@@ -1,123 +1,98 @@
 @extends('layouts.guru')
-
 @section('title', 'Detail Presensi - ' . $session->classSubject->eClass->name . ' - ' . $session->classSubject->subject->name)
 @section('icon', 'fas fa-clipboard-list')
 
 @section('content')
-<!-- SESSION HEADER with Gradient -->
-<div class="bg-gradient-to-r from-green-500 to-green-700 text-white rounded-lg p-6 sm:p-8 mb-8 shadow-lg">
-    <h1 class="text-2xl sm:text-3xl font-bold mb-3">{{ $session->classSubject->eClass->name }} - {{ $session->classSubject->subject->name }}</h1>
-    <div class="space-y-1 text-green-100 text-sm sm:text-base">
-        <p><i class="fas fa-calendar mr-2"></i> {{ $session->attendance_date->format('l, d F Y') }}</p>
-        <p><i class="fas fa-clock mr-2"></i> Dibuka: {{ $session->opened_at }}</p>
-    </div>
-    
-    <!-- STATUS BADGE -->
-    <div class="mt-4 pt-4 border-t border-green-400">
-        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm {{ $session->isOpen() ? 'bg-green-400 text-green-900' : ($session->isClosed() ? 'bg-red-400 text-red-900' : 'bg-gray-400 text-gray-900') }}">
-            @if($session->isOpen())
-                <i class="fas fa-circle"></i> Terbuka
-            @elseif($session->isClosed())
-                <i class="fas fa-check-circle"></i> Ditutup
-            @else
-                <i class="fas fa-ban"></i> Dibatalkan
-            @endif
+
+<div class="mb-6">
+    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1"><i class="fas fa-clipboard-list mr-1"></i> Guru / Presensi / Detail</p>
+    <h1 class="text-2xl font-extrabold text-gray-900">{{ $session->classSubject->eClass->name }} — {{ $session->classSubject->subject->name }}</h1>
+</div>
+
+{{-- Session Info + Stats --}}
+<div class="bg-white rounded-2xl border-2 border-gray-100 overflow-hidden mb-6">
+    <div class="h-1 bg-gradient-to-r from-[#A41E35] to-rose-400"></div>
+    <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100">
+        <div>
+            <p class="font-bold text-gray-900"><i class="fas fa-calendar mr-2 text-gray-400"></i>{{ $session->attendance_date->format('l, d F Y') }}</p>
+            <p class="text-xs text-gray-400 mt-1"><i class="fas fa-clock mr-2"></i>Dibuka: {{ $session->opened_at }}</p>
+        </div>
+        <span class="self-start sm:self-auto text-xs font-semibold px-3 py-1.5 rounded-full
+            {{ $session->isOpen() ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : ($session->isClosed() ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-gray-100 text-gray-500 border border-gray-200') }}">
+            {{ $session->isOpen() ? '● Terbuka' : ($session->isClosed() ? '✓ Ditutup' : '✕ Dibatalkan') }}
         </span>
     </div>
-
-    <!-- STATS GRID -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
-        <div class="bg-white bg-opacity-20 rounded-lg p-4 text-center">
-            <div class="text-2xl sm:text-3xl font-bold">{{ $session->records->count() }}</div>
-            <div class="text-xs sm:text-sm mt-2 opacity-90">Total Siswa</div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 divide-x divide-gray-100">
+        <div class="text-center py-4 px-3">
+            <p class="text-2xl font-extrabold text-gray-900">{{ $session->records->count() }}</p>
+            <p class="text-xs text-gray-400 mt-1">Total Siswa</p>
         </div>
-        <div class="bg-white bg-opacity-20 rounded-lg p-4 text-center">
-            <div class="text-2xl sm:text-3xl font-bold text-green-200">{{ $session->records->where('status', 'present')->count() }}</div>
-            <div class="text-xs sm:text-sm mt-2 opacity-90">Hadir</div>
+        <div class="text-center py-4 px-3">
+            <p class="text-2xl font-extrabold text-emerald-600">{{ $session->records->where('status','present')->count() }}</p>
+            <p class="text-xs text-gray-400 mt-1">Hadir</p>
         </div>
-        <div class="bg-white bg-opacity-20 rounded-lg p-4 text-center">
-            <div class="text-2xl sm:text-3xl font-bold text-red-200">{{ $session->records->where('status', 'absent')->count() }}</div>
-            <div class="text-xs sm:text-sm mt-2 opacity-90">Tidak Hadir</div>
+        <div class="text-center py-4 px-3">
+            <p class="text-2xl font-extrabold text-red-500">{{ $session->records->where('status','absent')->count() }}</p>
+            <p class="text-xs text-gray-400 mt-1">Tidak Hadir</p>
         </div>
-        <div class="bg-white bg-opacity-20 rounded-lg p-4 text-center">
-            <div class="text-2xl sm:text-3xl font-bold">{{ $session->getAttendancePercentage() }}%</div>
-            <div class="text-xs sm:text-sm mt-2 opacity-90">Kehadiran</div>
+        <div class="text-center py-4 px-3">
+            <p class="text-2xl font-extrabold text-blue-600">{{ $session->getAttendancePercentage() }}%</p>
+            <p class="text-xs text-gray-400 mt-1">Kehadiran</p>
         </div>
     </div>
 </div>
 
-<!-- ACTION BUTTONS -->
 @if($session->isOpen())
-    <div class="flex flex-col sm:flex-row gap-3 mb-8">
+    <div class="flex flex-col sm:flex-row gap-3 mb-6">
         <form action="{{ route('guru.attendance.close', $session) }}" method="POST" class="attendance-form flex-1">
             @csrf
-            <button type="button" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg transition inline-flex items-center justify-center gap-2" onclick="confirmAttendanceAction(event, 'close')">
-                <i class="fas fa-times-circle"></i> Tutup Presensi
+            <button type="button" onclick="confirmAttendanceAction(event,'close')"
+                class="w-full inline-flex justify-center items-center gap-2 bg-orange-50 hover:bg-orange-500 text-orange-600 hover:text-white border border-orange-200 font-semibold py-2.5 px-4 rounded-xl text-sm transition">
+                <i class="fas fa-door-closed text-xs"></i> Tutup Presensi
             </button>
         </form>
         <form action="{{ route('guru.attendance.cancel', $session) }}" method="POST" class="attendance-form flex-1">
             @csrf
-            <button type="button" class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition inline-flex items-center justify-center gap-2" onclick="confirmAttendanceAction(event, 'cancel')">
-                <i class="fas fa-ban"></i> Batalkan Presensi
+            <button type="button" onclick="confirmAttendanceAction(event,'cancel')"
+                class="w-full inline-flex justify-center items-center gap-2 bg-red-50 hover:bg-red-600 text-red-600 hover:text-white border border-red-200 font-semibold py-2.5 px-4 rounded-xl text-sm transition">
+                <i class="fas fa-ban text-xs"></i> Batalkan Presensi
             </button>
         </form>
     </div>
 @endif
 
-<!-- ATTENDANCE TABLE -->
-<div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-    <div class="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gray-50">
-        <h2 class="font-bold text-gray-900 text-lg flex items-center gap-2">
-            <i class="fas fa-users text-green-500"></i>
-            Daftar Absensi Siswa
-        </h2>
+<div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50">
+        <h2 class="font-bold text-gray-900"><i class="fas fa-users mr-2 text-gray-400"></i>Daftar Absensi Siswa</h2>
     </div>
 
     @if($session->records->count() > 0)
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
-                <thead class="bg-gray-50 border-b border-gray-200">
+                <thead class="bg-gray-50 border-b border-gray-100">
                     <tr>
-                        <th class="px-6 py-3 text-left font-semibold text-gray-900">No.</th>
-                        <th class="px-6 py-3 text-left font-semibold text-gray-900">Nama Siswa</th>
-                        <th class="px-6 py-3 text-left font-semibold text-gray-900">Status</th>
-                        <th class="px-6 py-3 text-left font-semibold text-gray-900">Waktu Hadir</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">No.</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nama Siswa</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Waktu</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
+                <tbody class="divide-y divide-gray-100">
                     @foreach($session->records->sortBy('student.name') as $record)
+                        @php
+                            $statusMap = ['present'=>['bg-emerald-50 text-emerald-700 border-emerald-200','fa-check-circle','Hadir'],'absent'=>['bg-red-50 text-red-600 border-red-200','fa-times-circle','Tidak Hadir'],'late'=>['bg-yellow-50 text-yellow-700 border-yellow-200','fa-hourglass-end','Terlambat'],'excused'=>['bg-blue-50 text-blue-600 border-blue-200','fa-clipboard','Izin']];
+                            [$sc,$ic,$sl] = $statusMap[strtolower($record->status)] ?? $statusMap['absent'];
+                        @endphp
                         <tr class="hover:bg-gray-50 transition">
-                            <td class="px-6 py-4 font-medium text-gray-900">{{ $loop->iteration }}</td>
-                            <td class="px-6 py-4 font-medium text-gray-700">{{ $record->student->name }}</td>
-                            <td class="px-6 py-4">
-                                @php
-                                    $statusConfig = [
-                                        'present' => ['bg' => 'bg-green-100', 'text' => 'text-green-800', 'label' => 'Hadir'],
-                                        'absent' => ['bg' => 'bg-red-100', 'text' => 'text-red-800', 'label' => 'Tidak Hadir'],
-                                        'late' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-800', 'label' => 'Terlambat'],
-                                        'excused' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-800', 'label' => 'Izin'],
-                                    ];
-                                    $config = $statusConfig[strtolower($record->status)] ?? $statusConfig['absent'];
-                                @endphp
-                                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold {{ $config['bg'] }} {{ $config['text'] }}">
-                                    @if(strtolower($record->status) === 'present')
-                                        <i class="fas fa-check-circle"></i>
-                                    @elseif(strtolower($record->status) === 'absent')
-                                        <i class="fas fa-times-circle"></i>
-                                    @elseif(strtolower($record->status) === 'late')
-                                        <i class="fas fa-hourglass-end"></i>
-                                    @else
-                                        <i class="fas fa-clipboard"></i>
-                                    @endif
-                                    {{ $config['label'] }}
+                            <td class="px-5 py-3.5 text-gray-400 text-xs">{{ $loop->iteration }}</td>
+                            <td class="px-5 py-3.5 font-semibold text-gray-800">{{ $record->student->name }}</td>
+                            <td class="px-5 py-3.5">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border {{ $sc }}">
+                                    <i class="fas {{ $ic }} text-[10px]"></i> {{ $sl }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-gray-600 text-sm">
-                                @if($record->checked_in_at)
-                                    <span class="font-medium">{{ $record->checked_in_at->format('H:i') }}</span>
-                                @else
-                                    <span class="text-gray-400 italic">—</span>
-                                @endif
+                            <td class="px-5 py-3.5 text-gray-500 text-xs">
+                                {{ $record->checked_in_at ? $record->checked_in_at->format('H:i') : '—' }}
                             </td>
                         </tr>
                     @endforeach
@@ -125,17 +100,17 @@
             </table>
         </div>
     @else
-        <div class="text-center py-12 px-6">
-            <i class="fas fa-inbox text-gray-300 text-5xl mb-4 block"></i>
-            <p class="text-gray-600 text-base">Belum ada data presensi</p>
+        <div class="flex flex-col items-center justify-center py-12 text-center">
+            <i class="fas fa-inbox text-gray-200 text-4xl mb-3"></i>
+            <p class="text-gray-400 text-sm">Belum ada data presensi.</p>
         </div>
     @endif
 </div>
 
-<!-- BACK BUTTON -->
-<div class="mt-8">
-    <a href="{{ route('guru.attendance.index') }}" class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-6 rounded-lg transition">
-        <i class="fas fa-arrow-left"></i> Kembali ke Daftar
+<div class="mt-6">
+    <a href="{{ route('guru.attendance.index') }}"
+       class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm px-5 py-2.5 rounded-xl transition">
+        <i class="fas fa-arrow-left text-xs"></i> Kembali ke Daftar
     </a>
 </div>
 
@@ -146,19 +121,11 @@
 function confirmAttendanceAction(event, action) {
     event.preventDefault();
     const form = event.target.closest('form');
-    
-    let message, title;
-    if (action === 'close') {
-        message = 'Tutup presensi? Siswa tidak bisa absensi lagi.';
-        title = 'Konfirmasi Tutup Presensi';
-    } else if (action === 'cancel') {
-        message = 'Batalkan presensi? Data akan dihapus dan hanya admin bisa restore.';
-        title = 'Konfirmasi Batalkan Presensi';
-    }
-    
-    showConfirmation(message, title, function() {
-        form.submit();
-    });
+    const configs = {
+        close: ['Tutup presensi? Siswa tidak bisa absensi lagi.', 'Konfirmasi Tutup'],
+        cancel: ['Batalkan presensi? Data akan dihapus.', 'Konfirmasi Batalkan']
+    };
+    showConfirmation(...configs[action], () => form.submit());
 }
 </script>
 @endpush

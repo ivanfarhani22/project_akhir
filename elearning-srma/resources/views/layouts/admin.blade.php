@@ -58,68 +58,69 @@
         #sidebar {
             position: fixed;
             top: 0; left: 0;
-            width: 240px;
+            width: 220px;
             height: 100vh;
             background: var(--sidebar-bg);
             display: flex;
             flex-direction: column;
             overflow-y: auto;
-            overflow-x: hidden;        /* ← cegah scrollbar horizontal saat compact */
+            overflow-x: hidden;
             border-right: 1px solid var(--sidebar-border);
             z-index: 50;
             transition: width .28s cubic-bezier(.4,0,.2,1);
         }
-        #sidebar.compact { width: 64px; }   /* ← naik dari 70px ke 64px agar rapi */
+        /* FIX: lebar compact lebih kecil agar ikon proporsional */
+        #sidebar.compact { width: 58px; }
 
         /* ── header ── */
         .sb-header {
             height: 60px;
-            padding: 0 12px;
+            padding: 0 10px;
             border-bottom: 1px solid var(--sidebar-border);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             flex-shrink: 0;
         }
         .sb-header-content {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             flex: 1;
             min-width: 0;
             overflow: hidden;
         }
         .logo-mark {
-            width: 36px; height: 36px;
-            border-radius: 9px;
+            width: 32px; height: 32px;
+            border-radius: 8px;
             background: #ffffff;
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,.15);
         }
-        .logo-mark img { width: 100%; height: 100%; object-fit: cover; border-radius: 9px; }
+        .logo-mark img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
         .brand-info {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 1px;
             min-width: 0;
             overflow: hidden;
         }
-        .brand-title { color: #fff; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
-        .brand-sub   { color: rgba(255,255,255,.45); font-size: 9.5px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+        .brand-title { color: #fff; font-size: 12px; font-weight: 700; white-space: nowrap; }
+        .brand-sub   { color: rgba(255,255,255,.45); font-size: 9px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 
         .sb-collapse-btn {
-            width: 28px; height: 28px;
-            border-radius: 7px;
+            width: 26px; height: 26px;
+            border-radius: 6px;
             background: rgba(196,30,58,.15);
             border: 1px solid rgba(196,30,58,.3);
             color: rgba(255,255,255,.7);
             cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            font-size: 11px;
+            font-size: 10px;
             flex-shrink: 0;
-            transition: background .2s, color .2s, transform .2s;
+            transition: background .2s, color .2s;
         }
         .sb-collapse-btn:hover {
             background: rgba(196,30,58,.28);
@@ -127,30 +128,24 @@
             border-color: rgba(196,30,58,.5);
         }
 
-        /* compact header: centre logo only */
-        #sidebar.compact .sb-header { padding: 0; justify-content: center; gap: 0; }
-        #sidebar.compact .sb-header-content { flex: 0; }
-        #sidebar.compact .brand-info { display: none; }
-        
-        /* Compact: tombol pindah ke bawah header, full-width, ikon berubah arah */
+        /* compact: sembunyikan teks brand, pusatkan logo */
         #sidebar.compact .sb-header {
+            padding: 0;
+            justify-content: center;
             flex-direction: column;
             height: auto;
-            padding: 12px 0 8px;
-            gap: 8px;
-            justify-content: center;
-            align-items: center;
+            padding: 10px 0 6px;
+            gap: 6px;
         }
-        #sidebar.compact .sb-collapse-btn {
-            display: flex;   /* tampilkan kembali */
-            width: 40px;
-            height: 28px;
-        }
-        /* ── nav ── */
+        #sidebar.compact .sb-header-content { flex: 0; }
+        #sidebar.compact .brand-info { display: none; }
+        #sidebar.compact .sb-collapse-btn { width: 36px; height: 24px; }
+
+        /* ── nav body ── */
         .sb-body { flex: 1; padding: 6px 0 10px; }
 
         .sb-section {
-            padding: 12px 16px 4px;
+            padding: 10px 14px 3px;
             font-size: 9px;
             font-weight: 700;
             letter-spacing: .1em;
@@ -163,18 +158,22 @@
         .sb-link {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 9px 12px 9px 14px;
-            margin: 1px 8px;
-            border-radius: 8px;
+            gap: 9px;
+            /* FIX: padding disesuaikan agar compact pas */
+            padding: 8px 10px 8px 12px;
+            margin: 1px 6px;
+            border-radius: 7px;
             color: rgba(255,255,255,.6);
-            font-size: 12.5px;
+            font-size: 12px;
             font-weight: 500;
             text-decoration: none;
             transition: background .18s, color .18s;
             position: relative;
             white-space: nowrap;
             overflow: hidden;
+            /* FIX: pastikan pointer events aktif */
+            pointer-events: auto;
+            cursor: pointer;
         }
         .sb-link-text { flex: 1; min-width: 0; overflow: hidden; }
         .sb-link .sb-icon {
@@ -197,26 +196,30 @@
             position: absolute;
             left: 0; top: 50%;
             transform: translateY(-50%);
-            width: 3px; height: 18px;
+            width: 3px; height: 16px;
             background: linear-gradient(180deg, var(--red), var(--red-dark));
             border-radius: 0 3px 3px 0;
         }
 
-        /* compact links: perfectly centred icon */
+        /* FIX: compact links – ikon benar-benar di tengah */
         #sidebar.compact .sb-link {
             justify-content: center;
-            padding: 10px 0;
-            margin: 1px 6px;
+            padding: 9px 0;
+            margin: 1px 4px;
             gap: 0;
-            width: calc(100% - 12px);
+            width: calc(100% - 8px);
         }
         #sidebar.compact .sb-link-text { display: none; }
         #sidebar.compact .sb-link.active::before { display: none; }
+        /* FIX: agar ikon tidak terpotong saat compact */
+        #sidebar.compact .sb-link .sb-icon {
+            width: 18px; height: 18px;
+        }
 
         .sb-badge {
             background: var(--red); color: #fff;
             font-size: 10px; font-weight: 700;
-            padding: 1px 7px; border-radius: 20px; line-height: 1.7;
+            padding: 1px 6px; border-radius: 20px; line-height: 1.7;
             flex-shrink: 0;
         }
         #sidebar.compact .sb-badge { display: none; }
@@ -224,14 +227,14 @@
         .sb-divider {
             height: 1px;
             background: var(--sidebar-border);
-            margin: 6px 16px;
+            margin: 5px 14px;
         }
-        #sidebar.compact .sb-divider { margin: 6px 8px; }
+        #sidebar.compact .sb-divider { margin: 5px 6px; }
 
         /* ── footer ── */
         .sb-footer {
             flex-shrink: 0;
-            padding: 8px;
+            padding: 6px;
             border-top: 1px solid var(--sidebar-border);
         }
         .sb-link.logout:hover { background: rgba(220,30,50,.22); color: #ff8080; }
@@ -246,8 +249,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 26px;
-            gap: 16px;
+            padding: 0 24px;
+            gap: 14px;
         }
         .topbar-left { display: flex; align-items: center; gap: 12px; }
 
@@ -265,8 +268,8 @@
         }
         #sb-toggle:hover { background: #F3F4F6; }
 
-        .page-title { font-size: 17px; font-weight: 700; color: var(--text-1); letter-spacing: -.015em; }
-        .breadcrumb { font-size: 11.5px; color: var(--text-2); margin-top: 1px; }
+        .page-title { font-size: 16px; font-weight: 700; color: var(--text-1); letter-spacing: -.015em; }
+        .breadcrumb { font-size: 11px; color: var(--text-2); margin-top: 1px; }
         .breadcrumb .bc-active { color: var(--red); font-weight: 600; }
 
         .topbar-right { display: flex; align-items: center; gap: 7px; }
@@ -300,6 +303,8 @@
             cursor: pointer;
             transition: border-color .14s;
             text-decoration: none;
+            /* FIX: pastikan bisa diklik */
+            user-select: none;
         }
         .user-chip:hover { border-color: #C0C4CC; }
         .uc-avatar {
@@ -314,66 +319,77 @@
         .uc-role { font-size: 10.5px; color: var(--text-2); }
 
         /* ══════════════ PROFILE CARD ══════════════ */
+        /* FIX: pakai position absolute relatif terhadap topbar-right, bukan fixed */
+        .topbar-right { position: relative; }
+
         #profile-card {
-            position: fixed; top: 70px; right: 26px;
-            width: 320px; background: white;
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 300px;
+            background: white;
             border: 1px solid var(--border);
             border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.13);
             z-index: 1200;
-            display: none;
-            animation: slideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            /* FIX: gunakan visibility + opacity, bukan display:none agar animasi mulus */
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px);
+            transition: opacity .2s, visibility .2s, transform .2s cubic-bezier(.4,0,.2,1);
+            pointer-events: none;
         }
-        #profile-card.active { display: block; }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-8px); }
-            to { opacity: 1; transform: translateY(0); }
+        #profile-card.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            pointer-events: auto;
         }
         .profile-header {
             background: linear-gradient(135deg, var(--red), var(--red-dark));
-            padding: 20px;
+            padding: 18px;
             text-align: center;
             border-radius: 11px 11px 0 0;
         }
         .profile-avatar {
-            width: 60px; height: 60px;
+            width: 56px; height: 56px;
             border-radius: 50%;
             background: white;
             color: var(--red);
             display: flex; align-items: center; justify-content: center;
-            font-size: 24px; font-weight: 700;
-            margin: 0 auto 12px;
+            font-size: 22px; font-weight: 700;
+            margin: 0 auto 10px;
         }
-        .profile-name { color: white; font-size: 16px; font-weight: 700; }
-        .profile-email { color: rgba(255,255,255,.75); font-size: 12px; margin-top: 4px; word-break: break-all; }
+        .profile-name { color: white; font-size: 15px; font-weight: 700; }
+        .profile-email { color: rgba(255,255,255,.75); font-size: 11.5px; margin-top: 3px; word-break: break-all; }
         .profile-role {
             display: inline-block;
             background: rgba(255,255,255,.2);
             color: white;
             font-size: 11px; font-weight: 600;
-            padding: 4px 12px;
+            padding: 3px 10px;
             border-radius: 20px;
-            margin-top: 8px;
+            margin-top: 6px;
         }
         .profile-body {
-            padding: 16px;
+            padding: 12px 14px;
             border-bottom: 1px solid var(--border);
         }
         .profile-item {
             display: flex; align-items: center; gap: 10px;
-            padding: 10px 0;
-            font-size: 13px;
+            padding: 8px 0;
+            font-size: 12.5px;
             color: var(--text-2);
         }
-        .profile-item i { color: var(--red); width: 16px; flex-shrink: 0; }
+        .profile-item i { color: var(--red); width: 14px; flex-shrink: 0; }
         .profile-item-value { color: var(--text-1); font-weight: 600; }
         .profile-footer {
-            padding: 12px;
+            padding: 10px 12px;
             display: flex; gap: 8px;
         }
         .profile-btn {
             flex: 1;
-            padding: 10px 12px;
+            padding: 9px 10px;
             border: 1px solid var(--border);
             border-radius: 8px;
             background: white;
@@ -383,7 +399,7 @@
             transition: background 0.15s, border-color 0.15s;
             text-decoration: none;
             display: flex; align-items: center; justify-content: center;
-            gap: 6px;
+            gap: 5px;
         }
         .profile-btn:hover { background: #F9FAFB; border-color: #D1D5DB; }
         .profile-btn.logout {
@@ -394,9 +410,22 @@
 
         /* ══════════════ LAYOUT ══════════════ */
         .page-wrap { display: flex; min-height: 100vh; }
-        .main-col  { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; transition: margin-left .28s cubic-bezier(.4,0,.2,1); }
-        .main-col.compact { margin-left: 64px; }   /* sesuai lebar compact baru */
-        .content-area { flex: 1; padding: 26px; }
+        .main-col  {
+            margin-left: 220px;
+            flex: 1; display: flex; flex-direction: column; min-height: 100vh;
+            transition: margin-left .28s cubic-bezier(.4,0,.2,1);
+        }
+        /* FIX: sesuaikan margin dengan lebar compact baru */
+        .main-col.compact { margin-left: 58px; }
+        .content-area { flex: 1; padding: 24px; }
+
+        /* ── mobile overlay ── */
+        #sb-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.45);
+            z-index: 49;
+        }
 
         /* ══════════════ RESPONSIVE ══════════════ */
         @media (max-width: 768px) {
@@ -404,7 +433,7 @@
             #sidebar.open { transform: translateX(0); box-shadow: 0 0 40px rgba(0,0,0,.5); }
             .main-col, .main-col.compact { margin-left: 0 !important; }
             #sb-toggle { display: flex; }
-            .content-area { padding: 16px; }
+            .content-area { padding: 14px; }
             .uc-name, .uc-role { display: none; }
             .sb-collapse-btn { display: none; }
         }
@@ -413,6 +442,9 @@
     @stack('styles')
 </head>
 <body>
+
+{{-- FIX: overlay dipindah ke luar sidebar agar tidak menimpa konten sidebar --}}
+<div id="sb-overlay"></div>
 
 <div class="page-wrap">
 
@@ -428,7 +460,7 @@
                     <div class="brand-sub">Admin Panel</div>
                 </div>
             </div>
-            <button class="sb-collapse-btn" id="sb-collapse-btn" title="Collapse sidebar" onclick="toggleSidebarCollapse()">
+            <button class="sb-collapse-btn" id="sb-collapse-btn" title="Collapse sidebar">
                 <i class="fas fa-chevron-left" id="sb-collapse-icon"></i>
             </button>
         </div>
@@ -536,7 +568,7 @@
                     <polyline points="16 17 21 12 16 7"/>
                     <line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
-                Keluar
+                <span class="sb-link-text">Keluar</span>
             </a>
             <form id="logout-form" action="{{ route('logout') }}" method="POST" hidden>@csrf</form>
         </div>
@@ -544,7 +576,7 @@
     <!-- ════════ /SIDEBAR ════════ -->
 
     <!-- ════════ MAIN ════════ -->
-    <div class="main-col">
+    <div class="main-col" id="main-col">
 
         <!-- TOPBAR -->
         <header id="topbar">
@@ -560,31 +592,30 @@
                     </div>
                 </div>
             </div>
+
             <div class="topbar-right">
-                <!-- Expandable Search Bar -->
-                <div id="search-container" style="display: flex; align-items: center; gap: 8px; max-width: 0; overflow: hidden; transition: max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1);">
-                    <input type="text" id="search-input" placeholder="Cari materi, tugas, kelas, siswa..." 
-                        style="padding: 8px 12px; border: 2px solid var(--red); border-radius: 8px; font-size: 13px; background: white; color: var(--text-1); width: 250px; outline: none; transition: border-color 0.2s;" 
-                        onkeyup="performSearch()" 
-                        onkeydown="if(event.key === 'Escape') closeSearchBar(); if(event.key === 'Enter') performSearch()"
-                        onfocus="this.style.borderColor = 'var(--red)'"
-                        onblur="this.style.borderColor = 'var(--red)'">
+                <!-- Search container -->
+                <div id="search-container" style="display:flex; align-items:center; gap:8px; max-width:0; overflow:hidden; transition:max-width .4s cubic-bezier(.4,0,.2,1);">
+                    <input type="text" id="search-input"
+                        placeholder="Cari materi, tugas, kelas, siswa..."
+                        style="padding:8px 12px; border:2px solid var(--red); border-radius:8px; font-size:13px; background:white; color:var(--text-1); width:240px; outline:none;"
+                        autocomplete="off">
                 </div>
-                
-                <!-- Search Button Toggle -->
-                <button class="icon-btn" id="search-toggle" title="Pencarian" onclick="toggleSearchBar()" style="transition: all 0.3s ease;">
+
+                <button type="button" class="icon-btn" id="search-toggle" title="Pencarian">
                     <i class="fas fa-search" style="font-size:13px;"></i>
                 </button>
 
-                <div class="user-chip" onclick="toggleProfileCard()" style="cursor: pointer;">
+                <!-- User chip -->
+                <button type="button" class="user-chip" id="profile-toggle">
                     <div class="uc-avatar">{{ substr(auth()->user()->name, 0, 1) }}</div>
                     <div>
                         <div class="uc-name">{{ auth()->user()->name }}</div>
                         <div class="uc-role">{{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}</div>
                     </div>
-                </div>
+                </button>
 
-                <!-- Profile Card -->
+                <!-- FIX: Profile card sekarang di dalam .topbar-right, pakai position absolute -->
                 <div id="profile-card">
                     <div class="profile-header">
                         <div class="profile-avatar">{{ substr(auth()->user()->name, 0, 1) }}</div>
@@ -593,14 +624,11 @@
                         <div class="profile-role">
                             @switch(auth()->user()->role)
                                 @case('admin_elearning')
-                                    <i class="fas fa-crown"></i> Admin E-Learning
-                                    @break
+                                    <i class="fas fa-crown"></i> Admin E-Learning @break
                                 @case('guru')
-                                    <i class="fas fa-chalkboard-user"></i> Guru
-                                    @break
+                                    <i class="fas fa-chalkboard-user"></i> Guru @break
                                 @case('siswa')
-                                    <i class="fas fa-book"></i> Siswa
-                                    @break
+                                    <i class="fas fa-book"></i> Siswa @break
                             @endswitch
                         </div>
                     </div>
@@ -608,33 +636,35 @@
                         <div class="profile-item">
                             <i class="fas fa-envelope"></i>
                             <div>
-                                <div style="font-size: 11px; color: var(--text-2);">Email</div>
-                                <div class="profile-item-value" style="word-break: break-all;">{{ auth()->user()->email }}</div>
+                                <div style="font-size:11px; color:var(--text-2);">Email</div>
+                                <div class="profile-item-value" style="word-break:break-all;">{{ auth()->user()->email }}</div>
                             </div>
                         </div>
                         <div class="profile-item">
                             <i class="fas fa-calendar"></i>
                             <div>
-                                <div style="font-size: 11px; color: var(--text-2);">Bergabung</div>
+                                <div style="font-size:11px; color:var(--text-2);">Bergabung</div>
                                 <div class="profile-item-value">{{ auth()->user()->created_at->format('d M Y') }}</div>
                             </div>
                         </div>
                         @if(auth()->user()->email_verified_at)
-                            <div class="profile-item">
-                                <i class="fas fa-check-circle"></i>
-                                <div>
-                                    <div style="font-size: 11px; color: var(--text-2);">Status Email</div>
-                                    <div class="profile-item-value">Terverifikasi</div>
-                                </div>
+                        <div class="profile-item">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <div style="font-size:11px; color:var(--text-2);">Status Email</div>
+                                <div class="profile-item-value">Terverifikasi</div>
                             </div>
+                        </div>
                         @endif
                     </div>
                     <div class="profile-footer">
                         <a href="{{ route('admin.dashboard') }}" class="profile-btn">
                             <i class="fas fa-home"></i> Dashboard
                         </a>
-                        <form method="POST" action="{{ route('logout') }}" style="display: none;" id="logout-form-profile">@csrf</form>
-                        <button type="button" onclick="showConfirmation('Apakah Anda yakin ingin keluar?', 'Konfirmasi Logout', function() { document.getElementById('logout-form-profile').submit(); })" class="profile-btn logout">
+                        <form method="POST" action="{{ route('logout') }}" id="logout-form-profile" style="display:none;">@csrf</form>
+                        <button type="button"
+                            onclick="showConfirmation('Apakah Anda yakin ingin keluar?', 'Konfirmasi Logout', function() { document.getElementById('logout-form-profile').submit(); })"
+                            class="profile-btn logout">
                             <i class="fas fa-sign-out-alt"></i> Keluar
                         </button>
                     </div>
@@ -643,11 +673,11 @@
         </header>
 
         <!-- Search Results Dropdown -->
-        <div id="search-results-dropdown" style="display: none; position: fixed; top: 65px; right: 20px; width: 420px; background: white; border: 1px solid #E5E7EB; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); z-index: 1500; max-height: 500px; overflow-y: auto;">
-            <div id="search-results" style="padding: 0;">
-                <div style="padding: 48px 24px; text-align: center; color: var(--text-2);">
-                    <i class="fas fa-search" style="font-size: 40px; opacity: 0.2; display: block; margin-bottom: 16px;"></i>
-                    <p style="margin: 0; font-size: 14px; font-weight: 500;">Mulai ketik untuk mencari...</p>
+        <div id="search-results-dropdown" style="display:none; position:fixed; top:65px; right:20px; width:400px; background:white; border:1px solid #E5E7EB; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.12); z-index:1500; max-height:480px; overflow-y:auto;">
+            <div id="search-results" style="padding:0;">
+                <div style="padding:40px 20px; text-align:center; color:var(--text-2);">
+                    <i class="fas fa-search" style="font-size:36px; opacity:.2; display:block; margin-bottom:12px;"></i>
+                    <p style="margin:0; font-size:14px; font-weight:500;">Mulai ketik untuk mencari...</p>
                 </div>
             </div>
         </div>
@@ -659,9 +689,7 @@
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
                         const errors = @json($errors->all());
-                        if (errors.length > 0) {
-                            showPopup('error', errors.join('\n'), 'Terjadi Kesalahan');
-                        }
+                        if (errors.length > 0) showPopup('error', errors.join('\n'), 'Terjadi Kesalahan');
                     });
                 </script>
             @endif
@@ -683,202 +711,216 @@
             @endif
 
             @yield('content')
-
         </main>
-
     </div>
     <!-- ════════ /MAIN ════════ -->
 
-</div><!-- /page-wrap -->
+</div>
 
 @stack('scripts')
 @include('components.popup')
+
 <script>
-    // Override browser alert dengan popup
     window.alert = function(message) {
         showPopup('info', message, 'Pemberitahuan');
     };
 </script>
+
 <script>
 (function () {
-    /* Sidebar toggle */
-    const toggle  = document.getElementById('sb-toggle');
-    const sidebar = document.getElementById('sidebar');
-    const mainCol = document.querySelector('.main-col');
-    const overlay = document.createElement('div');
-    Object.assign(overlay.style, {
-        position:'fixed', inset:'0', background:'rgba(0,0,0,.45)',
-        zIndex:'49', display:'none', backdropFilter:'blur(2px)'
-    });
-    document.body.appendChild(overlay);
+    const sidebar  = document.getElementById('sidebar');
+    const mainCol  = document.getElementById('main-col');
+    const overlay  = document.getElementById('sb-overlay');
+    const toggle   = document.getElementById('sb-toggle');
+    const collapseBtn  = document.getElementById('sb-collapse-btn');
+    const collapseIcon = document.getElementById('sb-collapse-icon');
 
-    function openSidebar() {
+    /* ── Mobile sidebar ── */
+    function openMobile() {
         sidebar.classList.add('open');
         overlay.style.display = 'block';
         document.body.style.overflow = 'hidden';
     }
-    function closeSidebar() {
+    function closeMobile() {
         sidebar.classList.remove('open');
         overlay.style.display = 'none';
         document.body.style.overflow = '';
     }
 
     if (toggle) toggle.addEventListener('click', () =>
-        sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
+        sidebar.classList.contains('open') ? closeMobile() : openMobile());
 
-    overlay.addEventListener('click', closeSidebar);
+    overlay.addEventListener('click', closeMobile);
 
     sidebar.querySelectorAll('.sb-link').forEach(a =>
-        a.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }));
+        a.addEventListener('click', () => { if (window.innerWidth <= 768) closeMobile(); }));
 
-    window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+    window.addEventListener('resize', () => { if (window.innerWidth > 768) closeMobile(); });
 
-    /* Sidebar Collapse Toggle */
-    function updateCollapseBtn(isCompact) {
-        const icon = document.getElementById('sb-collapse-icon');
-        const btn  = document.getElementById('sb-collapse-btn');
-        if (isCompact) {
-            icon.className = 'fas fa-chevron-right';
-            btn.title = 'Expand sidebar';
-            btn.setAttribute('aria-label', 'Expand sidebar navigation');
-            btn.setAttribute('aria-expanded', 'false');
-        } else {
-            icon.className = 'fas fa-chevron-left';
-            btn.title = 'Collapse sidebar';
-            btn.setAttribute('aria-label', 'Collapse sidebar navigation');
-            btn.setAttribute('aria-expanded', 'true');
-        }
-    }
-
-    window.toggleSidebarCollapse = function() {
-        const isCompact = sidebar.classList.toggle('compact');
-        mainCol.classList.toggle('compact');
-        localStorage.setItem('sidebar_compact', isCompact);
-        updateCollapseBtn(isCompact);
-    };
-
-    // Load sidebar preference on page load
-    document.addEventListener('DOMContentLoaded', () => {
-        const isCompact = localStorage.getItem('sidebar_compact') === 'true';
+    /* ── Sidebar collapse (desktop) ── */
+    function applyCompact(isCompact) {
         if (isCompact) {
             sidebar.classList.add('compact');
             mainCol.classList.add('compact');
+            collapseIcon.className = 'fas fa-chevron-right';
+            collapseBtn.title = 'Expand sidebar';
+        } else {
+            sidebar.classList.remove('compact');
+            mainCol.classList.remove('compact');
+            collapseIcon.className = 'fas fa-chevron-left';
+            collapseBtn.title = 'Collapse sidebar';
         }
-        updateCollapseBtn(isCompact);
+    }
+
+    if (collapseBtn) {
+        collapseBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isCompact = !sidebar.classList.contains('compact');
+            applyCompact(isCompact);
+            localStorage.setItem('sidebar_compact', isCompact);
+        });
+    }
+
+    // Restore preference
+    document.addEventListener('DOMContentLoaded', function() {
+        const saved = localStorage.getItem('sidebar_compact') === 'true';
+        applyCompact(saved);
     });
 
-    /* Search Bar Functions */
-    window.toggleSearchBar = function() {
-        const container = document.getElementById('search-container');
-        const isExpanded = container.style.maxWidth !== '0px' && container.style.maxWidth !== '';
-        
-        if (isExpanded) {
-            closeSearchBar();
-        } else {
-            container.style.maxWidth = '280px';
-            setTimeout(() => {
-                const input = document.getElementById('search-input');
-                input.focus();
-            }, 100);
-        }
-    };
+    /* ── Profile card ── */
+    const profileToggle = document.getElementById('profile-toggle');
+    const profileCard   = document.getElementById('profile-card');
 
-    window.closeSearchBar = function() {
-        const container = document.getElementById('search-container');
-        container.style.maxWidth = '0px';
-        document.getElementById('search-input').value = '';
-        document.getElementById('search-results-dropdown').style.display = 'none';
-        document.getElementById('search-results').innerHTML = `
-            <div style="padding: 40px 20px; text-align: center; color: var(--text-2);">
-                <i class="fas fa-search" style="font-size: 32px; opacity: 0.3; display: block; margin-bottom: 12px;"></i>
-                <p style="margin: 0; font-size: 14px;">Mulai ketik untuk mencari...</p>
-            </div>
-        `;
-    };
-
-    window.performSearch = function() {
-        const query = document.getElementById('search-input').value.trim();
-        const dropdown = document.getElementById('search-results-dropdown');
-        
-        if (query.length < 2) {
-            document.getElementById('search-results').innerHTML = `
-                <div style="padding: 40px 20px; text-align: center; color: var(--text-2);">
-                    <i class="fas fa-search" style="font-size: 32px; opacity: 0.3; display: block; margin-bottom: 12px;"></i>
-                    <p style="margin: 0; font-size: 14px;">Mulai ketik untuk mencari...</p>
-                </div>
-            `;
-            return;
-        }
-
-        dropdown.style.display = 'block';
-
-        // Fetch search results
-        fetch(`/api/search?q=${encodeURIComponent(query)}`, {
-            headers: { 'Accept': 'application/json' }
-        })
-        .then(r => r.json())
-        .then(data => {
-            let html = '';
-            if (data.results && data.results.length > 0) {
-                html = data.results.map(item => `
-                    <a href="${item.url}" style="display: block; padding: 12px 16px; border-bottom: 1px solid #F3F4F6; text-decoration: none; color: inherit; transition: background 0.15s;">
-                        <div style="display: flex; gap: 10px; align-items: flex-start;">
-                            <i class="${item.icon}" style="color: var(--red); flex-shrink: 0; margin-top: 2px;"></i>
-                            <div style="flex: 1; min-width: 0;">
-                                <div style="font-size: 13px; font-weight: 600; color: var(--text-1); word-break: break-word;">${item.title}</div>
-                                <div style="font-size: 12px; color: var(--text-2); margin-top: 2px;">${item.description}</div>
-                            </div>
-                        </div>
-                    </a>
-                `).join('');
-            } else {
-                html = `
-                    <div style="padding: 40px 20px; text-align: center; color: var(--text-2);">
-                        <i class="fas fa-search" style="font-size: 32px; opacity: 0.3; display: block; margin-bottom: 12px;"></i>
-                        <p style="margin: 0; font-size: 14px;">Tidak ada hasil untuk "${query}"</p>
-                    </div>
-                `;
-            }
-            document.getElementById('search-results').innerHTML = html;
-        })
-        .catch(err => {
-            console.error('Search error:', err);
-            document.getElementById('search-results').innerHTML = `
-                <div style="padding: 20px; text-align: center; color: #dc2626; font-size: 13px;">
-                    <i class="fas fa-exclamation-circle" style="display: block; font-size: 24px; margin-bottom: 8px;"></i>
-                    Terjadi kesalahan saat mencari
-                </div>
-            `;
+    if (profileToggle) {
+        profileToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            profileCard.classList.toggle('active');
+            // Tutup search dropdown jika terbuka
+            closeSearch();
         });
-    };
+    }
+    if (profileCard) {
+        profileCard.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
 
-    window.toggleProfileCard = function() {
-        const card = document.getElementById('profile-card');
-        card.classList.toggle('active');
-    };
+    /* ── Search ── */
+    const searchToggle    = document.getElementById('search-toggle');
+    const searchContainer = document.getElementById('search-container');
+    const searchInput     = document.getElementById('search-input');
+    const searchDropdown  = document.getElementById('search-results-dropdown');
+    const searchResults   = document.getElementById('search-results');
 
-    window.closeProfileCard = function() {
-        const card = document.getElementById('profile-card');
-        card.classList.remove('active');
-    };
+    let searchTimer = null;
 
-    // Close search bar and dropdowns on escape key
+    const EMPTY_STATE = `
+        <div style="padding:40px 20px; text-align:center; color:var(--text-2);">
+            <i class="fas fa-search" style="font-size:32px; opacity:.25; display:block; margin-bottom:10px;"></i>
+            <p style="margin:0; font-size:13px;">Mulai ketik untuk mencari...</p>
+        </div>`;
+
+    function openSearch() {
+        searchContainer.style.maxWidth = '280px';
+        searchDropdown.style.display = 'block';
+        setTimeout(() => searchInput && searchInput.focus(), 120);
+        // Tutup profile card jika terbuka
+        profileCard.classList.remove('active');
+    }
+
+    function closeSearch() {
+        searchContainer.style.maxWidth = '0';
+        searchInput.value = '';
+        searchDropdown.style.display = 'none';
+        searchResults.innerHTML = EMPTY_STATE;
+    }
+
+    if (searchToggle) {
+        searchToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isOpen = searchContainer.style.maxWidth !== '0px' && searchContainer.style.maxWidth !== '';
+            isOpen ? closeSearch() : openSearch();
+        });
+    }
+
+    if (searchDropdown) {
+        searchDropdown.addEventListener('click', function(e) { e.stopPropagation(); });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeSearch();
+        });
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimer);
+            const q = this.value.trim();
+
+            if (q.length < 2) {
+                searchDropdown.style.display = 'none';
+                searchResults.innerHTML = EMPTY_STATE;
+                return;
+            }
+
+            // Debounce 300ms
+            searchTimer = setTimeout(() => doSearch(q), 300);
+        });
+    }
+
+    /* FIX: syntax error .then data => diperbaiki menjadi .then(data => */
+    function doSearch(q) {
+        searchDropdown.style.display = 'block';
+        searchResults.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-2); font-size:13px;"><i class="fas fa-spinner fa-spin" style="margin-bottom:8px; display:block; font-size:20px;"></i>Mencari...</div>`;
+
+        fetch('/api/search?q=' + encodeURIComponent(q), {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var html = '';
+            if (data.results && data.results.length > 0) {
+                html = data.results.map(function(item) {
+                    return '<a href="' + item.url + '" style="display:block; padding:11px 14px; border-bottom:1px solid #F3F4F6; text-decoration:none; color:inherit;">'
+                         + '<div style="display:flex; gap:10px; align-items:flex-start;">'
+                         + '<i class="' + item.icon + '" style="color:var(--red); flex-shrink:0; margin-top:2px; font-size:14px;"></i>'
+                         + '<div style="flex:1; min-width:0;">'
+                         + '<div style="font-size:13px; font-weight:600; color:var(--text-1);">' + item.title + '</div>'
+                         + '<div style="font-size:11.5px; color:var(--text-2); margin-top:2px;">' + item.description + '</div>'
+                         + '</div></div></a>';
+                }).join('');
+            } else {
+                html = '<div style="padding:36px 20px; text-align:center; color:var(--text-2);">'
+                     + '<i class="fas fa-search" style="font-size:28px; opacity:.2; display:block; margin-bottom:10px;"></i>'
+                     + '<p style="margin:0; font-size:13px;">Tidak ada hasil untuk &ldquo;' + q + '&rdquo;</p></div>';
+            }
+            searchResults.innerHTML = html;
+        })
+        .catch(function(err) {
+            console.error('Search error:', err);
+            searchResults.innerHTML = '<div style="padding:20px; text-align:center; color:#dc2626; font-size:13px;"><i class="fas fa-exclamation-circle" style="display:block; font-size:22px; margin-bottom:8px;"></i>Terjadi kesalahan saat mencari</div>';
+        });
+    }
+
+    /* ── Global click → tutup dropdown ── */
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#search-container') &&
+            !e.target.closest('#search-toggle') &&
+            !e.target.closest('#search-results-dropdown')) {
+            closeSearch();
+        }
+        if (!e.target.closest('#profile-toggle') &&
+            !e.target.closest('#profile-card')) {
+            profileCard.classList.remove('active');
+        }
+    });
+
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
-            closeSearchBar();
-            document.getElementById('search-results-dropdown').style.display = 'none';
+            closeSearch();
+            profileCard.classList.remove('active');
         }
     });
 
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('#search-container') && !e.target.closest('#search-toggle') && !e.target.closest('#search-results-dropdown')) {
-            closeSearchBar();
-        }
-        if (!e.target.closest('.user-chip') && !e.target.closest('#profile-card')) {
-            closeProfileCard();
-        }
-    });
 })();
 </script>
 </body>

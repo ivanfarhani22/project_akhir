@@ -48,6 +48,32 @@
                 </div>
             </div>
 
+            @if($assignment->file_path)
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <h2 class="font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-download text-green-600"></i>
+                            File Tugas dari Guru
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 flex justify-between items-center gap-4">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-file text-2xl text-green-600"></i>
+                                <div>
+                                    <p class="font-bold text-gray-900">{{ basename($assignment->file_path) }}</p>
+                                    <p class="text-gray-600 text-xs mt-1">Klik download untuk melihat soal.</p>
+                                </div>
+                            </div>
+                            <a href="{{ route('siswa.assignments.download', $assignment) }}"
+                               class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition inline-flex items-center gap-2 whitespace-nowrap">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Grade Card (if exists) -->
             @if($submission && $submission->grade)
                 <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg shadow-sm border-l-4 border-amber-500 overflow-hidden">
@@ -138,7 +164,7 @@
                         </h2>
                     </div>
                     <div class="p-6">
-                        <form action="#" method="POST" enctype="multipart/form-data" class="space-y-4">
+                        <form action="{{ route('siswa.submissions.store', $assignment) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                             @csrf
                             
                             <div>
@@ -219,7 +245,17 @@
                             <p class="text-gray-900 font-bold">{{ $submission->submitted_at->format('d M Y') }}</p>
                             <p class="text-gray-600 text-sm">{{ $submission->submitted_at->format('H:i') }} WIB</p>
                             @if($isLate && $deadline)
-                                <p class="text-amber-600 text-xs font-bold mt-2">⚠️ Terlambat {{ $submission->submitted_at->diffInHours($deadline) }} jam</p>
+                                @php
+                                    // Show positive, non-decimal lateness (e.g. "2 jam 10 menit")
+                                    $lateMinutes = $deadline->diffInMinutes($submission->submitted_at);
+                                    $lateHours = intdiv($lateMinutes, 60);
+                                    $lateRemainderMinutes = $lateMinutes % 60;
+                                @endphp
+                                <p class="text-amber-600 text-xs font-bold mt-2">
+                                    ⚠️ Terlambat
+                                    {{ $lateHours > 0 ? $lateHours . ' jam' : '' }}
+                                    {{ $lateRemainderMinutes > 0 ? $lateRemainderMinutes . ' menit' : ($lateHours === 0 ? '0 menit' : '') }}
+                                </p>
                             @endif
                         </div>
                     @endif

@@ -19,20 +19,33 @@ class AssignmentController extends Controller
     {
         $classId = request('class');
         $search = request('search');
-        
-        $query = Assignment::with(['classSubject' => fn($q) => $q->with(['eClass', 'subject', 'teacher']), 'submissions']);
-        
+
+        $query = Assignment::with([
+            'eClass' => fn($q) => $q->with(['classSubjects.teacher']),
+            'classSubject' => fn($q) => $q->with(['eClass', 'subject', 'teacher']),
+        ])
+        ->withCount([
+            'submissions as submissions_count',
+            'submissions as pending_count' => fn($q) => $q->whereNull('submitted_at'),
+        ]);
+
         if ($classId) {
-            $query->whereHas('classSubject', fn($q) => $q->where('e_class_id', $classId));
+            // Support both schemas:
+            // - new: assignments.class_subject_id -> class_subjects.e_class_id
+            // - legacy: assignments.e_class_id
+            $query->where(function ($q) use ($classId) {
+                $q->whereHas('classSubject', fn($q2) => $q2->where('e_class_id', $classId))
+                  ->orWhere('e_class_id', $classId);
+            });
         }
-        
+
         if ($search) {
             $query->where('title', 'like', "%$search%");
         }
-        
+
         $assignments = $query->orderBy('deadline', 'desc')->paginate(20);
         $classes = EClass::orderBy('name')->get();
-        
+
         // Statistics
         $statistics = [
             'total' => Assignment::count(),
@@ -40,7 +53,7 @@ class AssignmentController extends Controller
             'submission_rate' => 0,
             'pending_grading' => Grade::whereNull('score')->count(),
         ];
-        
+
         return view('admin.assignments.index', compact('assignments', 'classes', 'statistics'));
     }
 
@@ -103,22 +116,27 @@ class AssignmentController extends Controller
      */
     public function show(Assignment $assignment)
     {
+        $assignment->load([
+            'eClass' => fn($q) => $q->with(['classSubjects.teacher', 'classSubjects.subject']),
+            'classSubject' => fn($q) => $q->with(['eClass', 'subject', 'teacher']),
+        ]);
+
         $submissionsQuery = Submission::where('assignment_id', $assignment->id)
             ->with('student', 'grade')
             ->orderBy('submitted_at', 'desc');
 
         $submissions = $submissionsQuery->get();
 
-        $stats = [
+        $statistics = [
             // Prefer classSubject->eClass (current schema). Fallback to eClass if it exists.
-            'total' => optional(optional($assignment->classSubject)->eClass ?? $assignment->eClass)->students()->count() ?? 0,
+            'total_students' => optional(optional($assignment->classSubject)->eClass ?? $assignment->eClass)->students()->count() ?? 0,
             'submitted' => (clone $submissionsQuery)->whereNotNull('submitted_at')->count(),
             'pending' => (clone $submissionsQuery)->whereNull('submitted_at')->count(),
             'graded' => (clone $submissionsQuery)->whereHas('grade')->count(),
             'ungraded' => (clone $submissionsQuery)->whereNotNull('submitted_at')->whereDoesntHave('grade')->count(),
         ];
 
-        return view('admin.assignments.show', compact('assignment', 'submissions', 'stats'));
+        return view('admin.assignments.show', compact('assignment', 'submissions', 'statistics'));
     }
 
     /**
@@ -185,10 +203,15 @@ class AssignmentController extends Controller
     /**
      * Grade submission.
      */
-    public function gradeSubmission(Request $request, Submission $submission)
+    public function gradeSubmission(Request $request, Assignment $assignment, Submission $submission)
     {
+        // Safety: ensure submission belongs to the assignment from the URL
+        abort_if((int) $submission->assignment_id !== (int) $assignment->id, 404);
+
+        $maxScore = $assignment->max_score ?? 100;
+
         $validated = $request->validate([
-            'score' => 'required|numeric|min:0|max:' . $submission->assignment->max_score,
+            'score' => ['required', 'numeric', 'min:0', 'max:' . $maxScore],
             'feedback' => 'nullable|string',
         ]);
 
@@ -205,7 +228,7 @@ class AssignmentController extends Controller
         \App\Models\ActivityLog::create([
             'user_id' => auth()->id(),
             'action' => 'grade_submission',
-            'description' => "Admin beri nilai {$validated['score']} untuk submission tugas {$submission->assignment->title}",
+            'description' => "Admin beri nilai {$validated['score']} untuk submission tugas {$assignment->title}",
             'ip_address' => $request->ip(),
             'timestamp' => now(),
         ]);

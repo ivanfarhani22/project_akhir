@@ -90,7 +90,12 @@
                         @forelse($assignments as $assignment)
                             @php
                                 $className = $assignment->classSubject?->eClass?->name ?? $assignment->eClass?->name;
-                                $teacherName = $assignment->classSubject?->teacher?->name;
+
+                                // Teacher fallback:
+                                // - preferred: assignment->classSubject->teacher
+                                // - legacy: derive from class (EClass accessor uses first classSubject teacher)
+                                $teacherName = $assignment->classSubject?->teacher?->name
+                                    ?? $assignment->eClass?->teacher?->name;
                             @endphp
                             <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
                                 <td class="px-2 sm:px-6 py-2 sm:py-4 text-gray-900 font-medium">{{ $loop->iteration }}</td>

@@ -58,8 +58,12 @@
                     <div class="space-y-4">
                         @php
                             $className = $assignment->classSubject?->eClass?->name ?? $assignment->eClass?->name;
-                            $subjectName = $assignment->classSubject?->subject?->name;
-                            $teacherName = $assignment->classSubject?->teacher?->name;
+
+                            $subjectName = $assignment->classSubject?->subject?->name
+                                ?? $assignment->eClass?->subject?->name;
+
+                            $teacherName = $assignment->classSubject?->teacher?->name
+                                ?? $assignment->eClass?->teacher?->name;
                         @endphp
 
                         <div class="flex justify-between items-start pb-4 border-b border-gray-200">

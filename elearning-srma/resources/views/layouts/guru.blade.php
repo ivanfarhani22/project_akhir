@@ -743,4 +743,13 @@
                 throw new Error(text || 'Failed to clear notifications');
             }
             const dd = document.getElementById('notif-dropdown');
-            if
+            dd.style.display = 'none';
+            loadNotifications();
+        })
+        .catch(err => console.error('Clear notifications error:', err));
+    };
+})();
+</script>
+
+</body>
+</html>

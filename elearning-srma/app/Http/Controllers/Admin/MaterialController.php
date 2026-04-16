@@ -176,14 +176,32 @@ class MaterialController extends Controller
      */
     public function download(Material $material)
     {
-        if (!file_exists(storage_path('app/materials/' . $material->file_path))) {
-            abort(404, 'File not found');
+        $relative = ltrim($material->file_path ?? '', '/');
+        abort_if($relative === '', 404);
+
+        // Many uploads store paths like: storage/materials/xxx.ext
+        $normalized = preg_replace('#^storage/#', '', $relative);
+
+        $candidates = [
+            storage_path('app/public/' . $normalized),
+            storage_path('app/' . $relative),
+            storage_path('app/' . $normalized),
+        ];
+
+        $fullPath = null;
+        foreach ($candidates as $candidate) {
+            if (file_exists($candidate)) {
+                $fullPath = $candidate;
+                break;
+            }
         }
 
-        return response()->download(
-            storage_path('app/materials/' . $material->file_path),
-            $material->title . '.' . pathinfo($material->file_path, PATHINFO_EXTENSION)
-        );
+        abort_unless($fullPath, 404);
+
+        $ext = pathinfo($relative, PATHINFO_EXTENSION);
+        $downloadName = trim(($material->title ?: 'material') . ($ext ? '.' . $ext : ''));
+
+        return response()->download($fullPath, $downloadName);
     }
 
     /**
