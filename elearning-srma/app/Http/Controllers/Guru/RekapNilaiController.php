@@ -32,7 +32,7 @@ class RekapNilaiController extends Controller
                 ->assignments()
                 ->where('class_subject_id', $classSubject->id)
                 ->orderBy('created_at')
-                ->get(['id', 'title', 'max_score']);
+                ->get(['id', 'title']);
 
             $studentIds = $classSubject->eClass->students->pluck('id');
             $assignmentIds = $assignments->pluck('id');

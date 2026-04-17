@@ -79,7 +79,7 @@ class AssignmentController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'deadline' => 'required|date|after:now',
-            'max_score' => 'required|numeric|min:1',
+            // max_score sengaja dihapus dari input/validasi. Nilai diberikan saat siswa mengumpulkan tugas.
             'file' => 'nullable|file|max:10240', // 10MB
         ]);
 
@@ -107,7 +107,6 @@ class AssignmentController extends Controller
             'description' => $validated['description'],
             'file_path' => $filePath,
             'deadline' => $validated['deadline'],
-            'max_score' => $validated['max_score'],
             'created_by' => auth()->id(),
         ]);
 
@@ -169,7 +168,7 @@ class AssignmentController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'deadline' => 'required|date|after:now',
-            'max_score' => 'required|numeric|min:1',
+            // max_score sengaja dihapus dari input/validasi. Nilai diberikan saat siswa mengumpulkan tugas.
             'file' => 'nullable|file|max:10240', // 10MB
         ]);
 

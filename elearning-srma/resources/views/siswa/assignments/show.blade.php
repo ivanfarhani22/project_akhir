@@ -86,9 +86,6 @@
                     <div class="px-6 py-8 text-center">
                         <div class="text-5xl font-bold text-amber-600 mb-3">
                             {{ $submission->grade->score }}
-                            @if($submission->grade->max_score)
-                                <span class="text-3xl text-gray-500 font-normal">/ {{ $submission->grade->max_score }}</span>
-                            @endif
                         </div>
                         @php
                             $maxScore = $submission->grade->max_score ?? 100;

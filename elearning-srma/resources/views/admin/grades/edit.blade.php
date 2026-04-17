@@ -42,10 +42,6 @@
                         <span class="font-semibold text-blue-700">Tugas:</span>
                         <span class="text-gray-800">{{ $grade->submission->assignment->title }}</span>
                     </p>
-                    <p class="text-gray-700">
-                        <span class="font-semibold text-blue-700">Nilai Maksimal:</span>
-                        <span class="text-gray-800">{{ $grade->submission->assignment->max_score }}</span>
-                    </p>
                 </div>
             </div>
 
@@ -60,8 +56,9 @@
                         <label for="score" class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-star text-red-600 mr-2"></i>Nilai <span class="text-red-600">*</span>
                         </label>
+                        @php($maxScore = $grade->submission->assignment->max_score ?? 100)
                         <input type="number" name="score" id="score" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-red-600 focus:outline-none @error('score') border-red-500 @enderror" 
-                            min="0" max="{{ $grade->submission->assignment->max_score }}" step="0.5"
+                            min="0" max="{{ $maxScore }}" step="0.5"
                             value="{{ old('score', $grade->score) }}" required>
                         @error('score')
                             <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -107,7 +104,7 @@
 <script>
 const scoreInput = document.getElementById('score');
 const percentageInput = document.getElementById('percentage');
-const maxScore = {{ $grade->submission->assignment->max_score }};
+const maxScore = {{ $grade->submission->assignment->max_score ?? 100 }};
 
 function updatePercentage() {
     const score = parseFloat(scoreInput.value) || 0;

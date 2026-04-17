@@ -96,22 +96,6 @@
                         >
                     </div>
 
-                    <!-- MAX SCORE FIELD -->
-                    <div class="mb-6">
-                        <label class="block font-semibold text-gray-900 mb-2">
-                            Nilai Maksimal <span class="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="number"
-                            name="max_score"
-                            id="max_score"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
-                            value="{{ old('max_score', $assignment->max_score ?? 100) }}"
-                            min="1"
-                            required
-                        >
-                    </div>
-
                     <!-- FILE UPLOAD FIELD -->
                     <div class="mb-8">
                         <label class="block font-semibold text-gray-900 mb-3">

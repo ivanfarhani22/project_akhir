@@ -56,10 +56,6 @@
                         <span class="text-gray-600 text-sm font-semibold">Deadline</span>
                         <span class="text-gray-900 text-sm font-bold">{{ $assignment->deadline?->format('d M Y H:i') ?? '-' }}</span>
                     </div>
-                    <div class="flex justify-between gap-4">
-                        <span class="text-gray-600 text-sm font-semibold">Nilai Maksimal</span>
-                        <span class="text-gray-900 text-sm font-bold">{{ $assignment->max_score ?? 100 }}</span>
-                    </div>
 
                     @if($downloadUrl)
                         <div class="pt-4 border-t border-gray-200">

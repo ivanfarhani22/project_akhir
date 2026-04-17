@@ -99,10 +99,6 @@
                             </span>
                         </div>
 
-                        <div class="flex justify-between items-start pb-4 border-b border-gray-200">
-                            <span class="text-gray-700 font-semibold">Nilai Maksimal:</span>
-                            <span class="text-gray-900 font-semibold">{{ $assignment->max_score }}</span>
-                        </div>
 
                         <div class="flex justify-between items-start">
                             <span class="text-gray-700 font-semibold">Dibuat:</span>
@@ -237,12 +233,13 @@
             
             <div class="space-y-4">
                 <div>
+                    @php($maxScore = $assignment->max_score ?? 100)
                     <label for="score{{ $submission->id }}" class="block text-sm font-semibold text-gray-700 mb-2">
-                        Nilai (0-{{ $assignment->max_score }})
+                        Nilai (0-{{ $maxScore }})
                     </label>
                     <input type="number" name="score" id="score{{ $submission->id }}" 
                         class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition"
-                        min="0" max="{{ $assignment->max_score }}" step="0.5"
+                        min="0" max="{{ $maxScore }}" step="0.5"
                         value="{{ $submission->grade->score ?? '' }}" required>
                 </div>
 

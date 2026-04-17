@@ -95,29 +95,16 @@
                     @enderror
                 </div>
 
-                <!-- Deadline & Nilai Maksimal Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="deadline" class="block text-sm font-semibold text-gray-700 mb-2">
-                            Deadline <span class="text-red-600">*</span>
-                        </label>
-                        <input type="datetime-local" name="deadline" id="deadline" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('deadline') border-red-500 @enderror" 
-                            value="{{ old('deadline') }}" required>
-                        @error('deadline')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label for="max_score" class="block text-sm font-semibold text-gray-700 mb-2">
-                            Nilai Maksimal <span class="text-red-600">*</span>
-                        </label>
-                        <input type="number" name="max_score" id="max_score" placeholder="100" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('max_score') border-red-500 @enderror" 
-                            value="{{ old('max_score', 100) }}" min="1" required>
-                        @error('max_score')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
+                <!-- Deadline -->
+                <div>
+                    <label for="deadline" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Deadline <span class="text-red-600">*</span>
+                    </label>
+                    <input type="datetime-local" name="deadline" id="deadline" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('deadline') border-red-500 @enderror" 
+                        value="{{ old('deadline') }}" required>
+                    @error('deadline')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 <!-- File (Opsional) -->
