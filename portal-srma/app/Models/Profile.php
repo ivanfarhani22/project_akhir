@@ -13,6 +13,7 @@ class Profile extends Model
         'key',
         'title',
         'content',
+        'content_2',
         'type',
     ];
 

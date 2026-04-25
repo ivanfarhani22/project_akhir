@@ -31,6 +31,16 @@
                     @enderror
                 </div>
                 
+                <div class="mb-6">
+                    <label for="video_url" class="block text-sm font-medium text-gray-700 mb-2">Link Video (opsional)</label>
+                    <input type="url" name="video_url" id="video_url" value="{{ old('video_url') }}"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent @error('video_url') border-red-500 @enderror"
+                           placeholder="Contoh: https://youtube.com/watch?v=... atau https://drive.google.com/file/d/...">
+                    @error('video_url')
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                
                 <div>
                     <label for="content" class="block text-sm font-medium text-gray-700 mb-2">Konten <span class="text-red-500">*</span></label>
                     <textarea name="content" id="content" rows="15" required
@@ -39,6 +49,10 @@
                     @error('content')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                     @enderror
+
+                    <div class="mt-2 text-xs text-gray-500">
+                        Jika editor tidak muncul, cek koneksi internet / cache browser.
+                    </div>
                 </div>
             </div>
         </div>
@@ -96,3 +110,22 @@
     </div>
 </form>
 @endsection
+
+@push('scripts')
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (!window.CKEDITOR) return;
+
+            // Avoid double init
+            if (CKEDITOR.instances && CKEDITOR.instances.content) {
+                CKEDITOR.instances.content.destroy(true);
+            }
+
+            CKEDITOR.replace('content', {
+                height: 450,
+                removeButtons: 'Subscript,Superscript,Flash',
+            });
+        });
+    </script>
+@endpush

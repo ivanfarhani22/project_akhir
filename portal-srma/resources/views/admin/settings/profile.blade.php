@@ -160,6 +160,50 @@ NPSN: XXXXXXXX">{{ $profiles['dasar_hukum'] ?? '' }}</textarea>
                 </div>
             </div>
         </div>
+        
+        <!-- PPDB - Poster & Informasi Tambahan -->
+        <div class="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                PPDB
+            </h2>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+                <div>
+                    <p class="text-sm font-medium text-gray-700 mb-2">Poster PPDB Saat Ini:</p>
+                    @if(($profiles['ppdb_poster_image'] ?? false))
+                        <img src="{{ asset('storage/' . $profiles['ppdb_poster_image']) }}"
+                             alt="Poster PPDB" class="max-w-full h-auto rounded-lg border border-gray-200 max-h-64 object-contain">
+                    @else
+                        <div class="bg-gray-50 rounded-lg p-8 text-center border-2 border-dashed border-gray-200">
+                            <p class="text-gray-500 text-sm">Belum ada poster PPDB</p>
+                        </div>
+                    @endif
+
+                    <div class="mt-4">
+                        <label for="ppdb_poster" class="block text-sm font-medium text-gray-700 mb-2">
+                            Upload/Ganti Poster (opsional)
+                        </label>
+                        <input type="file" name="ppdb_poster" id="ppdb_poster" accept="image/jpeg,image/png,image/jpg,image/webp"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-2">PNG, JPG, JPEG, WEBP (Maks. 2MB)</p>
+                        @error('ppdb_poster')
+                        <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+
+                <div>
+                    <label for="ppdb_extra_info" class="block text-sm font-medium text-gray-700 mb-2">Informasi Tambahan PPDB</label>
+                    <textarea name="ppdb_extra_info" id="ppdb_extra_info" rows="10"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                              placeholder="Contoh: link pendaftaran/nomor panitia/pengumuman resmi, dll.">{{ old('ppdb_extra_info', $profiles['ppdb_extra_info'] ?? '') }}</textarea>
+                    <p class="text-xs text-gray-500 mt-2">Boleh diisi teks biasa atau HTML sederhana.</p>
+                </div>
+            </div>
+        </div>
     </div>
     
     <!-- Submit Button -->

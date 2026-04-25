@@ -92,8 +92,10 @@ class SettingController extends Controller
             'visi' => Profile::getValue('visi', ''),
             'misi' => Profile::getValue('misi', ''),
             'struktur_organisasi_image' => Profile::getValue('struktur_organisasi_image', ''),
+            'ppdb_poster_image' => Profile::getValue('ppdb_poster_image', ''),
+            'ppdb_extra_info' => Profile::where('key', 'ppdb_extra_info')->value('content_2') ?? '',
         ];
-        
+
         return view('admin.settings.profile', compact('profiles'));
     }
 
@@ -104,6 +106,8 @@ class SettingController extends Controller
             'visi' => 'nullable|string',
             'misi' => 'nullable|string',
             'struktur_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'ppdb_poster' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'ppdb_extra_info' => 'nullable|string',
         ]);
 
         Profile::setValue('dasar_hukum', 'Dasar Hukum dan Legalitas', $validated['dasar_hukum'] ?? '', 'html');
@@ -120,6 +124,30 @@ class SettingController extends Controller
             $filename = time() . '_struktur.' . $file->getClientOriginalExtension();
             $path = $file->storeAs('profiles', $filename, 'public');
             Profile::setValue('struktur_organisasi_image', 'Gambar Struktur Organisasi', $path, 'image');
+        }
+
+        // PPDB extra info (text/html)
+        Profile::updateOrCreate(
+            ['key' => 'ppdb_extra_info'],
+            [
+                'title' => 'PPDB - Informasi Tambahan',
+                'content' => '',
+                'content_2' => $validated['ppdb_extra_info'] ?? '',
+                'type' => 'html',
+            ]
+        );
+
+        // PPDB poster upload
+        if ($request->hasFile('ppdb_poster')) {
+            $oldPoster = Profile::getValue('ppdb_poster_image', '');
+            if ($oldPoster) {
+                Storage::disk('public')->delete($oldPoster);
+            }
+
+            $file = $request->file('ppdb_poster');
+            $filename = time() . '_ppdb_poster.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('profiles', $filename, 'public');
+            Profile::setValue('ppdb_poster_image', 'PPDB - Poster Pengumuman', $path, 'image');
         }
         
         ActivityLog::log('update', 'Mengupdate profil sekolah', Profile::class);

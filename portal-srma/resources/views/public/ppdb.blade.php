@@ -20,6 +20,22 @@
 <!-- Content -->
 <section class="py-16 bg-gray-50">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        @if(!empty($ppdbPoster))
+            <div class="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Poster / Pengumuman PPDB</h2>
+                <img src="{{ asset('storage/' . $ppdbPoster) }}" alt="Poster PPDB" class="w-full h-auto rounded-xl border border-gray-200">
+            </div>
+        @endif
+
+        @if(!empty($ppdbExtraInfo))
+            <div class="bg-white rounded-2xl shadow-sm p-6 md:p-8 mb-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Informasi Tambahan</h2>
+                <div class="prose prose-gray max-w-none">
+                    {!! clean($ppdbExtraInfo, 'simple') !!}
+                </div>
+            </div>
+        @endif
+
         <div class="bg-white rounded-2xl shadow-sm p-8 md:p-12 text-center">
             <!-- Icon -->
             <div class="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">

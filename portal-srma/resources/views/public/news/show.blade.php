@@ -56,6 +56,21 @@
                             </span>
                         </div>
                         
+                        @if($news->video_embed_url)
+                            <div class="mb-6">
+                                <div class="aspect-video w-full bg-black rounded-xl overflow-hidden">
+                                    <iframe
+                                        src="{{ $news->video_embed_url }}"
+                                        class="w-full h-full"
+                                        title="Video"
+                                        frameborder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                        allowfullscreen
+                                    ></iframe>
+                                </div>
+                            </div>
+                        @endif
+
                         <div class="prose prose-gray max-w-none">
                             {!! clean($news->content, 'content') !!}
                         </div>
