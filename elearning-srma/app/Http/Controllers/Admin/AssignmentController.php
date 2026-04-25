@@ -78,7 +78,7 @@ class AssignmentController extends Controller
             'description' => 'required|string',
             'deadline' => 'required|date|after:now',
             // max_score sengaja dihapus dari input/validasi. Nilai diberikan saat siswa mengumpulkan tugas.
-            'file' => 'nullable|file|max:10240', // 10MB
+            'file' => 'nullable|file|max:' . config('upload.assignment_max_kb'),
         ]);
 
         $filePath = null;
@@ -185,12 +185,40 @@ class AssignmentController extends Controller
         $title = $assignment->title;
         $className = $assignment->eClass->name;
 
+        // Delete physical files first (best-effort)
+        $filesDeleted = 0;
+
+        // 1) Assignment attachment
+        if (!empty($assignment->file_path)) {
+            $relative = preg_replace('#^storage/#', '', ltrim((string) $assignment->file_path, '/'));
+            if ($relative && Storage::disk('public')->exists($relative)) {
+                if (Storage::disk('public')->delete($relative)) {
+                    $filesDeleted++;
+                }
+            }
+        }
+
+        // 2) Submissions files to avoid orphans + broken references
+        $submissionPaths = Submission::where('assignment_id', $assignment->id)
+            ->whereNotNull('file_path')
+            ->pluck('file_path')
+            ->all();
+
+        foreach ($submissionPaths as $p) {
+            $relative = preg_replace('#^storage/#', '', ltrim((string) $p, '/'));
+            if ($relative && Storage::disk('public')->exists($relative)) {
+                if (Storage::disk('public')->delete($relative)) {
+                    $filesDeleted++;
+                }
+            }
+        }
+
         $assignment->delete();
 
         \App\Models\ActivityLog::create([
             'user_id' => auth()->id(),
             'action' => 'delete_assignment',
-            'description' => "Admin hapus tugas '{$title}' dari kelas {$className}",
+            'description' => "Admin hapus tugas '{$title}' dari kelas {$className} (hapus file: {$filesDeleted})",
             'ip_address' => $request->ip(),
             'timestamp' => now(),
         ]);

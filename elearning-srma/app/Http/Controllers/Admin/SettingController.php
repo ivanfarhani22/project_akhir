@@ -93,7 +93,7 @@ class SettingController extends Controller
 
         $request->validate([
             'login_banners'   => 'required|array|max:' . $remainingSlots,
-            'login_banners.*' => 'required|image|mimes:jpg,jpeg,png,gif|max:5120',
+            'login_banners.*' => 'required|image|mimes:jpg,jpeg,png,gif|max:' . config('upload.banner_max_kb'),
         ]);
 
         $uploaded = 0;

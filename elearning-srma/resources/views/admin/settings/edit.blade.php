@@ -315,7 +315,7 @@ body.font-large  { font-size: 18px; }
                     <div class="upload-area" onclick="document.getElementById('banner-input').click();">
                         <div class="upload-icon"><i class="fas fa-cloud-arrow-up"></i></div>
                         <div class="upload-text">Klik atau drag gambar ke sini</div>
-                        <div class="upload-hint">JPG, PNG, GIF | Max 5MB per file | Sisa {{ $remainingSlots }} slot</div>
+                        <div class="upload-hint">JPG, PNG, GIF | Maks. 5MB per file | Sisa {{ $remainingSlots }} slot</div>
                     </div>
                 </div>
             @else

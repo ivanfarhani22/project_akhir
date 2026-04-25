@@ -72,7 +72,7 @@ class MaterialController extends Controller
             'e_class_id' => 'required|exists:e_classes,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'file' => 'required|file',
+            'file' => 'required|file|max:' . config('upload.material_max_kb'),
         ]);
 
         $class = EClass::findOrFail($validated['e_class_id']);
@@ -149,8 +149,9 @@ class MaterialController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'display_name' => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'file' => 'nullable|file',
+            'file' => 'nullable|file|max:' . config('upload.material_max_kb'),
         ]);
 
         // If new file provided, create new version
@@ -223,5 +224,46 @@ class MaterialController extends Controller
         return redirect()
             ->route('guru.materials.index', ['class_id' => $class->id])
             ->with('success', 'Material deleted successfully');
+    }
+
+    /**
+     * Preview material file (inline).
+     */
+    public function preview(Material $material)
+    {
+        $class = $material->eClass;
+        if (!$class->isTeachedBy(auth()->id())) {
+            abort(403, 'Unauthorized');
+        }
+
+        $relative = ltrim($material->file_path ?? '', '/');
+        abort_if($relative === '', 404);
+
+        $normalized = preg_replace('#^storage/#', '', $relative);
+
+        $candidates = [
+            storage_path('app/public/' . $normalized),
+            storage_path('app/' . $relative),
+            storage_path('app/' . $normalized),
+        ];
+
+        $fullPath = null;
+        foreach ($candidates as $candidate) {
+            if (file_exists($candidate)) {
+                $fullPath = $candidate;
+                break;
+            }
+        }
+
+        abort_unless($fullPath, 404);
+
+        $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+        $previewable = ['pdf', 'png', 'jpg', 'jpeg', 'gif'];
+        abort_if(!in_array($ext, $previewable, true), 415);
+
+        $downloadName = trim(($material->display_name ?: $material->title ?: 'material') . '.' . $ext);
+        return response()->file($fullPath, [
+            'Content-Disposition' => 'inline; filename="' . addslashes($downloadName) . '"',
+        ]);
     }
 }

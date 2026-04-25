@@ -75,12 +75,11 @@ class AssignmentController extends Controller
     {
         $validated = $request->validate([
             'e_class_id' => 'required|exists:e_classes,id',
-            'class_subject_id' => 'required|exists:class_subjects,id',
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'required|string',
             'deadline' => 'required|date|after:now',
             // max_score sengaja dihapus dari input/validasi. Nilai diberikan saat siswa mengumpulkan tugas.
-            'file' => 'nullable|file|max:10240', // 10MB
+            'file' => 'nullable|file|max:' . config('upload.assignment_max_kb'),
         ]);
 
         $class = EClass::findOrFail($validated['e_class_id']);
@@ -167,9 +166,9 @@ class AssignmentController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'deadline' => 'required|date|after:now',
+            'deadline' => 'required|date',
             // max_score sengaja dihapus dari input/validasi. Nilai diberikan saat siswa mengumpulkan tugas.
-            'file' => 'nullable|file|max:10240', // 10MB
+            'file' => 'nullable|file|max:' . config('upload.assignment_max_kb'),
         ]);
 
         // If new file provided

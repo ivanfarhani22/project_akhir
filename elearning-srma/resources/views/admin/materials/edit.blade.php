@@ -69,6 +69,18 @@
                     @enderror
                 </div>
 
+                <!-- Display Name -->
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Tampilan (Opsional)</label>
+                    <input type="text" name="display_name" value="{{ old('display_name', $material->display_name) }}"
+                        class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg text-xs sm:text-sm focus:border-red-600 focus:outline-none @error('display_name') border-red-500 @enderror"
+                        placeholder="Contoh: Materi Bab 1 - PDF">
+                    @error('display_name')
+                        <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                    <p class="text-gray-500 text-xs mt-1">Fitur rename ini hanya mengubah nama yang ditampilkan/filename saat download, bukan nama file fisik di server.</p>
+                </div>
+
                 <!-- File Upload -->
                 <div>
                     <label for="file" class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
@@ -89,7 +101,7 @@
                     <input type="file" name="file" id="file" class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg text-xs sm:text-sm focus:border-red-600 focus:outline-none @error('file') border-red-500 @enderror" 
                         accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.mp4,.mkv">
                     <p class="text-gray-600 text-xs mt-2">
-                        <i class="fas fa-info-circle mr-1"></i>Format: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, JPG, PNG, MP4, MKV (Maks. 100MB)
+                        <i class="fas fa-info-circle mr-1"></i>Format: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, JPG, PNG, MP4, MKV (Maks. {{ (int) ceil(config('upload.material_max_kb') / 1024) }}MB)
                     </p>
                     @error('file')
                         <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
@@ -109,4 +121,22 @@
         </div>
     </div>
 </div>
+
+<script>
+(function () {
+    const input = document.getElementById('file');
+    if (!input) return;
+
+    const MAX_BYTES = {{ (int) config('upload.material_max_kb') }} * 1024;
+
+    input.addEventListener('change', function () {
+        const f = this.files && this.files[0];
+        if (!f) return;
+        if (f.size > MAX_BYTES) {
+            alert('Ukuran file terlalu besar. Maksimal {{ (int) ceil(config('upload.material_max_kb') / 1024) }} MB.');
+            this.value = '';
+        }
+    });
+})();
+</script>
 @endsection

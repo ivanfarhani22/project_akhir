@@ -119,9 +119,28 @@ class FileUploadService
      */
     public static function deleteFile(string $path): bool
     {
-        if (Storage::disk('public')->exists($path)) {
-            return Storage::disk('public')->delete($path);
+        $path = trim((string) $path);
+        if ($path === '') {
+            return false;
         }
+
+        // Normalize common formats:
+        // - 'storage/assignments/xxx.pdf' (public URL style)
+        // - '/storage/assignments/xxx.pdf'
+        // - full URL: https://domain.tld/storage/assignments/xxx.pdf
+        // - disk path: 'assignments/xxx.pdf'
+        $path = preg_replace('#^https?://[^/]+/#i', '', $path); // strip domain
+        $path = ltrim($path, '/');
+        $path = preg_replace('#^storage/#', '', $path);
+
+        if ($path === '') {
+            return false;
+        }
+
+        if (Storage::disk('public')->exists($path)) {
+            return (bool) Storage::disk('public')->delete($path);
+        }
+
         return false;
     }
 

@@ -39,6 +39,9 @@
             <a href="{{ route('admin.materials.index') }}" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-gray-400 hover:bg-gray-500 text-white font-semibold px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-sm transition whitespace-nowrap">
                 <i class="fas fa-arrow-left"></i> <span class="hidden sm:inline">Kembali</span>
             </a>
+            <a href="{{ route('admin.materials.preview', $material) }}" target="_blank" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-sm transition whitespace-nowrap">
+                <i class="fas fa-eye"></i> <span class="hidden sm:inline">Preview</span>
+            </a>
         </div>
     </div>
 

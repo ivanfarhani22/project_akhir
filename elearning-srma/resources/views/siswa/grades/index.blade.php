@@ -1,78 +1,70 @@
 @extends('layouts.siswa')
-
 @section('title', 'Nilai Saya')
 @section('icon', 'fas fa-star')
 
 @section('content')
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <i class="fas fa-star text-amber-500"></i>
-            Nilai Saya
-        </h1>
-        <p class="text-gray-600 text-sm mt-1">Lihat nilai dan feedback dari guru</p>
+
+<div class="mb-8">
+    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1"><i class="fas fa-star mr-1"></i> Siswa / Nilai</p>
+    <h1 class="text-2xl font-extrabold text-gray-900"><i class="fas fa-star text-amber-400 mr-2"></i>Nilai Saya</h1>
+    <p class="text-sm text-gray-500 mt-1">Lihat nilai dan feedback dari guru</p>
+</div>
+
+@if($grades->count() > 0)
+    @php $average = $grades->avg('score'); @endphp
+
+    <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm text-center py-5">
+            <p class="text-3xl font-extrabold text-blue-600">{{ number_format($average, 1) }}</p>
+            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mt-1">Rata-rata</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm text-center py-5">
+            <p class="text-3xl font-extrabold text-blue-600">{{ $grades->count() }}</p>
+            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mt-1">Total Penilaian</p>
+        </div>
     </div>
 
-    @if($grades->count() > 0)
-        <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden mb-8">
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="border-b-2 border-gray-200 bg-gray-50">
-                            <th class="px-6 py-4 text-left text-gray-600 font-semibold text-sm">Kelas</th>
-                            <th class="px-6 py-4 text-left text-gray-600 font-semibold text-sm">Tugas/Ujian</th>
-                            <th class="px-6 py-4 text-left text-gray-600 font-semibold text-sm">Nilai</th>
-                            <th class="px-6 py-4 text-left text-gray-600 font-semibold text-sm">Tanggal Penilaian</th>
-                            <th class="px-6 py-4 text-left text-gray-600 font-semibold text-sm">Feedback</th>
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="h-1 bg-gradient-to-r from-amber-400 to-orange-400"></div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kelas</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tugas</th>
+                        <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Nilai</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Feedback</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @foreach($grades as $grade)
+                        @php
+                            $s = $grade->score;
+                            $sc = $s >= 80 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ($s >= 70 ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-red-50 text-red-600 border-red-200');
+                        @endphp
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-5 py-3.5 font-semibold text-gray-800">{{ $grade->assignment->eClass->name }}</td>
+                            <td class="px-5 py-3.5 text-gray-600">{{ $grade->assignment->title }}</td>
+                            <td class="px-5 py-3.5 text-center">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border {{ $sc }}">{{ $s }}</span>
+                            </td>
+                            <td class="px-5 py-3.5 text-xs text-gray-400">{{ $grade->graded_at?->format('d M Y') ?? '—' }}</td>
+                            <td class="px-5 py-3.5 text-xs text-gray-500">{{ $grade->feedback ? Str::limit($grade->feedback, 50) : '—' }}</td>
                         </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        @foreach($grades as $grade)
-                            @php
-                                $assignment = $grade->assignment;
-                                $score = $grade->score;
-                                $scoreColor = $score >= 80 ? 'bg-green-100 text-green-800' : ($score >= 70 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
-                            @endphp
-                            <tr class="hover:bg-gray-50 transition">
-                                <td class="px-6 py-4 text-gray-900 font-semibold">{{ $assignment->eClass->name }}</td>
-                                <td class="px-6 py-4 text-gray-900">{{ $assignment->title }}</td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold {{ $scoreColor }}">
-                                        {{ $score }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-gray-600 text-sm">{{ $grade->graded_at ? $grade->graded_at->format('d M Y') : '-' }}</td>
-                                <td class="px-6 py-4 text-gray-700 text-sm">{{ $grade->feedback ? substr($grade->feedback, 0, 50) . '...' : '-' }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-            <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 text-center">
-                <p class="text-gray-600 text-sm font-semibold mb-2 uppercase">Nilai Rata-rata</p>
-                @php
-                    $average = $grades->avg('score');
-                @endphp
-                <p class="text-4xl font-bold text-blue-600">
-                    {{ number_format($average, 1) }}
-                </p>
+    </div>
+@else
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
+        <div class="flex flex-col items-center justify-center py-16 text-center">
+            <div class="w-20 h-20 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center mb-4">
+                <i class="fas fa-star text-3xl text-gray-300"></i>
             </div>
-
-            <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 text-center">
-                <p class="text-gray-600 text-sm font-semibold mb-2 uppercase">Total Penilaian</p>
-                <p class="text-4xl font-bold text-blue-600">
-                    {{ $grades->count() }}
-                </p>
-            </div>
+            <p class="text-gray-500 text-sm">Anda belum memiliki nilai.</p>
         </div>
-    @else
-        <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-            <div class="p-12 text-center">
-                <i class="fas fa-inbox text-gray-300 text-6xl mb-4 block"></i>
-                <p class="text-gray-600 text-base">Anda belum memiliki nilai</p>
-            </div>
-        </div>
-    @endif
+    </div>
+@endif
 @endsection

@@ -6,6 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') — E-Learning SRMA</title>
 
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#561020">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -549,6 +553,15 @@
             <div class="sb-divider"></div>
             <div class="sb-section">Sistem</div>
 
+            <a href="{{ route('admin.storage.index') }}"
+               class="sb-link @if(request()->routeIs('admin.storage.*')) active @endif">
+                <svg class="sb-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M4 7h16M4 12h16M4 17h16"/>
+                    <path d="M7 7v10M17 7v10"/>
+                </svg>
+                <span class="sb-link-text">Manajemen Penyimpanan</span>
+            </a>
+
             <a href="{{ route('admin.settings.edit') }}"
                class="sb-link @if(request()->routeIs('admin.settings.*')) active @endif">
                 <svg class="sb-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -715,6 +728,16 @@
     </div>
     <!-- ════════ /MAIN ════════ -->
 
+    <!-- PWA Install button (hidden by default, shown when beforeinstallprompt fires) -->
+    <button id="pwa-install-btn"
+        type="button"
+        class="hidden fixed bottom-4 right-4 z-[9999] px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold shadow-lg hover:bg-blue-700 transition"
+    >
+        Install App
+    </button>
+
+    <!-- PWA: Install UX + Service Worker -->
+    <script src="/js/pwa-install.js" defer></script>
 </div>
 
 @stack('scripts')

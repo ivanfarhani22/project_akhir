@@ -116,6 +116,7 @@
                         class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('file') border-red-500 @enderror"
                         accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip,.rar,.jpg,.jpeg,.png">
                     <p class="text-xs text-gray-500 mt-1">Boleh dikosongkan. Jika diisi, file akan disimpan sebagai lampiran tugas.</p>
+                    <p class="text-xs text-gray-500 mt-1" id="file-hint">Maksimal ukuran file: {{ (int) ceil(config('upload.assignment_max_kb') / 1024) }} MB</p>
                     @error('file')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -155,5 +156,23 @@ document.getElementById('e_class_id').addEventListener('change', function() {
             .catch(error => console.error('Error:', error));
     }
 });
+</script>
+
+<script>
+(function () {
+    const input = document.getElementById('file');
+    if (!input) return;
+
+    const MAX_BYTES = {{ (int) config('upload.assignment_max_kb') }} * 1024;
+
+    input.addEventListener('change', function () {
+        const f = this.files && this.files[0];
+        if (!f) return;
+        if (f.size > MAX_BYTES) {
+            alert('Ukuran file terlalu besar. Maksimal {{ (int) ceil(config('upload.assignment_max_kb') / 1024) }} MB.');
+            this.value = '';
+        }
+    });
+})();
 </script>
 @endsection

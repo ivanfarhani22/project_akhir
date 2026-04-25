@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Models\AttendanceSession;
 
+// Offline page (PWA fallback)
+Route::view('/offline', 'offline.offline')->name('offline');
+
 // Auth Routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -27,11 +30,18 @@ Route::get('/', function () {
 // API Routes (no auth required)
 
 // API Routes (authenticated)
-Route::middleware(['auth'])->prefix('api')->group(function () {
-    Route::get('/search', [\App\Http\Controllers\Api\SearchController::class, 'search']);
-    Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
-    Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
-    Route::post('/notifications/clear', [\App\Http\Controllers\Api\NotificationController::class, 'clearAll']);
+Route::prefix('api')->middleware(['auth'])->group(function () {
+    // Admin-only (search global data)
+    Route::middleware(['role:admin_elearning'])->group(function () {
+        Route::get('/search', [\App\Http\Controllers\Api\SearchController::class, 'search']);
+    });
+
+    // Guru/Siswa only (notifications)
+    Route::middleware(['role:guru,siswa'])->group(function () {
+        Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+        Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+        Route::post('/notifications/clear', [\App\Http\Controllers\Api\NotificationController::class, 'clearAll']);
+    });
 });
 
 // Dashboard Admin E-Learning
@@ -51,6 +61,7 @@ Route::middleware(['auth', 'role:admin_elearning'])->prefix('admin')->name('admi
     // Materials
     Route::get('/materials/{material}/download', [\App\Http\Controllers\Admin\MaterialController::class, 'download'])->name('materials.download');
     Route::get('/materials/statistics', [\App\Http\Controllers\Admin\MaterialController::class, 'statistics'])->name('materials.statistics');
+    Route::get('/materials/{material}/preview', [\App\Http\Controllers\Admin\MaterialController::class, 'preview'])->name('materials.preview');
     
     // Assignments
     Route::get('/assignments/{assignment}/submissions', [\App\Http\Controllers\Admin\AssignmentController::class, 'submissions'])->name('assignments.submissions');
@@ -105,6 +116,11 @@ Route::middleware(['auth', 'role:admin_elearning'])->prefix('admin')->name('admi
     // Rekap Nilai (admin - semua kelas/mapel)
     Route::get('/rekap-nilai', [\App\Http\Controllers\Admin\RekapNilaiController::class, 'index'])->name('rekap-nilai.index');
     Route::get('/rekap-nilai/export', [\App\Http\Controllers\Admin\RekapNilaiController::class, 'export'])->name('rekap-nilai.export');
+    
+    // Storage management
+    Route::get('/storage', [\App\Http\Controllers\Admin\StorageController::class, 'index'])->name('storage.index');
+    Route::post('/storage/delete', [\App\Http\Controllers\Admin\StorageController::class, 'delete'])->name('storage.delete');
+    Route::post('/storage/cleanup', [\App\Http\Controllers\Admin\StorageController::class, 'cleanup'])->name('storage.cleanup');
 });
 
 // Dashboard Guru
@@ -254,11 +270,11 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
     });
 
     // Submission upload/update for an assignment
-    Route::post('/assignments/{assignment}/submit', function (\Illuminate\Http\Request $request, \App\Models\Assignment $assignment) {
+    Route::post('/assignments/{assignment}/submit', function (\App\Models\Assignment $assignment, \Illuminate\Http\Request $request) {
         abort_if(!auth()->user()->classes->contains($assignment->eClass), 403);
 
         $request->validate([
-            'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,zip|max:10240',
+            'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,zip|max:' . config('upload.submission_max_kb'),
         ]);
 
         $studentId = auth()->id();
@@ -267,6 +283,11 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
             'assignment_id' => $assignment->id,
             'student_id' => $studentId,
         ]);
+
+        // If replacing an existing submission, delete the old file first
+        if ($submission->exists && $submission->file_path) {
+            \App\Services\FileUploadService::deleteFile($submission->file_path);
+        }
 
         // Store in public disk so it can also be downloaded later if needed
         $stored = $request->file('file')->store('submissions', 'public');
@@ -360,5 +381,33 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
 
         return response()->download($fullPath);
     })->name('materials.download');
+    
+    // Download siswa submission file (for siswa)
+    Route::get('/submissions/{submission}/download', function (\App\Models\Submission $submission) {
+        abort_if($submission->student_id !== auth()->id(), 403);
+
+        $relative = ltrim($submission->file_path ?? '', '/');
+        abort_if($relative === '', 404);
+
+        $normalized = preg_replace('#^storage/#', '', $relative);
+
+        $candidates = [
+            storage_path('app/public/' . $normalized),
+            storage_path('app/' . $relative),
+            storage_path('app/' . $normalized),
+        ];
+
+        $fullPath = null;
+        foreach ($candidates as $candidate) {
+            if (file_exists($candidate)) {
+                $fullPath = $candidate;
+                break;
+            }
+        }
+
+        abort_unless($fullPath, 404);
+
+        return response()->download($fullPath);
+    })->name('submissions.download');
 });
 

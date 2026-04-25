@@ -57,14 +57,29 @@
                     </div>
 
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Upload File Baru <span class="text-gray-400 font-normal">(Opsional)</span></label>
-                    <div id="dropzone" class="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center bg-gray-50 hover:border-[#A41E35] hover:bg-red-50 transition cursor-pointer">
-                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-300 mb-3 block"></i>
-                        <p class="text-sm font-semibold text-gray-700 mb-1">Klik atau drag file di sini</p>
-                        <p class="text-xs text-gray-400">PDF, DOC, XLS, PPT, ZIP — Maks. 10MB</p>
-                        <input type="file" name="file" id="file" class="hidden">
+                    <div class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus-within:border-red-600 transition-colors relative">
+                        <input type="file" name="file" id="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                            accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.mp4,.mkv">
+                        <div class="flex items-center justify-center">
+                            <i class="fas fa-cloud-upload-alt text-gray-400 text-lg sm:text-xl mr-2"></i>
+                            <span class="text-gray-500 text-xs sm:text-sm" id="file-name">Pilih file atau drag & drop</span>
+                        </div>
                     </div>
-                    <p class="text-emerald-600 text-xs mt-2 font-medium" id="filename"></p>
-                    @error('file')<span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>@enderror
+                    <p class="text-gray-600 text-xs mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>Format: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, JPG, PNG, MP4, MKV (Maks. {{ (int) ceil(config('upload.material_max_kb') / 1024) }}MB)
+                    </p>
+                    @error('file')
+                        <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nama Tampilan (Opsional)</label>
+                    <input type="text" name="display_name" value="{{ old('display_name', $material->display_name) }}"
+                           class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#A41E35] focus:ring-2 focus:ring-red-100 transition @error('display_name') border-red-500 @enderror"
+                           placeholder="Contoh: Materi Bab 1 - PDF">
+                    @error('display_name')<span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>@enderror
+                    <p class="text-xs text-gray-400 mt-1">Rename ini hanya mengubah nama yang ditampilkan/filename saat download.</p>
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-3">
@@ -83,19 +98,29 @@
 </div>
 
 <script>
-    const dropzone = document.getElementById('dropzone');
-    const fileInput = document.getElementById('file');
-    const filename  = document.getElementById('filename');
-    dropzone.addEventListener('click', () => fileInput.click());
-    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('border-[#A41E35]','bg-red-50'); });
-    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('border-[#A41E35]','bg-red-50'));
-    dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('border-[#A41E35]','bg-red-50'); fileInput.files = e.dataTransfer.files; updateFilename(); });
-    fileInput.addEventListener('change', updateFilename);
-    function updateFilename() {
-        if (fileInput.files.length) {
-            const f = fileInput.files[0];
-            filename.textContent = `✓ ${f.name} (${(f.size/1048576).toFixed(2)} MB)`;
-        }
-    }
+    (function () {
+        const fileInput = document.getElementById('file');
+        const fileName = document.getElementById('file-name');
+        if (!fileInput) return;
+
+        const MAX_BYTES = {{ (int) config('upload.material_max_kb') }} * 1024;
+
+        fileInput.addEventListener('change', function () {
+            const f = this.files && this.files[0];
+            if (!f) {
+                if (fileName) fileName.textContent = 'Pilih file atau drag & drop';
+                return;
+            }
+
+            if (f.size > MAX_BYTES) {
+                alert('Ukuran file terlalu besar. Maksimal {{ (int) ceil(config('upload.material_max_kb') / 1024) }} MB.');
+                this.value = '';
+                if (fileName) fileName.textContent = 'Pilih file atau drag & drop';
+                return;
+            }
+
+            if (fileName) fileName.textContent = f.name;
+        });
+    })();
 </script>
 @endsection

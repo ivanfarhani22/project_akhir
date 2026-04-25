@@ -1,98 +1,76 @@
 @extends('layouts.siswa')
-
 @section('title', 'Mata Pelajaran')
 @section('icon', 'fas fa-book')
 
 @section('content')
-    <!-- PAGE HEADER -->
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3 mb-2">
-            <i class="fas fa-book text-amber-500"></i>
-            Mata Pelajaran
-        </h1>
-        <p class="text-gray-600 text-sm">Daftar mata pelajaran yang Anda pelajari</p>
-    </div>
 
-    @if($classes->count() > 0)
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            @foreach($classes as $class)
-                <div class="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-bold text-gray-900 mb-1">{{ $class->subject->name }}</h3>
-                        <p class="text-gray-600 text-sm">{{ $class->name }}</p>
+<div class="mb-8">
+    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1"><i class="fas fa-book mr-1"></i> Siswa / Mata Pelajaran</p>
+    <h1 class="text-2xl font-extrabold text-gray-900"><i class="fas fa-book text-amber-500 mr-2"></i>Mata Pelajaran</h1>
+    <p class="text-sm text-gray-500 mt-1">Daftar mata pelajaran yang Anda pelajari</p>
+</div>
+
+@if($classes->count() > 0)
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        @foreach($classes as $class)
+            <div class="group bg-white rounded-2xl border-2 border-gray-100 hover:border-amber-400 hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col">
+                <div class="h-1 bg-gradient-to-r from-amber-400 to-orange-400"></div>
+                <div class="p-5 flex flex-col flex-1">
+                    <div class="mb-3">
+                        <h3 class="text-base font-bold text-gray-900 truncate">{{ $class->subject->name }}</h3>
+                        <p class="text-xs text-gray-400 mt-0.5">{{ $class->name }}</p>
                     </div>
-                    
-                    <div class="p-6 space-y-4">
-                        <!-- Guru -->
-                        <div class="pb-4 border-b border-gray-200">
-                            <p class="text-gray-500 text-xs font-semibold mb-1 uppercase">Pengajar</p>
-                            <p class="text-gray-900 font-medium">{{ $class->teacher->name }}</p>
-                        </div>
+                    <p class="text-xs text-gray-500 mb-1"><i class="fas fa-chalkboard-teacher mr-1"></i>{{ $class->teacher->name }}</p>
+                    @if($class->description)
+                        <p class="text-xs text-gray-400 line-clamp-2 mb-3">{{ Str::limit($class->description, 80) }}</p>
+                    @endif
 
-                        <!-- Deskripsi -->
-                        @if($class->description)
-                            <div class="pb-4 border-b border-gray-200">
-                                <p class="text-gray-500 text-xs font-semibold mb-1 uppercase">Deskripsi</p>
-                                <p class="text-gray-700 text-sm">{{ Str::limit($class->description, 100) }}</p>
-                            </div>
-                        @endif
+                    <div class="py-3 border-t border-b border-gray-100 my-3">
+                        <p class="text-xs text-gray-400 mb-1">
+                            @if($class->schedules && $class->schedules->count() > 0)
+                                @php $sch = $class->schedules->first(); @endphp
+                                <i class="fas fa-calendar mr-1"></i>{{ ucfirst($sch->day_of_week) }}
+                                @if($sch->start_time) • {{ \Carbon\Carbon::createFromTimeString($sch->start_time)->format('H:i') }}@if($sch->end_time) – {{ \Carbon\Carbon::createFromTimeString($sch->end_time)->format('H:i') }}@endif @endif
+                            @else
+                                <i class="fas fa-calendar mr-1"></i>TBA
+                            @endif
+                        </p>
+                    </div>
 
-                        <!-- Jadwal -->
-                        <div class="pb-4 border-b border-gray-200">
-                            <p class="text-gray-500 text-xs font-semibold mb-2 uppercase">Jadwal</p>
-                            <div class="flex items-center gap-2 text-gray-700 text-sm">
-                                <i class="fas fa-calendar text-blue-500"></i>
-                                <span>
-                                    @if($class->schedules && $class->schedules->count() > 0)
-                                        @php $schedule = $class->schedules->first(); @endphp
-                                        {{ ucfirst($schedule->day_of_week) }}
-                                        @if($schedule->start_time)
-                                            • {{ \Carbon\Carbon::createFromTimeString($schedule->start_time)->format('H:i') }}
-                                            @if($schedule->end_time)
-                                                - {{ \Carbon\Carbon::createFromTimeString($schedule->end_time)->format('H:i') }}
-                                            @endif
-                                        @endif
-                                    @else
-                                        TBA
-                                    @endif
-                                </span>
-                            </div>
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="text-center bg-blue-50 rounded-xl py-3">
+                            <p class="text-xl font-extrabold text-blue-600">{{ $class->materials->count() }}</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Materi</p>
                         </div>
+                        <div class="text-center bg-amber-50 rounded-xl py-3">
+                            <p class="text-xl font-extrabold text-amber-600">{{ $class->assignments->count() }}</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Tugas</p>
+                        </div>
+                    </div>
 
-                        <!-- Statistik -->
-                        <div class="grid grid-cols-2 gap-3 pb-4 border-b border-gray-200">
-                            @php
-                                $materials = $class->materials->count();
-                                $assignments = $class->assignments->count();
-                            @endphp
-                            <div class="text-center">
-                                <p class="text-gray-600 text-xs font-medium mb-1">Materi</p>
-                                <p class="text-2xl font-bold text-blue-600">{{ $materials }}</p>
-                            </div>
-                            <div class="text-center">
-                                <p class="text-gray-600 text-xs font-medium mb-1">Tugas</p>
-                                <p class="text-2xl font-bold text-amber-600">{{ $assignments }}</p>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="grid grid-cols-2 gap-2">
-                            <a href="{{ route('siswa.subjects.show', $class->id) }}" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-3 rounded-lg text-sm transition text-center inline-flex items-center justify-center gap-1">
-                                <i class="fas fa-eye"></i> Detail
-                            </a>
-                            <a href="{{ route('siswa.assignments.index') }}?class={{ $class->id }}" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-3 rounded-lg text-sm transition text-center inline-flex items-center justify-center gap-1">
-                                <i class="fas fa-tasks"></i> Tugas
-                            </a>
-                        </div>
+                    <div class="flex gap-2 mt-auto">
+                        <a href="{{ route('siswa.subjects.show', $class->id) }}"
+                           class="flex-1 inline-flex justify-center items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold py-2.5 rounded-xl transition">
+                            <i class="fas fa-eye text-[10px]"></i> Detail
+                        </a>
+                        <a href="{{ route('siswa.assignments.index') }}?class={{ $class->id }}"
+                           class="flex-1 inline-flex justify-center items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold py-2.5 rounded-xl transition">
+                            <i class="fas fa-tasks text-[10px]"></i> Tugas
+                        </a>
                     </div>
                 </div>
-            @endforeach
+            </div>
+        @endforeach
+    </div>
+@else
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
+        <div class="flex flex-col items-center justify-center py-16 text-center">
+            <div class="w-20 h-20 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center mb-4">
+                <i class="fas fa-book text-3xl text-gray-300"></i>
+            </div>
+            <p class="text-gray-500 text-sm mb-1">Anda belum terdaftar di mata pelajaran apapun.</p>
+            <p class="text-xs text-gray-400">Hubungi administrator untuk mendaftar.</p>
         </div>
-    @else
-        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-12 text-center">
-            <i class="fas fa-inbox text-gray-300 text-5xl mb-4 block"></i>
-            <p class="text-gray-600 text-base mb-3">Anda belum terdaftar di mata pelajaran apapun</p>
-            <p class="text-gray-500 text-sm">Hubungi administrator untuk mendaftar ke mata pelajaran</p>
-        </div>
-    @endif
+    </div>
+@endif
 @endsection

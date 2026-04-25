@@ -63,7 +63,7 @@ class MaterialController extends Controller
             'e_class_id' => 'required|exists:e_classes,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'file' => 'required|file|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,jpg,jpeg,png,mp4,mkv|max:100000', // max 100MB
+            'file' => 'required|file|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,jpg,jpeg,png,mp4,mkv|max:' . config('upload.material_max_kb'),
         ]);
 
         // Upload file
@@ -119,8 +119,9 @@ class MaterialController extends Controller
         $validated = $request->validate([
             'e_class_id' => 'required|exists:e_classes,id',
             'title' => 'required|string|max:255',
+            'display_name' => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'file' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,jpg,jpeg,png,mp4,mkv|max:100000',
+            'file' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,jpg,jpeg,png,mp4,mkv|max:' . config('upload.material_max_kb'),
         ]);
 
         $oldClass = $material->eClass->name;
@@ -156,7 +157,12 @@ class MaterialController extends Controller
     {
         $title = $material->title;
         $className = $material->eClass->name;
-        
+
+        // Delete physical file first (avoid orphaned files)
+        if ($material->file_path) {
+            FileUploadService::deleteFile($material->file_path);
+        }
+
         $material->delete();
 
         \App\Models\ActivityLog::create([
@@ -202,6 +208,43 @@ class MaterialController extends Controller
         $downloadName = trim(($material->title ?: 'material') . ($ext ? '.' . $ext : ''));
 
         return response()->download($fullPath, $downloadName);
+    }
+
+    /**
+     * Preview material file (inline).
+     */
+    public function preview(Material $material)
+    {
+        $relative = ltrim($material->file_path ?? '', '/');
+        abort_if($relative === '', 404);
+
+        $normalized = preg_replace('#^storage/#', '', $relative);
+
+        $candidates = [
+            storage_path('app/public/' . $normalized),
+            storage_path('app/' . $relative),
+            storage_path('app/' . $normalized),
+        ];
+
+        $fullPath = null;
+        foreach ($candidates as $candidate) {
+            if (file_exists($candidate)) {
+                $fullPath = $candidate;
+                break;
+            }
+        }
+
+        abort_unless($fullPath, 404);
+
+        // Inline preview for common previewable types
+        $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+        $previewable = ['pdf', 'png', 'jpg', 'jpeg', 'gif'];
+        abort_if(!in_array($ext, $previewable, true), 415);
+
+        $downloadName = trim(($material->display_name ?: $material->title ?: 'material') . '.' . $ext);
+        return response()->file($fullPath, [
+            'Content-Disposition' => 'inline; filename="' . addslashes($downloadName) . '"',
+        ]);
     }
 
     /**

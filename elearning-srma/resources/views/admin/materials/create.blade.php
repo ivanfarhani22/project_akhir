@@ -86,7 +86,7 @@
                             accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.mp4,.mkv" required>
                     </div>
                     <p class="text-gray-600 text-xs mt-2">
-                        <i class="fas fa-info-circle mr-1"></i>Format: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, JPG, PNG, MP4, MKV (Maks. 100MB)
+                        <i class="fas fa-info-circle mr-1"></i>Format: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, JPG, PNG, MP4, MKV (Maks. {{ (int) ceil(config('upload.material_max_kb') / 1024) }}MB)
                     </p>
                     @error('file')
                         <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
@@ -106,4 +106,22 @@
         </div>
     </div>
 </div>
+
+<script>
+(function () {
+    const input = document.getElementById('file');
+    if (!input) return;
+
+    const MAX_BYTES = {{ (int) config('upload.material_max_kb') }} * 1024;
+
+    input.addEventListener('change', function () {
+        const f = this.files && this.files[0];
+        if (!f) return;
+        if (f.size > MAX_BYTES) {
+            alert('Ukuran file terlalu besar. Maksimal {{ (int) ceil(config('upload.material_max_kb') / 1024) }} MB.');
+            this.value = '';
+        }
+    });
+})();
+</script>
 @endsection

@@ -6,6 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Beranda') — E-Learning SRMA</title>
 
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#561020">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -704,5 +708,9 @@
     loadNotifications();
 })();
 </script>
+
+<!-- PWA: Install UX + Service Worker -->
+<script src="/js/pwa-install.js" defer></script>
+
 </body>
 </html>

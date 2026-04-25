@@ -86,6 +86,12 @@
                    class="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">
                     <i class="fas fa-download"></i> Download / Buka File
                 </a>
+                @if(in_array($ext, ['PDF', 'JPG', 'JPEG', 'PNG', 'GIF']))
+                    <a href="{{ route('guru.materials.preview', $material) }}" target="_blank"
+                       class="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+                        <i class="fas fa-eye"></i> Preview
+                    </a>
+                @endif
             </div>
 
             <form method="POST" action="{{ route('guru.materials.destroy', $material) }}" class="delete-form">

@@ -1,108 +1,109 @@
 @extends('layouts.guru')
-
 @section('title', 'Penilaian')
 @section('icon', 'fas fa-star')
 
 @section('content')
-    <!-- PAGE HEADER -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-        <div>
-            <p class="text-gray-600 text-sm mb-2">Kelola Nilai</p>
-            <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <i class="fas fa-star text-yellow-500"></i>
-                Penilaian
-            </h1>
-        </div>
 
-        <a href="{{ route('guru.rekap-nilai.index') }}"
-           class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg text-sm transition">
-            <i class="fas fa-table"></i> Rekap Nilai
-        </a>
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+    <div>
+        <p class="text-xs text-gray-400 uppercase tracking-widest mb-1"><i class="fas fa-star mr-1"></i> Guru / Penilaian</p>
+        <h1 class="text-2xl font-extrabold text-gray-900"><i class="fas fa-star text-yellow-400 mr-2"></i>Penilaian</h1>
+    </div>
+    <a href="{{ route('guru.rekap-nilai.index') }}"
+       class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition whitespace-nowrap">
+        <i class="fas fa-table text-xs"></i> Rekap Nilai
+    </a>
+</div>
+
+@if($assignments->count() > 0)
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6">
+        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+            <h2 class="font-bold text-gray-900 text-sm">Filter Tugas</h2>
+        </div>
+        <div class="p-4 flex flex-wrap gap-2">
+            <a href="{{ route('guru.grades.index') }}"
+               class="inline-flex items-center gap-1.5 bg-[#A41E35] text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+                <i class="fas fa-list text-[10px]"></i> Semua
+            </a>
+            @foreach($assignments as $assignment)
+                <a href="{{ route('guru.grades.index', ['assignment_id' => $assignment->id]) }}"
+                   class="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold px-3 py-2 rounded-lg transition">
+                    {{ Str::limit($assignment->title, 30) }}
+                </a>
+            @endforeach
+        </div>
+    </div>
+@endif
+
+<div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-gray-50">
+        <h2 class="font-bold text-gray-900">Daftar Penilaian</h2>
+        <span class="bg-gray-900 text-white text-xs font-bold px-3 py-1 rounded-full">{{ $submissions->count() }}</span>
     </div>
 
-    <!-- ASSIGNMENT FILTER -->
-    @if($assignments->count() > 0)
-        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-8">
-            <p class="text-gray-700 text-sm mb-4 font-medium">Filter berdasarkan tugas:</p>
-            <div class="flex flex-wrap gap-2">
-                <a href="{{ route('guru.grades.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 px-4 rounded text-sm transition inline-flex items-center gap-2">
-                    <i class="fas fa-list"></i> Semua Penilaian
-                </a>
-                @foreach($assignments as $assignment)
-                    <a href="{{ route('guru.grades.index', ['assignment_id' => $assignment->id]) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-1.5 px-4 rounded text-sm transition inline-flex items-center gap-1">
-                        {{ Str::limit($assignment->title, 30) }}
-                    </a>
-                @endforeach
+    @if($submissions->isEmpty())
+        <div class="flex flex-col items-center justify-center py-16 text-center">
+            <div class="w-20 h-20 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center mb-4">
+                <i class="fas fa-star text-3xl text-gray-300"></i>
             </div>
+            <p class="text-gray-500 text-sm">Belum ada pengumpulan.</p>
+        </div>
+    @else
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Siswa</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tugas</th>
+                        <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Nilai</th>
+                        <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal Dinilai</th>
+                        <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @foreach($submissions as $submission)
+                        @php
+                            $grade = $submission->grade;
+                            $scoreColor = !$grade ? 'bg-gray-100 text-gray-500 border-gray-200' : ($grade->score >= 80 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ($grade->score >= 70 ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-red-50 text-red-600 border-red-200'));
+                        @endphp
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-5 py-3.5 font-semibold text-gray-800">{{ $submission->student->name }}</td>
+                            <td class="px-5 py-3.5 text-gray-600">{{ Str::limit($submission->assignment->title, 30) }}</td>
+                            <td class="px-5 py-3.5 text-center">
+                                @if($submission->submitted_at)
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <i class="fas fa-check-circle text-[10px]"></i> Terkumpul
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-200">
+                                        <i class="fas fa-times-circle text-[10px]"></i> Belum
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-5 py-3.5 text-center">
+                                @if($grade)
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border {{ $scoreColor }}">
+                                        {{ $grade->score }}
+                                    </span>
+                                @else
+                                    <span class="text-gray-300 text-xs">—</span>
+                                @endif
+                            </td>
+                            <td class="px-5 py-3.5 text-center text-xs text-gray-400">
+                                {{ $grade && $grade->graded_at ? $grade->graded_at->format('d M Y') : '—' }}
+                            </td>
+                            <td class="px-5 py-3.5 text-center">
+                                <a href="{{ route('guru.grades.edit', $submission) }}"
+                                   class="inline-flex items-center gap-1.5 bg-yellow-50 hover:bg-yellow-500 text-yellow-600 hover:text-white border border-yellow-200 text-xs font-semibold px-3 py-1.5 rounded-lg transition">
+                                    <i class="fas fa-pen text-[10px]"></i> Nilai
+                                </a>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     @endif
-
-    <!-- GRADES TABLE -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-        <div class="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gray-50">
-            <h2 class="font-bold text-gray-900 text-lg">Daftar Penilaian</h2>
-            <span class="bg-gray-200 text-gray-800 text-xs font-semibold px-3 py-1 rounded-full">
-                Total: {{ $submissions->count() }}
-            </span>
-        </div>
-        
-        <div class="overflow-x-auto">
-            @if($submissions->isEmpty())
-                <div class="text-center py-12">
-                    <i class="fas fa-inbox text-gray-300 text-5xl mb-4 block"></i>
-                    <p class="text-gray-600 text-base">Belum ada pengumpulan</p>
-                </div>
-            @else
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="bg-gray-50 border-b border-gray-200">
-                            <th class="px-6 py-4 text-left font-semibold text-gray-900">Siswa</th>
-                            <th class="px-6 py-4 text-left font-semibold text-gray-900">Tugas</th>
-                            <th class="px-6 py-4 text-center font-semibold text-gray-900">Status</th>
-                            <th class="px-6 py-4 text-center font-semibold text-gray-900">Nilai</th>
-                            <th class="px-6 py-4 text-center font-semibold text-gray-900">Tanggal Dinilai</th>
-                            <th class="px-6 py-4 text-center font-semibold text-gray-900">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        @foreach($submissions as $submission)
-                            @php
-                                $grade = $submission->grade;
-                                $gradeColor = !$grade ? 'bg-gray-100 text-gray-800' : ($grade->score >= 80 ? 'bg-green-100 text-green-800' : ($grade->score >= 70 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'));
-                            @endphp
-                            <tr class="hover:bg-gray-50 transition">
-                                <td class="px-6 py-4 font-semibold text-gray-900">{{ $submission->student->name }}</td>
-                                <td class="px-6 py-4 text-gray-700">{{ Str::limit($submission->assignment->title, 30) }}</td>
-                                <td class="px-6 py-4 text-center">
-                                    @if($submission->submitted_at)
-                                        <span class="inline-block bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded">Terkumpul</span>
-                                    @else
-                                        <span class="inline-block bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded">Belum Dikumpul</span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    @if($grade)
-                                        <span class="inline-block {{ $gradeColor }} text-xs font-semibold px-3 py-1 rounded">
-                                            {{ $grade->score }}
-                                        </span>
-                                    @else
-                                        <span class="text-gray-500">-</span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 text-center text-gray-600 text-xs">
-                                    {{ $grade && $grade->graded_at ? $grade->graded_at->format('d M Y') : '-' }}
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    {{-- tombol edit nilai (aksi khusus penilaian) tetap kuning --}}
-                                    <a href="{{ route('guru.grades.edit', $submission) }}" class="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-1.5 px-3 rounded text-xs transition inline-flex items-center gap-1">
-                                        <i class="fas fa-pen"></i> Nilai
-                                    </a>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            @endif
-        </div>
-    </div>
+</div>
 @endsection

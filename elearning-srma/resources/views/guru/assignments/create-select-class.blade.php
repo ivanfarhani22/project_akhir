@@ -1,46 +1,40 @@
 @extends('layouts.guru')
-
 @section('title', 'Buat Tugas Baru')
 @section('icon', 'fas fa-tasks')
 
 @section('content')
-    <!-- PAGE HEADER -->
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3 mb-2">
-            <i class="fas fa-tasks text-blue-500"></i>
-            Buat Tugas Baru
-        </h1>
-        <p class="text-gray-600 text-sm">Pilih kelas untuk membuat tugas pembelajaran</p>
-    </div>
 
-    @if($classes->count() > 0)
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            @foreach($classes as $class)
-                <div class="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition overflow-hidden">
-                    <div class="p-6">
-                        <h3 class="text-lg font-bold text-gray-900 mb-2">
-                            {{ $class->name }}
-                        </h3>
-                        <p class="text-sm text-gray-600 mb-1">
-                            <strong>Mata Pelajaran:</strong> {{ $class->subject->name }}
-                        </p>
-                        <p class="text-xs text-gray-500 mb-6">
-                            {{ $class->students->count() }} siswa
-                        </p>
+<div class="mb-8">
+    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1"><i class="fas fa-tasks mr-1"></i> Guru / Tugas / Buat</p>
+    <h1 class="text-2xl font-extrabold text-gray-900"><i class="fas fa-tasks text-[#A41E35] mr-2"></i>Buat Tugas Baru</h1>
+    <p class="text-sm text-gray-500 mt-1">Pilih kelas untuk membuat tugas pembelajaran</p>
+</div>
 
-                        <a href="{{ route('guru.assignments.create', ['class_id' => $class->id]) }}" class="w-full bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-2 px-4 rounded-lg text-sm transition inline-flex justify-center items-center gap-2">
-                            <i class="fas fa-plus"></i> Buat Tugas
-                        </a>
-                    </div>
+@if($classes->count() > 0)
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        @foreach($classes as $class)
+            <div class="group bg-white rounded-2xl border-2 border-gray-100 hover:border-[#A41E35] hover:shadow-lg transition-all duration-200 overflow-hidden">
+                <div class="h-1 bg-gradient-to-r from-[#A41E35] to-rose-400"></div>
+                <div class="p-5">
+                    <h3 class="text-base font-bold text-gray-900 truncate">{{ $class->name }}</h3>
+                    <p class="text-xs text-gray-500 mt-0.5"><i class="fas fa-book-open mr-1"></i>{{ $class->subject->name }}</p>
+                    <p class="text-xs text-gray-400 mb-5 mt-0.5"><i class="fas fa-users mr-1"></i>{{ $class->students->count() }} siswa</p>
+                    <a href="{{ route('guru.assignments.create', ['class_id' => $class->id]) }}"
+                       class="w-full inline-flex justify-center items-center gap-2 bg-[#A41E35] hover:bg-[#7D1627] text-white text-sm font-semibold py-2.5 px-4 rounded-xl transition shadow-sm hover:shadow-md">
+                        <i class="fas fa-plus text-xs"></i> Buat Tugas
+                    </a>
                 </div>
-            @endforeach
-        </div>
-    @else
-        <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-            <div class="py-16 px-6 text-center">
-                <i class="fas fa-inbox text-gray-300 text-6xl mb-4 block"></i>
-                <p class="text-gray-600 text-base">Anda belum mengajar kelas apapun</p>
             </div>
+        @endforeach
+    </div>
+@else
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
+        <div class="flex flex-col items-center justify-center py-16 text-center">
+            <div class="w-20 h-20 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center mb-4">
+                <i class="fas fa-chalkboard text-3xl text-gray-300"></i>
+            </div>
+            <p class="text-gray-500 text-sm">Anda belum mengajar kelas apapun.</p>
         </div>
-    @endif
+    </div>
+@endif
 @endsection
