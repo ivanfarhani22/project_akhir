@@ -58,32 +58,48 @@
             <p class="text-gray-600 text-xs sm:text-sm">{{ $class->description ?? '—' }}</p>
         </div>
 
-        <!-- Jadwal Card -->
+        <!-- Kalender / Info Sekarang Card -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-6">
             <h3 class="text-base sm:text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <span class="w-7 sm:w-8 h-7 sm:h-8 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-600 text-sm sm:text-base flex-shrink-0">
                     <i class="fas fa-calendar"></i>
                 </span>
-                Jadwal
+                Kalender
             </h3>
+
             <div class="space-y-2 text-xs sm:text-sm">
                 <p>
-                    <span class="font-semibold text-gray-700">Hari:</span>
-                    <span class="text-gray-600">{{ $class->day_of_week ? ucfirst($class->day_of_week) : '—' }}</span>
+                    <span class="font-semibold text-gray-700">Hari ini:</span>
+                    <span class="text-gray-600">
+                        {{ $dayTranslate[strtolower(now()->locale('id')->englishDayOfWeek)] ?? now()->locale('id')->translatedFormat('l') }}
+                        , {{ now()->locale('id')->translatedFormat('d F Y') }}
+                    </span>
                 </p>
                 <p>
-                    <span class="font-semibold text-gray-700">Waktu:</span>
-                    @if ($class->start_time && $class->end_time)
-                        <span class="text-gray-600">{{ \Carbon\Carbon::createFromFormat('H:i', $class->start_time)->format('H:i') }} – {{ \Carbon\Carbon::createFromFormat('H:i', $class->end_time)->format('H:i') }}</span>
-                    @else
-                        <span class="text-gray-600">—</span>
-                    @endif
+                    <span class="font-semibold text-gray-700">Waktu sekarang:</span>
+                    <span class="text-gray-600" id="liveClock">{{ now()->format('H:i:s') }}</span>
                 </p>
                 <p>
                     <span class="font-semibold text-gray-700">Ruangan:</span>
-                    <span class="text-gray-600">{{ $class->room ?? '—' }}</span>
+                    <span class="text-gray-600">{{ $class->name ?: '—' }}</span>
                 </p>
             </div>
+
+            <script>
+                (function () {
+                    const el = document.getElementById('liveClock');
+                    if (!el) return;
+
+                    function pad(n) { return String(n).padStart(2, '0'); }
+                    function tick() {
+                        const d = new Date();
+                        el.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+                    }
+
+                    tick();
+                    setInterval(tick, 1000);
+                })();
+            </script>
         </div>
 
         <!-- Statistik Card -->
@@ -172,9 +188,16 @@
                 <i class="fas fa-calendar-alt"></i> <span class="hidden sm:inline">Jadwal Pelajaran</span><span class="sm:hidden">Jadwal</span>
                 <span class="bg-yellow-100 text-yellow-800 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">{{ $class->schedules->count() }}</span>
             </h3>
-            <a href="{{ route('admin.schedules.create', $class) }}" class="inline-flex items-center justify-center gap-2 bg-yellow-500 text-white px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-yellow-600 transition w-full sm:w-auto whitespace-nowrap">
-                <i class="fas fa-plus"></i> <span class="hidden sm:inline">Tambah Jadwal</span><span class="sm:hidden">Tambah</span>
-            </a>
+
+            <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <a href="{{ route('admin.schedules.bulk.edit', $class) }}" class="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-blue-700 transition w-full sm:w-auto whitespace-nowrap">
+                    <i class="fas fa-wand-magic-sparkles"></i> <span class="hidden sm:inline">Bulk Scheduling</span><span class="sm:hidden">Bulk</span>
+                </a>
+
+                <a href="{{ route('admin.schedules.create', $class) }}" class="inline-flex items-center justify-center gap-2 bg-yellow-500 text-white px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-yellow-600 transition w-full sm:w-auto whitespace-nowrap">
+                    <i class="fas fa-plus"></i> <span class="hidden sm:inline">Tambah Jadwal</span><span class="sm:hidden">Tambah</span>
+                </a>
+            </div>
         </div>
 
         <div class="p-3 sm:p-6">
@@ -533,6 +556,7 @@ function confirmDelete(event, name) {
         form.submit();
     });
 }
+
 </script>
 
 @endsection

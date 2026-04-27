@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Assignment extends Model
 {
-    protected $fillable = ['e_class_id', 'title', 'description', 'file_path', 'deadline'];
+    protected $fillable = ['e_class_id', 'class_subject_id', 'title', 'description', 'file_path', 'deadline'];
     protected $casts = [
         'deadline' => 'datetime',
     ];

@@ -14,6 +14,15 @@
 @if($classSubjects->count() > 0)
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         @foreach($classSubjects as $cs)
+            @php
+                $materialsCount = $cs->materials_count ?? ($cs->relationLoaded('materials') ? $cs->materials->count() : null);
+                $assignmentsCount = $cs->assignments_count ?? ($cs->relationLoaded('assignments') ? $cs->assignments->count() : null);
+
+                // If counts are not loaded, fall back to 0 to avoid triggering queries from the view.
+                $materialsCount = is_null($materialsCount) ? 0 : $materialsCount;
+                $assignmentsCount = is_null($assignmentsCount) ? 0 : $assignmentsCount;
+            @endphp
+
             <div class="group bg-white rounded-2xl border-2 border-gray-100 hover:border-[#A41E35] hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col">
                 <div class="h-1 bg-gradient-to-r from-[#A41E35] to-rose-400"></div>
 
@@ -36,21 +45,21 @@
 
                     <div class="grid grid-cols-2 gap-3 mt-auto mb-4">
                         <div class="text-center bg-gray-50 border border-gray-100 rounded-xl py-3">
-                            <p class="text-2xl font-extrabold text-[#A41E35]">{{ $cs->eClass->materials->count() }}</p>
+                            <p class="text-2xl font-extrabold text-[#A41E35]">{{ $materialsCount }}</p>
                             <p class="text-xs text-gray-400 font-medium mt-0.5"><i class="fas fa-book mr-1"></i>Materi</p>
                         </div>
                         <div class="text-center bg-gray-50 border border-gray-100 rounded-xl py-3">
-                            <p class="text-2xl font-extrabold text-blue-600">{{ $cs->eClass->assignments->count() }}</p>
+                            <p class="text-2xl font-extrabold text-blue-600">{{ $assignmentsCount }}</p>
                             <p class="text-xs text-gray-400 font-medium mt-0.5"><i class="fas fa-tasks mr-1"></i>Tugas</p>
                         </div>
                     </div>
 
                     <div class="flex gap-2">
-                        <a href="{{ route('guru.materials.index', ['class' => $cs->eClass->id]) }}"
+                        <a href="{{ route('guru.materials.index', ['class_id' => $cs->eClass->id, 'class_subject_id' => $cs->id]) }}"
                            class="flex-1 inline-flex justify-center items-center gap-1.5 bg-[#A41E35] hover:bg-[#7D1627] text-white text-xs font-semibold py-2.5 px-3 rounded-xl transition-all shadow-sm hover:shadow-md">
                             <i class="fas fa-book text-[10px]"></i> Materi
                         </a>
-                        <a href="{{ route('guru.assignments.index', ['class' => $cs->eClass->id]) }}"
+                        <a href="{{ route('guru.assignments.index', ['class_id' => $cs->eClass->id, 'class_subject_id' => $cs->id]) }}"
                            class="flex-1 inline-flex justify-center items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold py-2.5 px-3 rounded-xl transition-all">
                             <i class="fas fa-tasks text-[10px]"></i> Tugas
                         </a>

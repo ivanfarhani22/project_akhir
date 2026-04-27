@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assignment;
+use App\Models\ClassSubject;
 use App\Models\EClass;
 use App\Services\FileUploadService;
 use Illuminate\Http\Request;
@@ -44,6 +45,24 @@ class AssignmentController extends Controller
     }
 
     /**
+     * New (preferred): list assignments for a specific class_subject.
+     */
+    public function indexByClassSubject(ClassSubject $classSubject)
+    {
+        abort_if($classSubject->teacher_id !== auth()->id(), 403, 'Unauthorized');
+        $classSubject->load(['eClass', 'subject']);
+        $class = $classSubject->eClass;
+
+        $assignments = Assignment::query()
+            ->where('class_subject_id', $classSubject->id)
+            ->with(['classSubject' => fn($q) => $q->with(['subject', 'teacher', 'eClass']), 'submissions', 'submissions.student'])
+            ->orderBy('deadline', 'desc')
+            ->get();
+
+        return view('guru.assignments.index', compact('class', 'assignments', 'classSubject'));
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
@@ -66,6 +85,18 @@ class AssignmentController extends Controller
             $classes = EClass::whereHas('classSubjects', fn($q) => $q->where('teacher_id', auth()->id()))->get();
             return view('guru.assignments.create-select-class', compact('classes'));
         }
+    }
+
+    /**
+     * New (preferred): show create form scoped to class_subject.
+     */
+    public function createByClassSubject(ClassSubject $classSubject)
+    {
+        abort_if($classSubject->teacher_id !== auth()->id(), 403, 'Unauthorized');
+        $classSubject->load(['eClass', 'subject']);
+        $class = $classSubject->eClass;
+
+        return view('guru.assignments.create', compact('class', 'classSubject'));
     }
 
     /**
@@ -120,6 +151,52 @@ class AssignmentController extends Controller
 
         return redirect()
             ->route('guru.assignments.index', ['class_id' => $class->id])
+            ->with('success', 'Assignment created successfully');
+    }
+
+    /**
+     * New (preferred): store assignment scoped to class_subject.
+     */
+    public function storeByClassSubject(Request $request, ClassSubject $classSubject)
+    {
+        abort_if($classSubject->teacher_id !== auth()->id(), 403, 'Unauthorized');
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'deadline' => 'required|date|after:now',
+            'file' => 'nullable|file|max:' . config('upload.assignment_max_kb'),
+        ]);
+
+        $filePath = null;
+        if ($request->hasFile('file')) {
+            $filePath = FileUploadService::uploadAssignment($request->file('file'));
+            if (!$filePath) {
+                return back()->withErrors('File upload failed')->withInput();
+            }
+            $filePath = str_starts_with($filePath, 'storage/') ? $filePath : ('storage/' . ltrim($filePath, '/'));
+        }
+
+        $assignment = Assignment::create([
+            'e_class_id' => $classSubject->e_class_id, // keep for compatibility/reporting
+            'class_subject_id' => $classSubject->id,
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'file_path' => $filePath,
+            'deadline' => $validated['deadline'],
+            'created_by' => auth()->id(),
+        ]);
+
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'create_assignment',
+            'description' => "Guru buat tugas '{$assignment->title}' untuk kelas {$classSubject->eClass->name}",
+            'ip_address' => $request->ip(),
+            'timestamp' => now(),
+        ]);
+
+        return redirect()
+            ->route('guru.class-subjects.assignments.index', $classSubject)
             ->with('success', 'Assignment created successfully');
     }
 

@@ -10,7 +10,9 @@
     <h1 class="text-2xl font-extrabold text-gray-900"><i class="fas fa-cloud-upload-alt text-[#A41E35] mr-2"></i>Tambah Materi</h1>
     <span class="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full mt-1">
         <i class="fas fa-door-open"></i> Kelas: <strong class="text-gray-700">{{ $class->name }}</strong>
-        <span class="mx-1 text-gray-300">•</span> {{ $class->subject->name }}
+        @if(isset($classSubject))
+            <span class="mx-1 text-gray-300">•</span> {{ $classSubject->subject->name }}
+        @endif
     </span>
 </div>
 
@@ -21,9 +23,14 @@
             <h2 class="font-bold text-gray-900">Formulir Upload Materi</h2>
         </div>
         <div class="p-6">
-            <form method="POST" action="{{ route('guru.materials.store') }}" enctype="multipart/form-data">
+            <form method="POST"
+                  action="{{ isset($classSubject) ? route('guru.class-subjects.materials.store', $classSubject) : route('guru.materials.store') }}"
+                  enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="e_class_id" value="{{ $class->id }}">
+                @if(isset($classSubject))
+                    <input type="hidden" name="class_subject_id" value="{{ $classSubject->id }}">
+                @endif
 
                 <div class="mb-5">
                     <label for="title" class="block text-sm font-semibold text-gray-700 mb-1.5">Judul Materi <span class="text-red-500">*</span></label>
@@ -62,7 +69,7 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <a href="{{ url()->previous() ?? route('guru.materials.index') }}"
+                    <a href="{{ url()->previous() ?? (isset($classSubject) ? route('guru.class-subjects.materials.index', $classSubject) : route('guru.materials.index')) }}"
                        class="flex-1 inline-flex justify-center items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-6 rounded-xl text-sm transition">
                         <i class="fas fa-arrow-left text-xs"></i> Kembali
                     </a>

@@ -1,0 +1,4 @@
+day_of_week,start_time,end_time,subject_code,teacher_email,room,notes
+monday,07:00,07:40,MAT001,guru1@example.com,R-101,
+monday,07:40,08:20,BIN001,guru2@example.com,R-101,
+tuesday,08:00,09:30,IPA001,guru3@example.com,LAB,

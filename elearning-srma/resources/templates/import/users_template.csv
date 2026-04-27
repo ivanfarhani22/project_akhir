@@ -1,0 +1,4 @@
+name,email,role,password
+"Budi Santoso",budi@example.com,siswa,
+"Siti Aminah",siti@example.com,guru,
+"Admin E-Learning",admin@example.com,admin_elearning,

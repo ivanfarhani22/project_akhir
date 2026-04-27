@@ -16,7 +16,11 @@ class ClassController extends Controller
     {
         // Get classSubjects directly to create one card per subject per class
         $classSubjects = ClassSubject::where('teacher_id', auth()->id())
-            ->with(['eClass' => fn($q) => $q->with('students', 'materials', 'assignments'), 'subject'])
+            ->withCount(['materials', 'assignments'])
+            ->with([
+                'eClass' => fn($q) => $q->with('students'),
+                'subject',
+            ])
             ->orderBy('e_class_id')
             ->get();
 
@@ -34,12 +38,11 @@ class ClassController extends Controller
         }
 
         $class->load([
-            'classSubjects' => fn($q) => $q->where('teacher_id', auth()->id())->with('subject'),
+            'classSubjects' => fn($q) => $q
+                ->where('teacher_id', auth()->id())
+                ->with('subject')
+                ->withCount(['materials', 'assignments']),
             'students',
-            'materials',
-            'assignments' => function ($query) {
-                $query->orderBy('deadline', 'desc');
-            }
         ]);
 
         return view('guru.classes.show', compact('class'));

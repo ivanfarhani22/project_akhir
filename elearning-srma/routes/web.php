@@ -4,410 +4,411 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Models\AttendanceSession;
 
-// Offline page (PWA fallback)
+// ─────────────────────────────────────────────
+// Misc / Public
+// ─────────────────────────────────────────────
+
 Route::view('/offline', 'offline.offline')->name('offline');
 
-// Auth Routes
+// ─────────────────────────────────────────────
+// Auth
+// ─────────────────────────────────────────────
+
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Redirect home ke dashboard sesuai role
+// Home → redirect by role
 Route::get('/', function () {
-    if (auth()->check()) {
-        $user = auth()->user();
-        if ($user->role === 'admin_elearning') {
-            return redirect()->route('admin.dashboard');
-        } elseif ($user->role === 'guru') {
-            return redirect()->route('guru.dashboard');
-        } else {
-            return redirect()->route('siswa.dashboard');
-        }
+    if (! auth()->check()) {
+        return redirect()->route('login');
     }
-    return redirect()->route('login');
+
+    return match (auth()->user()->role) {
+        'admin_elearning' => redirect()->route('admin.dashboard'),
+        'guru'            => redirect()->route('guru.dashboard'),
+        default           => redirect()->route('siswa.dashboard'),
+    };
 })->name('home');
 
-// API Routes (no auth required)
+// ─────────────────────────────────────────────
+// API (authenticated)
+// ─────────────────────────────────────────────
 
-// API Routes (authenticated)
-Route::prefix('api')->middleware(['auth'])->group(function () {
-    // Admin-only (search global data)
-    Route::middleware(['role:admin_elearning'])->group(function () {
+Route::prefix('api')->middleware('auth')->group(function () {
+
+    // Admin only
+    Route::middleware('role:admin_elearning')->group(function () {
         Route::get('/search', [\App\Http\Controllers\Api\SearchController::class, 'search']);
     });
 
-    // Guru/Siswa only (notifications)
-    Route::middleware(['role:guru,siswa'])->group(function () {
+    // Guru & Siswa
+    Route::middleware('role:guru,siswa')->group(function () {
         Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
         Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
         Route::post('/notifications/clear', [\App\Http\Controllers\Api\NotificationController::class, 'clearAll']);
     });
 });
 
-// Dashboard Admin E-Learning
-Route::middleware(['auth', 'role:admin_elearning'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
-    
-    Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
-    Route::resource('classes', \App\Http\Controllers\Admin\ClassController::class);
-    Route::resource('subjects', \App\Http\Controllers\Admin\SubjectController::class);
-    Route::resource('materials', \App\Http\Controllers\Admin\MaterialController::class);
-    Route::resource('assignments', \App\Http\Controllers\Admin\AssignmentController::class);
-    Route::resource('grades', \App\Http\Controllers\Admin\GradeController::class, ['only' => ['index', 'edit', 'update']]);
-    Route::resource('attendance', \App\Http\Controllers\Admin\AttendanceController::class, ['only' => ['index', 'create', 'store', 'show', 'destroy']])->parameter('attendance', 'session');
-    
-    // Materials
-    Route::get('/materials/{material}/download', [\App\Http\Controllers\Admin\MaterialController::class, 'download'])->name('materials.download');
-    Route::get('/materials/statistics', [\App\Http\Controllers\Admin\MaterialController::class, 'statistics'])->name('materials.statistics');
-    Route::get('/materials/{material}/preview', [\App\Http\Controllers\Admin\MaterialController::class, 'preview'])->name('materials.preview');
-    
-    // Assignments
-    Route::get('/assignments/{assignment}/submissions', [\App\Http\Controllers\Admin\AssignmentController::class, 'submissions'])->name('assignments.submissions');
+// ─────────────────────────────────────────────
+// Admin E-Learning
+// ─────────────────────────────────────────────
 
-    // Ensure proper implicit binding for nested params: (Assignment $assignment, Submission $submission)
-    Route::scopeBindings()->group(function () {
-        Route::post('/assignments/{assignment}/submissions/{submission}/grade', [\App\Http\Controllers\Admin\AssignmentController::class, 'gradeSubmission'])->name('assignments.gradeSubmission');
+Route::middleware(['auth', 'role:admin_elearning'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+
+        // Dashboard
+        Route::get('/dashboard', fn () => view('admin.dashboard'))->name('dashboard');
+
+        // ── Users ──────────────────────────────────
+        Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+        Route::get('/users/import/template', [\App\Http\Controllers\Admin\UserImportController::class, 'template'])->name('users.import.template');
+        Route::post('/users/import', [\App\Http\Controllers\Admin\UserImportController::class, 'import'])->name('users.import');
+
+        // ── Core Resources ─────────────────────────
+        Route::resource('classes', \App\Http\Controllers\Admin\ClassController::class);
+        Route::resource('subjects', \App\Http\Controllers\Admin\SubjectController::class);
+
+        // ── Materials ──────────────────────────────
+        Route::resource('materials', \App\Http\Controllers\Admin\MaterialController::class);
+        Route::get('/materials/statistics', [\App\Http\Controllers\Admin\MaterialController::class, 'statistics'])->name('materials.statistics');
+        Route::get('/materials/{material}/download', [\App\Http\Controllers\Admin\MaterialController::class, 'download'])->name('materials.download');
+        Route::get('/materials/{material}/preview', [\App\Http\Controllers\Admin\MaterialController::class, 'preview'])->name('materials.preview');
+
+        // ── Assignments ────────────────────────────
+        Route::resource('assignments', \App\Http\Controllers\Admin\AssignmentController::class);
+        Route::get('/assignments/statistics', [\App\Http\Controllers\Admin\AssignmentController::class, 'statistics'])->name('assignments.statistics');
+        Route::get('/assignments/{assignment}/submissions', [\App\Http\Controllers\Admin\AssignmentController::class, 'submissions'])->name('assignments.submissions');
+        Route::scopeBindings()->group(function () {
+            Route::post('/assignments/{assignment}/submissions/{submission}/grade', [\App\Http\Controllers\Admin\AssignmentController::class, 'gradeSubmission'])->name('assignments.gradeSubmission');
+        });
+
+        // ── Grades ─────────────────────────────────
+        Route::resource('grades', \App\Http\Controllers\Admin\GradeController::class)->only(['index', 'edit', 'update']);
+        Route::get('/grades/by-class/{class}', [\App\Http\Controllers\Admin\GradeController::class, 'byClass'])->name('grades.byClass');
+        Route::get('/grades/by-student/{student}', [\App\Http\Controllers\Admin\GradeController::class, 'byStudent'])->name('grades.byStudent');
+        Route::get('/grades/report', [\App\Http\Controllers\Admin\GradeController::class, 'report'])->name('grades.report');
+        Route::get('/grades/export', [\App\Http\Controllers\Admin\GradeController::class, 'exportCSV'])->name('grades.export');
+
+        // ── Attendance ─────────────────────────────
+        Route::resource('attendance', \App\Http\Controllers\Admin\AttendanceController::class)
+            ->only(['index', 'create', 'store', 'show', 'destroy'])
+            ->parameter('attendance', 'session');
+        Route::get('/attendance/by-class/{class}', [\App\Http\Controllers\Admin\AttendanceController::class, 'byClass'])->name('attendance.byClass');
+        Route::get('/attendance/by-student/{student}', [\App\Http\Controllers\Admin\AttendanceController::class, 'byStudent'])->name('attendance.byStudent');
+        Route::get('/attendance/export', [\App\Http\Controllers\Admin\AttendanceController::class, 'export'])->name('attendance.export');
+
+        // ── Settings ───────────────────────────────
+        Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'edit'])->name('settings.edit');
+        Route::post('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+        Route::post('/settings/reset', [\App\Http\Controllers\Admin\SettingController::class, 'reset'])->name('settings.reset');
+        Route::delete('/banners/{id}', [\App\Http\Controllers\Admin\SettingController::class, 'deleteBanner'])->name('banners.delete');
+        Route::patch('/banners/{id}/toggle', [\App\Http\Controllers\Admin\SettingController::class, 'toggleBanner'])->name('banners.toggle');
+        Route::post('/banners/reorder', [\App\Http\Controllers\Admin\SettingController::class, 'reorderBanners'])->name('banners.reorder');
+
+        // ── Class Subjects ─────────────────────────
+        Route::get('/classes/{class}/subjects', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'getByClass'])->name('classes.subjects');
+        Route::get('/classes/{class}/subjects/create', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'create'])->name('class-subjects.create');
+        Route::post('/classes/{class}/subjects', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'store'])->name('class-subjects.store');
+        Route::get('/classes/{class}/subjects/{classSubject}/edit', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'edit'])->name('class-subjects.edit');
+        Route::put('/classes/{class}/subjects/{classSubject}', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'update'])->name('class-subjects.update');
+        Route::delete('/classes/{class}/subjects/{classSubject}', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'destroy'])->name('class-subjects.destroy');
+        Route::get('/class-subjects/{classSubject}/students', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'getStudents'])->name('class-subjects.students');
+
+        // ── Schedules ──────────────────────────────
+        Route::get('/classes/{class}/schedules/create', [\App\Http\Controllers\Admin\ScheduleController::class, 'create'])->name('schedules.create');
+        Route::post('/classes/{class}/schedules', [\App\Http\Controllers\Admin\ScheduleController::class, 'store'])->name('schedules.store');
+        Route::get('/classes/{class}/schedules/{schedule}/edit', [\App\Http\Controllers\Admin\ScheduleController::class, 'edit'])->name('schedules.edit');
+        Route::put('/classes/{class}/schedules/{schedule}', [\App\Http\Controllers\Admin\ScheduleController::class, 'update'])->name('schedules.update');
+        Route::delete('/classes/{class}/schedules/{schedule}', [\App\Http\Controllers\Admin\ScheduleController::class, 'destroy'])->name('schedules.destroy');
+
+        // Bulk Schedules
+        Route::get('/classes/{class}/schedules/bulk', [\App\Http\Controllers\Admin\BulkScheduleController::class, 'edit'])->name('schedules.bulk.edit');
+        Route::post('/classes/{class}/schedules/bulk', [\App\Http\Controllers\Admin\BulkScheduleController::class, 'store'])->name('schedules.bulk.store');
+
+        // ── Class Students ─────────────────────────
+        Route::get('/classes/{class}/students', [\App\Http\Controllers\Admin\ClassStudentController::class, 'index'])->name('classes.students');
+        Route::post('/classes/{class}/students', [\App\Http\Controllers\Admin\ClassStudentController::class, 'store'])->name('classes.students.store');
+        Route::delete('/classes/{class}/students/{student}', [\App\Http\Controllers\Admin\ClassStudentController::class, 'destroy'])->name('classes.students.destroy');
+
+        // ── Rekap Nilai ────────────────────────────
+        Route::get('/rekap-nilai', [\App\Http\Controllers\Admin\RekapNilaiController::class, 'index'])->name('rekap-nilai.index');
+        Route::get('/rekap-nilai/export', [\App\Http\Controllers\Admin\RekapNilaiController::class, 'export'])->name('rekap-nilai.export');
+
+        // ── Storage ────────────────────────────────
+        Route::get('/storage', [\App\Http\Controllers\Admin\StorageController::class, 'index'])->name('storage.index');
+        Route::post('/storage/delete', [\App\Http\Controllers\Admin\StorageController::class, 'delete'])->name('storage.delete');
+        Route::post('/storage/cleanup', [\App\Http\Controllers\Admin\StorageController::class, 'cleanup'])->name('storage.cleanup');
     });
 
-    Route::get('/assignments/statistics', [\App\Http\Controllers\Admin\AssignmentController::class, 'statistics'])->name('assignments.statistics');
-    
-    // Grades
-    Route::get('/grades/by-class/{class}', [\App\Http\Controllers\Admin\GradeController::class, 'byClass'])->name('grades.byClass');
-    Route::get('/grades/by-student/{student}', [\App\Http\Controllers\Admin\GradeController::class, 'byStudent'])->name('grades.byStudent');
-    Route::get('/grades/report', [\App\Http\Controllers\Admin\GradeController::class, 'report'])->name('grades.report');
-    Route::get('/grades/export', [\App\Http\Controllers\Admin\GradeController::class, 'exportCSV'])->name('grades.export');
-    
-    // Attendance
-    Route::get('/attendance/by-class/{class}', [\App\Http\Controllers\Admin\AttendanceController::class, 'byClass'])->name('attendance.byClass');
-    Route::get('/attendance/by-student/{student}', [\App\Http\Controllers\Admin\AttendanceController::class, 'byStudent'])->name('attendance.byStudent');
-    Route::get('/attendance/export', [\App\Http\Controllers\Admin\AttendanceController::class, 'export'])->name('attendance.export');
-    
-    // Settings
-    Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'edit'])->name('settings.edit');
-    Route::post('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
-    Route::post('/settings/reset', [\App\Http\Controllers\Admin\SettingController::class, 'reset'])->name('settings.reset');
-    Route::delete('/banners/{id}', [\App\Http\Controllers\Admin\SettingController::class, 'deleteBanner'])->name('banners.delete');
-    Route::patch('/banners/{id}/toggle', [\App\Http\Controllers\Admin\SettingController::class, 'toggleBanner'])->name('banners.toggle');
-    Route::post('/banners/reorder', [\App\Http\Controllers\Admin\SettingController::class, 'reorderBanners'])->name('banners.reorder');
-    
-    // Class Subject Management Routes
-    Route::get('/classes/{class}/subjects', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'getByClass'])->name('classes.subjects');
-    Route::get('/class-subjects/{classSubject}/students', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'getStudents'])->name('class-subjects.students');
-    Route::post('/classes/{class}/subjects', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'store'])->name('class-subjects.store');
-    Route::get('/classes/{class}/subjects/create', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'create'])->name('class-subjects.create');
-    Route::get('/classes/{class}/subjects/{classSubject}/edit', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'edit'])->name('class-subjects.edit');
-    Route::put('/classes/{class}/subjects/{classSubject}', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'update'])->name('class-subjects.update');
-    Route::delete('/classes/{class}/subjects/{classSubject}', [\App\Http\Controllers\Admin\ClassSubjectController::class, 'destroy'])->name('class-subjects.destroy');
-    
-    // Schedule Management Routes
-    Route::get('/classes/{class}/schedules/create', [\App\Http\Controllers\Admin\ScheduleController::class, 'create'])->name('schedules.create');
-    Route::post('/classes/{class}/schedules', [\App\Http\Controllers\Admin\ScheduleController::class, 'store'])->name('schedules.store');
-    Route::get('/classes/{class}/schedules/{schedule}/edit', [\App\Http\Controllers\Admin\ScheduleController::class, 'edit'])->name('schedules.edit');
-    Route::put('/classes/{class}/schedules/{schedule}', [\App\Http\Controllers\Admin\ScheduleController::class, 'update'])->name('schedules.update');
-    Route::delete('/classes/{class}/schedules/{schedule}', [\App\Http\Controllers\Admin\ScheduleController::class, 'destroy'])->name('schedules.destroy');
-    
-    // Student Management in Classes
-    Route::get('/classes/{class}/students', [\App\Http\Controllers\Admin\ClassStudentController::class, 'index'])->name('classes.students');
-    Route::post('/classes/{class}/students', [\App\Http\Controllers\Admin\ClassStudentController::class, 'store'])->name('classes.students.store');
-    Route::delete('/classes/{class}/students/{student}', [\App\Http\Controllers\Admin\ClassStudentController::class, 'destroy'])->name('classes.students.destroy');
-    
-    // Rekap Nilai (admin - semua kelas/mapel)
-    Route::get('/rekap-nilai', [\App\Http\Controllers\Admin\RekapNilaiController::class, 'index'])->name('rekap-nilai.index');
-    Route::get('/rekap-nilai/export', [\App\Http\Controllers\Admin\RekapNilaiController::class, 'export'])->name('rekap-nilai.export');
-    
-    // Storage management
-    Route::get('/storage', [\App\Http\Controllers\Admin\StorageController::class, 'index'])->name('storage.index');
-    Route::post('/storage/delete', [\App\Http\Controllers\Admin\StorageController::class, 'delete'])->name('storage.delete');
-    Route::post('/storage/cleanup', [\App\Http\Controllers\Admin\StorageController::class, 'cleanup'])->name('storage.cleanup');
-});
+// ─────────────────────────────────────────────
+// Guru
+// ─────────────────────────────────────────────
 
-// Dashboard Guru
-Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(function () {
-    Route::get('/dashboard', function () {
-        // Guru lihat semua classSubjects dimana dia mengajar
-        $classSubjects = \App\Models\ClassSubject::where('teacher_id', auth()->id())
-            ->with(['eClass' => fn($q) => $q->with('students', 'materials', 'assignments'), 'subject'])
-            ->orderBy('e_class_id')
-            ->get();
-        
-        $totalClassSubjects = $classSubjects->count();
-        $totalClasses = $classSubjects->pluck('eClass')->unique('id')->count();
-        $totalStudents = $classSubjects->pluck('eClass')->unique('id')->sum(fn($c) => $c->students->count());
-        $totalMaterials = $classSubjects->pluck('eClass')->unique('id')->sum(fn($c) => $c->materials->count());
-        $totalAssignments = $classSubjects->pluck('eClass')->unique('id')->sum(fn($c) => $c->assignments->count());
-        
-        return view('guru.dashboard', compact('classSubjects', 'totalClassSubjects', 'totalClasses', 'totalStudents', 'totalMaterials', 'totalAssignments'));
-    })->name('dashboard');
-    
-    Route::get('/classes', function () {
-        // Guru hanya lihat classSubjects dimana dia mengajar
-        $classSubjects = \App\Models\ClassSubject::where('teacher_id', auth()->id())
-            ->with(['eClass' => fn($q) => $q->with('students', 'materials', 'assignments'), 'subject'])
-            ->orderBy('e_class_id')
-            ->get();
-        return view('guru.classes.index', compact('classSubjects'));
-    })->name('classes.index');
-    
-    Route::resource('materials', \App\Http\Controllers\Guru\MaterialController::class);
-    Route::resource('assignments', \App\Http\Controllers\Guru\AssignmentController::class);
+Route::middleware(['auth', 'role:guru'])
+    ->prefix('guru')
+    ->name('guru.')
+    ->group(function () {
 
-    // Grades (teacher grading is done on students submissions)
-    Route::resource('grades', \App\Http\Controllers\Guru\GradeController::class, ['only' => ['index', 'edit', 'update']])
-        ->parameters(['grades' => 'submission']);
+        // Dashboard
+        Route::get('/dashboard', function () {
+            $classSubjects = \App\Models\ClassSubject::where('teacher_id', auth()->id())
+                ->withCount(['materials', 'assignments'])
+                ->with(['eClass' => fn ($q) => $q->with('students'), 'subject'])
+                ->orderBy('e_class_id')
+                ->get();
 
-    // Attendance Management
-    Route::resource('attendance', \App\Http\Controllers\Guru\AttendanceController::class);
-    Route::post('attendance/{attendance}/close', [\App\Http\Controllers\Guru\AttendanceController::class, 'close'])->name('attendance.close');
-    Route::post('attendance/{attendance}/cancel', [\App\Http\Controllers\Guru\AttendanceController::class, 'cancel'])->name('attendance.cancel');
-    
-    // Backward-compatible URLs (if any old views still post to {session})
-    Route::model('session', AttendanceSession::class);
-    Route::post('attendance/{session}/close', [\App\Http\Controllers\Guru\AttendanceController::class, 'close']);
-    Route::post('attendance/{session}/cancel', [\App\Http\Controllers\Guru\AttendanceController::class, 'cancel']);
-    
-    // Download siswa submission file (for guru)
-    Route::get('/submissions/{submission}/download', function (\App\Models\Submission $submission) {
-        $assignment = $submission->assignment;
-        abort_unless($assignment, 404);
+            $totalClassSubjects = $classSubjects->count();
+            $totalClasses       = $classSubjects->pluck('eClass')->unique('id')->count();
+            $totalStudents      = $classSubjects->pluck('eClass')->unique('id')->sum(fn ($c) => $c->students->count());
+            $totalMaterials     = $classSubjects->sum('materials_count');
+            $totalAssignments   = $classSubjects->sum('assignments_count');
 
-        $class = $assignment->eClass;
-        abort_unless($class, 404);
+            return view('guru.dashboard', compact(
+                'classSubjects', 'totalClassSubjects', 'totalClasses',
+                'totalStudents', 'totalMaterials', 'totalAssignments'
+            ));
+        })->name('dashboard');
 
-        // Only allow teacher that teaches this class (consistent with other guru checks)
-        abort_if(!$class->isTeachedBy(auth()->id()), 403);
+        // Classes list
+        Route::get('/classes', function () {
+            $classSubjects = \App\Models\ClassSubject::where('teacher_id', auth()->id())
+                ->withCount(['materials', 'assignments'])
+                ->with(['eClass' => fn ($q) => $q->with('students'), 'subject'])
+                ->orderBy('e_class_id')
+                ->get();
 
-        $relative = ltrim($submission->file_path ?? '', '/');
-        abort_if($relative === '', 404);
+            return view('guru.classes.index', compact('classSubjects'));
+        })->name('classes.index');
 
-        // Normalize typical public path: storage/submissions/xxx.ext -> submissions/xxx.ext
-        $normalized = preg_replace('#^storage/#', '', $relative);
+        // ── Class-Subject scoped Materials ─────────
+        Route::get('/class-subjects/{classSubject}/materials', [\App\Http\Controllers\Guru\MaterialController::class, 'indexByClassSubject'])->name('class-subjects.materials.index');
+        Route::get('/class-subjects/{classSubject}/materials/create', [\App\Http\Controllers\Guru\MaterialController::class, 'createByClassSubject'])->name('class-subjects.materials.create');
+        Route::post('/class-subjects/{classSubject}/materials', [\App\Http\Controllers\Guru\MaterialController::class, 'storeByClassSubject'])->name('class-subjects.materials.store');
 
-        $candidates = [
-            storage_path('app/public/' . $normalized),
-            storage_path('app/' . $relative),
-            storage_path('app/' . $normalized),
-        ];
+        // ── Class-Subject scoped Assignments ───────
+        Route::get('/class-subjects/{classSubject}/assignments', [\App\Http\Controllers\Guru\AssignmentController::class, 'indexByClassSubject'])->name('class-subjects.assignments.index');
+        Route::get('/class-subjects/{classSubject}/assignments/create', [\App\Http\Controllers\Guru\AssignmentController::class, 'createByClassSubject'])->name('class-subjects.assignments.create');
+        Route::post('/class-subjects/{classSubject}/assignments', [\App\Http\Controllers\Guru\AssignmentController::class, 'storeByClassSubject'])->name('class-subjects.assignments.store');
 
-        $fullPath = null;
-        foreach ($candidates as $candidate) {
-            if (file_exists($candidate)) {
-                $fullPath = $candidate;
-                break;
-            }
-        }
+        // ── Backward-compat Resource Routes ────────
+        Route::resource('materials', \App\Http\Controllers\Guru\MaterialController::class);
+        Route::resource('assignments', \App\Http\Controllers\Guru\AssignmentController::class);
 
-        abort_unless($fullPath, 404);
+        // ── Grades ─────────────────────────────────
+        Route::resource('grades', \App\Http\Controllers\Guru\GradeController::class)
+            ->only(['index', 'edit', 'update'])
+            ->parameters(['grades' => 'submission']);
 
-        return response()->download($fullPath);
-    })->name('submissions.download');
+        // ── Attendance ─────────────────────────────
+        Route::resource('attendance', \App\Http\Controllers\Guru\AttendanceController::class);
+        Route::post('attendance/{attendance}/close', [\App\Http\Controllers\Guru\AttendanceController::class, 'close'])->name('attendance.close');
+        Route::post('attendance/{attendance}/cancel', [\App\Http\Controllers\Guru\AttendanceController::class, 'cancel'])->name('attendance.cancel');
 
-    // Rekap Nilai (per kelas + mapel yang diajarkan guru)
-    Route::get('/rekap-nilai', [\App\Http\Controllers\Guru\RekapNilaiController::class, 'index'])->name('rekap-nilai.index');
-    Route::get('/rekap-nilai/export', [\App\Http\Controllers\Guru\RekapNilaiController::class, 'export'])->name('rekap-nilai.export');
-});
+        // Backward-compat: old views posting to {session}
+        Route::model('session', AttendanceSession::class);
+        Route::post('attendance/{session}/close', [\App\Http\Controllers\Guru\AttendanceController::class, 'close']);
+        Route::post('attendance/{session}/cancel', [\App\Http\Controllers\Guru\AttendanceController::class, 'cancel']);
 
-// Dashboard Siswa
-Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {
-    Route::get('/dashboard', function () {
-        $myClasses = auth()->user()->classes;
-        $totalAssignments = \App\Models\Assignment::whereIn('e_class_id', $myClasses->pluck('id'))->count();
-        $totalSubmissions = \App\Models\Submission::where('student_id', auth()->id())->count();
-        $averageGrade = auth()->user()->grades()->avg('score');
-        return view('siswa.dashboard', compact('myClasses', 'totalAssignments', 'totalSubmissions', 'averageGrade'));
-    })->name('dashboard');
-    
-    // Mata Pelajaran (Subjects)
-    Route::get('/subjects', function () {
-        $classes = auth()->user()->classes()->with(['classSubjects.subject', 'classSubjects.teacher', 'schedules', 'materials', 'assignments'])->get();
-        return view('siswa.subjects.index', compact('classes'));
-    })->name('subjects.index');
-    
-    Route::get('/subjects/{class}', function (\App\Models\EClass $class) {
-        abort_if(!auth()->user()->classes->contains($class), 403);
-        $class->load(['classSubjects.subject', 'classSubjects.teacher', 'schedules', 'materials', 'assignments', 'students']);
-        return view('siswa.subjects.show', compact('class'));
-    })->name('subjects.show');
-    
-    // Jadwal Pelajaran (Schedule)
-    Route::get('/schedule', function () {
-        // Eager load relasi untuk menghindari N+1 query
-        $classes = auth()->user()
-            ->classes()
-            ->with(['classSubjects' => function($q) {
-                $q->with(['subject', 'teacher']);
-            }, 'schedules'])
-            ->get();
-        return view('siswa.schedule.index', compact('classes'));
-    })->name('schedule.index');
-    
-    // Tugas (Assignments)
-    Route::get('/assignments', function () {
-        $myClassIds = auth()->user()->classes()->pluck('e_classes.id');
+        // ── Submission Download ─────────────────────
+        Route::get('/submissions/{submission}/download', function (\App\Models\Submission $submission) {
+            $assignment = $submission->assignment;
+            abort_unless($assignment, 404);
 
-        $assignments = \App\Models\Assignment::query()
-            ->whereIn('e_class_id', $myClassIds)
-            ->with([
-                'eClass',
-                'classSubject.subject',
-                'classSubject.teacher',
-            ])
-            ->orderBy('deadline', 'desc')
-            ->get();
+            $class = $assignment->eClass;
+            abort_unless($class, 404);
+            abort_if(! $class->isTeachedBy(auth()->id()), 403);
 
-        return view('siswa.assignments.index', compact('assignments'));
-    })->name('assignments.index');
+            $relative = ltrim($submission->file_path ?? '', '/');
+            abort_if($relative === '', 404);
 
-    Route::get('/assignments/{assignment}', function (\App\Models\Assignment $assignment) {
-        abort_if(!auth()->user()->classes->contains($assignment->eClass), 403);
-        return view('siswa.assignments.show', compact('assignment'));
-    })->name('assignments.show');
+            $normalized = preg_replace('#^storage/#', '', $relative);
 
-    // Fallback: if any form still POSTs to the show URL, forward it to the submit handler
-    Route::post('/assignments/{assignment}', function (\Illuminate\Http\Request $request, \App\Models\Assignment $assignment) {
-        return redirect()->route('siswa.submissions.store', $assignment);
+            $fullPath = collect([
+                storage_path('app/public/' . $normalized),
+                storage_path('app/' . $relative),
+                storage_path('app/' . $normalized),
+            ])->first(fn ($p) => file_exists($p));
+
+            abort_unless($fullPath, 404);
+
+            return response()->download($fullPath);
+        })->name('submissions.download');
+
+        // ── Rekap Nilai ────────────────────────────
+        Route::get('/rekap-nilai', [\App\Http\Controllers\Guru\RekapNilaiController::class, 'index'])->name('rekap-nilai.index');
+        Route::get('/rekap-nilai/export', [\App\Http\Controllers\Guru\RekapNilaiController::class, 'export'])->name('rekap-nilai.export');
     });
 
-    // Submission upload/update for an assignment
-    Route::post('/assignments/{assignment}/submit', function (\App\Models\Assignment $assignment, \Illuminate\Http\Request $request) {
-        abort_if(!auth()->user()->classes->contains($assignment->eClass), 403);
+// ─────────────────────────────────────────────
+// Siswa
+// ─────────────────────────────────────────────
 
-        $request->validate([
-            'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,zip|max:' . config('upload.submission_max_kb'),
-        ]);
+Route::middleware(['auth', 'role:siswa'])
+    ->prefix('siswa')
+    ->name('siswa.')
+    ->group(function () {
 
-        $studentId = auth()->id();
+        // Dashboard
+        Route::get('/dashboard', function () {
+            $myClasses        = auth()->user()->classes;
+            $totalAssignments = \App\Models\Assignment::whereIn('e_class_id', $myClasses->pluck('id'))->count();
+            $totalSubmissions = \App\Models\Submission::where('student_id', auth()->id())->count();
+            $averageGrade     = auth()->user()->grades()->avg('score');
 
-        $submission = \App\Models\Submission::firstOrNew([
-            'assignment_id' => $assignment->id,
-            'student_id' => $studentId,
-        ]);
+            return view('siswa.dashboard', compact('myClasses', 'totalAssignments', 'totalSubmissions', 'averageGrade'));
+        })->name('dashboard');
 
-        // If replacing an existing submission, delete the old file first
-        if ($submission->exists && $submission->file_path) {
-            \App\Services\FileUploadService::deleteFile($submission->file_path);
-        }
+        // ── Subjects ───────────────────────────────
+        Route::get('/subjects', function () {
+            $classes = auth()->user()->classes()
+                ->with(['classSubjects.subject', 'classSubjects.teacher', 'schedules', 'materials', 'assignments'])
+                ->get();
 
-        // Store in public disk so it can also be downloaded later if needed
-        $stored = $request->file('file')->store('submissions', 'public');
+            return view('siswa.subjects.index', compact('classes'));
+        })->name('subjects.index');
 
-        $submission->file_path = 'storage/' . $stored;
-        $submission->submitted_at = now();
+        Route::get('/subjects/{class}', function (\App\Models\EClass $class) {
+            abort_if(! auth()->user()->classes->contains($class), 403);
+            $class->load(['classSubjects.subject', 'classSubjects.teacher', 'schedules', 'materials', 'assignments', 'students']);
 
-        $submission->save();
+            return view('siswa.subjects.show', compact('class'));
+        })->name('subjects.show');
 
-        return redirect()->route('siswa.assignments.show', $assignment)->with('success', 'Pengumpulan berhasil dikirim.');
-    })->name('submissions.store');
+        // ── Schedule ───────────────────────────────
+        Route::get('/schedule', function () {
+            $classes = auth()->user()
+                ->classes()
+                ->with(['classSubjects' => fn ($q) => $q->with(['subject', 'teacher']), 'schedules'])
+                ->get();
 
-    // If someone opens the submit URL directly, just go back to detail page
-    Route::get('/assignments/{assignment}/submit', function (\App\Models\Assignment $assignment) {
-        return redirect()->route('siswa.assignments.show', $assignment);
+            return view('siswa.schedule.index', compact('classes'));
+        })->name('schedule.index');
+
+        // ── Assignments ────────────────────────────
+        Route::get('/assignments', function () {
+            $myClassIds = auth()->user()->classes()->pluck('e_classes.id');
+
+            $assignments = \App\Models\Assignment::query()
+                ->whereIn('e_class_id', $myClassIds)
+                ->with(['eClass', 'classSubject.subject', 'classSubject.teacher'])
+                ->orderBy('deadline', 'desc')
+                ->get();
+
+            return view('siswa.assignments.index', compact('assignments'));
+        })->name('assignments.index');
+
+        Route::get('/assignments/{assignment}', function (\App\Models\Assignment $assignment) {
+            abort_if(! auth()->user()->classes->contains($assignment->eClass), 403);
+
+            return view('siswa.assignments.show', compact('assignment'));
+        })->name('assignments.show');
+
+        // Fallback: old forms POSTing to show URL
+        Route::post('/assignments/{assignment}', function (\Illuminate\Http\Request $request, \App\Models\Assignment $assignment) {
+            return redirect()->route('siswa.submissions.store', $assignment);
+        });
+
+        // Assignment Download
+        Route::get('/assignments/{assignment}/download', function (\App\Models\Assignment $assignment) {
+            abort_if(! auth()->user()->classes->contains($assignment->eClass), 403);
+
+            $relative   = ltrim($assignment->file_path ?? '', '/');
+            abort_if($relative === '', 404);
+
+            $normalized = preg_replace('#^storage/#', '', $relative);
+
+            $fullPath = collect([
+                storage_path('app/public/' . $normalized),
+                storage_path('app/' . $relative),
+                storage_path('app/' . $normalized),
+            ])->first(fn ($p) => file_exists($p));
+
+            abort_unless($fullPath, 404);
+
+            return response()->download($fullPath);
+        })->name('assignments.download');
+
+        // Assignment Submit URL (GET redirect guard)
+        Route::get('/assignments/{assignment}/submit', function (\App\Models\Assignment $assignment) {
+            return redirect()->route('siswa.assignments.show', $assignment);
+        });
+
+        // ── Submissions ────────────────────────────
+        Route::post('/assignments/{assignment}/submit', function (\App\Models\Assignment $assignment, \Illuminate\Http\Request $request) {
+            abort_if(! auth()->user()->classes->contains($assignment->eClass), 403);
+
+            $request->validate([
+                'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,zip|max:' . config('upload.submission_max_kb'),
+            ]);
+
+            $submission = \App\Models\Submission::firstOrNew([
+                'assignment_id' => $assignment->id,
+                'student_id'    => auth()->id(),
+            ]);
+
+            if ($submission->exists && $submission->file_path) {
+                \App\Services\FileUploadService::deleteFile($submission->file_path);
+            }
+
+            $stored = $request->file('file')->store('submissions', 'public');
+
+            $submission->file_path   = 'storage/' . $stored;
+            $submission->submitted_at = now();
+            $submission->save();
+
+            return redirect()->route('siswa.assignments.show', $assignment)->with('success', 'Pengumpulan berhasil dikirim.');
+        })->name('submissions.store');
+
+        Route::get('/submissions/{submission}/download', function (\App\Models\Submission $submission) {
+            abort_if($submission->student_id !== auth()->id(), 403);
+
+            $relative   = ltrim($submission->file_path ?? '', '/');
+            abort_if($relative === '', 404);
+
+            $normalized = preg_replace('#^storage/#', '', $relative);
+
+            $fullPath = collect([
+                storage_path('app/public/' . $normalized),
+                storage_path('app/' . $relative),
+                storage_path('app/' . $normalized),
+            ])->first(fn ($p) => file_exists($p));
+
+            abort_unless($fullPath, 404);
+
+            return response()->download($fullPath);
+        })->name('submissions.download');
+
+        // ── Quizzes ────────────────────────────────
+        Route::get('/quizzes', fn () => view('siswa.quizzes.index'))->name('quizzes.index');
+
+        // ── Attendance ─────────────────────────────
+        Route::get('/attendance/{classSubject}', [\App\Http\Controllers\Siswa\AttendanceController::class, 'show'])->name('attendance.show');
+        Route::post('/attendance/{session}/submit', [\App\Http\Controllers\Siswa\AttendanceController::class, 'store'])->name('attendance.store');
+
+        // ── Materials Download ──────────────────────
+        Route::get('/materials/{material}/download', function (\App\Models\Material $material) {
+            abort_if(! auth()->user()->classes->contains($material->eClass), 403);
+
+            $relative   = ltrim($material->file_path ?? '', '/');
+            abort_if($relative === '', 404);
+
+            $normalized = preg_replace('#^storage/#', '', $relative);
+
+            $fullPath = collect([
+                storage_path('app/public/' . $normalized),
+                storage_path('app/' . $relative),
+                storage_path('app/' . $normalized),
+            ])->first(fn ($p) => file_exists($p));
+
+            abort_unless($fullPath, 404);
+
+            return response()->download($fullPath);
+        })->name('materials.download');
+
+        // ── Legacy / Backward-compat ───────────────
+        Route::get('/classes', fn () => view('siswa.subjects.index', ['classes' => auth()->user()->classes]))->name('classes.index');
+        Route::get('/grades', fn () => view('siswa.grades.index', ['grades' => auth()->user()->grades]))->name('grades.index');
     });
-
-    // Assignment file (download/open)
-    Route::get('/assignments/{assignment}/download', function (\App\Models\Assignment $assignment) {
-        abort_if(!auth()->user()->classes->contains($assignment->eClass), 403);
-
-        $relative = ltrim($assignment->file_path ?? '', '/');
-        abort_if($relative === '', 404);
-
-        // Normalize typical public path: storage/assignments/xxx.ext -> assignments/xxx.ext
-        $normalized = preg_replace('#^storage/#', '', $relative);
-
-        $candidates = [
-            storage_path('app/public/' . $normalized),
-            storage_path('app/' . $relative),
-            storage_path('app/' . $normalized),
-        ];
-
-        $fullPath = null;
-        foreach ($candidates as $candidate) {
-            if (file_exists($candidate)) {
-                $fullPath = $candidate;
-                break;
-            }
-        }
-
-        abort_unless($fullPath, 404);
-
-        return response()->download($fullPath);
-    })->name('assignments.download');
-    
-    // Quiz / Ujian
-    Route::get('/quizzes', function () {
-        return view('siswa.quizzes.index');
-    })->name('quizzes.index');
-    
-    // Presensi/Absensi (Attendance)
-    Route::get('/attendance/{classSubject}', [\App\Http\Controllers\Siswa\AttendanceController::class, 'show'])->name('attendance.show');
-    Route::post('/attendance/{session}/submit', [\App\Http\Controllers\Siswa\AttendanceController::class, 'store'])->name('attendance.store');
-    
-    // Legacy routes for backward compatibility
-    Route::get('/classes', function () {
-        return view('siswa.subjects.index', ['classes' => auth()->user()->classes]);
-    })->name('classes.index');
-    
-    Route::get('/grades', function () {
-        return view('siswa.grades.index', ['grades' => auth()->user()->grades]);
-    })->name('grades.index');
-    
-    // Materials (download/open)
-    Route::get('/materials/{material}/download', function (\App\Models\Material $material) {
-        abort_if(!auth()->user()->classes->contains($material->eClass), 403);
-
-        $relative = ltrim($material->file_path ?? '', '/');
-        abort_if($relative === '', 404);
-
-        // Many uploads store paths like: storage/materials/xxx.ext (public URL-ish)
-        // Prefer mapping that to storage/app/public/materials/xxx.ext
-        $normalized = preg_replace('#^storage/#', '', $relative);
-
-        $candidates = [
-            storage_path('app/public/' . $normalized),
-            storage_path('app/' . $relative),
-            storage_path('app/' . $normalized),
-        ];
-
-        $fullPath = null;
-        foreach ($candidates as $candidate) {
-            if (file_exists($candidate)) {
-                $fullPath = $candidate;
-                break;
-            }
-        }
-
-        abort_unless($fullPath, 404);
-
-        return response()->download($fullPath);
-    })->name('materials.download');
-    
-    // Download siswa submission file (for siswa)
-    Route::get('/submissions/{submission}/download', function (\App\Models\Submission $submission) {
-        abort_if($submission->student_id !== auth()->id(), 403);
-
-        $relative = ltrim($submission->file_path ?? '', '/');
-        abort_if($relative === '', 404);
-
-        $normalized = preg_replace('#^storage/#', '', $relative);
-
-        $candidates = [
-            storage_path('app/public/' . $normalized),
-            storage_path('app/' . $relative),
-            storage_path('app/' . $normalized),
-        ];
-
-        $fullPath = null;
-        foreach ($candidates as $candidate) {
-            if (file_exists($candidate)) {
-                $fullPath = $candidate;
-                break;
-            }
-        }
-
-        abort_unless($fullPath, 404);
-
-        return response()->download($fullPath);
-    })->name('submissions.download');
-});
-

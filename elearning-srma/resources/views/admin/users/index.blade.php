@@ -13,9 +13,79 @@
             </h1>
             <p class="text-gray-500 text-xs sm:text-sm">Kelola guru, siswa, dan admin elearning</p>
         </div>
-        <a href="{{ route('admin.users.create') }}" class="inline-flex items-center gap-2 bg-red-500 text-white px-3 sm:px-6 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-red-600 transition whitespace-nowrap">
-            <i class="fas fa-plus"></i> Tambah Pengguna
-        </a>
+        <div class="flex flex-col sm:flex-row gap-2">
+            <button type="button" onclick="openImportUsersModal()" class="inline-flex items-center gap-2 bg-blue-500 text-white px-3 sm:px-6 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-blue-600 transition whitespace-nowrap">
+                <i class="fas fa-file-import"></i> Import
+            </button>
+            <a href="{{ route('admin.users.create') }}" class="inline-flex items-center gap-2 bg-red-500 text-white px-3 sm:px-6 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-red-600 transition whitespace-nowrap">
+                <i class="fas fa-plus"></i> Tambah Pengguna
+            </a>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div id="importUsersModal" class="fixed inset-0 z-[9998] hidden" aria-hidden="true">
+        <div class="absolute inset-0 bg-black/40" onclick="closeImportUsersModal()"></div>
+        <div class="relative mx-auto mt-10 sm:mt-16 w-[92%] max-w-xl">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="px-4 sm:px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <h3 class="font-bold text-gray-900 text-sm sm:text-base">
+                        <i class="fas fa-file-import text-blue-600 mr-2"></i> Import Pengguna (CSV/Excel)
+                    </h3>
+                    <button type="button" onclick="closeImportUsersModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="p-4 sm:p-6">
+                    <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                        Upload file <b>.csv</b> / <b>.xlsx</b> sesuai template agar kolomnya valid.
+                    </p>
+
+                    @if(session('import_failures'))
+                        <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <p class="text-xs sm:text-sm font-semibold text-red-700 mb-2">Detail baris gagal:</p>
+                            <div class="max-h-40 overflow-auto text-xs text-red-800 space-y-1">
+                                @foreach(session('import_failures') as $failure)
+                                    <div class="border-b border-red-100 pb-1">
+                                        Baris <b>{{ $failure->row() }}</b>:
+                                        {{ implode(' | ', $failure->errors()) }}
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('admin.users.import') }}" enctype="multipart/form-data" class="space-y-4">
+                        @csrf
+                        <div>
+                            <label class="block text-xs sm:text-sm font-semibold text-gray-900 mb-2">File Import</label>
+                            <input type="file" name="file" accept=".csv,.xlsx,.xls" required
+                                   class="w-full px-3 sm:px-4 py-2 border-2 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-blue-500 transition @error('file') border-red-500 @else border-gray-300 @enderror">
+                            @error('file')
+                                <span class="text-red-500 text-xs mt-2 block">❌ {{ $message }}</span>
+                            @enderror
+                            <p class="text-[11px] text-gray-500 mt-2">Maksimal 10MB.</p>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+                            <a href="{{ route('admin.users.import.template') }}" class="inline-flex items-center justify-center gap-2 bg-gray-100 text-gray-800 px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-gray-200 transition">
+                                <i class="fas fa-download"></i> Download Template
+                            </a>
+
+                            <div class="flex gap-2">
+                                <button type="button" onclick="closeImportUsersModal()" class="inline-flex items-center justify-center gap-2 bg-gray-200 text-gray-900 px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-gray-300 transition">
+                                    Batal
+                                </button>
+                                <button type="submit" class="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm hover:bg-blue-700 transition">
+                                    <i class="fas fa-upload"></i> Import
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Search & Filter Bar -->
@@ -174,6 +244,25 @@
 
 @push('scripts')
 <script>
+function openImportUsersModal() {
+    const el = document.getElementById('importUsersModal');
+    if (el) el.classList.remove('hidden');
+}
+
+function closeImportUsersModal() {
+    const el = document.getElementById('importUsersModal');
+    if (el) el.classList.add('hidden');
+}
+
+// Auto-open modal if there are validation errors for import or failure details
+document.addEventListener('DOMContentLoaded', function () {
+    const hasImportError = {!! $errors->has('file') ? 'true' : 'false' !!};
+    const hasFailures = {!! session()->has('import_failures') ? 'true' : 'false' !!};
+    if (hasImportError || hasFailures) {
+        openImportUsersModal();
+    }
+});
+
 function confirmDelete(event, name) {
     event.preventDefault();
     const form = event.target.closest('form');

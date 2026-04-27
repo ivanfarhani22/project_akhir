@@ -71,10 +71,18 @@ class ClassController extends Controller
      */
     public function show(EClass $class)
     {
-        $class->load('classSubjects.teacher', 'classSubjects.subject', 'students');
+        $class->load(
+            'classSubjects.teacher',
+            'classSubjects.subject',
+            'students',
+            // ensure schedules are available for the schedule section
+            'schedules.classSubject.subject',
+            'schedules.classSubject.teacher'
+        );
+
         $teachers = User::where('role', 'guru')->get();
         $subjects = Subject::all();
-        
+
         return view('admin.classes.show', compact('class', 'teachers', 'subjects'));
     }
 

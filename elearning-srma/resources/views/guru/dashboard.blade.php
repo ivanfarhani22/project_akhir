@@ -1,200 +1,148 @@
 @extends('layouts.guru')
-
 @section('title', 'Dashboard Guru')
 @section('icon', 'fas fa-graduation-cap')
 
 @section('content')
-    <!-- PAGE HEADER -->
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3 mb-2">
-            <i class="fas fa-graduation-cap text-amber-500"></i>
-            Dashboard Guru
-        </h1>
-        <p class="text-gray-600 text-sm">Kelola kelas, materi, dan penilaian Anda</p>
-    </div>
 
-    <!-- STATISTICS CARDS -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-8">
-        <!-- Mata Pelajaran -->
-        <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-amber-500">
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+<div class="mb-8">
+    <p class="text-xs text-gray-400 uppercase tracking-widest mb-1"><i class="fas fa-graduation-cap mr-1"></i> Guru</p>
+    <h1 class="text-2xl font-extrabold text-gray-900"><i class="fas fa-graduation-cap text-[#A41E35] mr-2"></i>Dashboard Guru</h1>
+    <p class="text-sm text-gray-500 mt-1">Kelola kelas, materi, dan penilaian Anda</p>
+</div>
+
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    @php
+        $stats = [
+            ['label'=>'Mata Pelajaran','value'=>$totalClassSubjects,'icon'=>'fa-book','bg'=>'bg-amber-50','icon_color'=>'text-amber-500','border'=>'border-amber-400'],
+            ['label'=>'Kelas','value'=>$totalClasses,'icon'=>'fa-chalkboard','bg'=>'bg-blue-50','icon_color'=>'text-blue-500','border'=>'border-blue-400'],
+            ['label'=>'Siswa Total','value'=>$totalStudents,'icon'=>'fa-users','bg'=>'bg-emerald-50','icon_color'=>'text-emerald-500','border'=>'border-emerald-400'],
+            ['label'=>'Materi Diunggah','value'=>$totalMaterials,'icon'=>'fa-file-alt','bg'=>'bg-red-50','icon_color'=>'text-[#A41E35]','border'=>'border-[#A41E35]'],
+        ];
+    @endphp
+    @foreach($stats as $s)
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="h-1 {{ str_replace('border-','bg-',$s['border']) }}"></div>
+            <div class="p-5 flex justify-between items-start">
                 <div>
-                    <p class="text-gray-600 text-xs sm:text-sm font-medium mb-2">Mata Pelajaran</p>
-                    <p class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $totalClassSubjects }}</p>
+                    <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">{{ $s['label'] }}</p>
+                    <p class="text-3xl font-extrabold text-gray-900">{{ $s['value'] }}</p>
                 </div>
-                <div class="bg-amber-100 p-3 rounded-lg flex-shrink-0">
-                    <i class="fas fa-book text-amber-500 text-lg sm:text-xl"></i>
+                <div class="w-10 h-10 {{ $s['bg'] }} rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i class="fas {{ $s['icon'] }} {{ $s['icon_color'] }}"></i>
                 </div>
             </div>
         </div>
+    @endforeach
+</div>
 
-        <!-- Kelas -->
-        <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-blue-500">
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+<div class="mb-8">
+    <h2 class="text-base font-extrabold text-gray-900 mb-4"><i class="fas fa-bolt text-amber-400 mr-2"></i>Aksi Cepat</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        @php
+            $actions = [
+                ['href'=>route('guru.materials.index'),'icon'=>'fa-plus-square','color'=>'text-amber-500','bg'=>'bg-amber-50','label'=>'Buat Materi','desc'=>'Tambahkan materi pembelajaran baru'],
+                ['href'=>route('guru.assignments.create'),'icon'=>'fa-tasks','color'=>'text-blue-500','bg'=>'bg-blue-50','label'=>'Buat Tugas','desc'=>'Buat tugas atau kuis untuk siswa'],
+                ['href'=>route('guru.attendance.index'),'icon'=>'fa-clipboard-list','color'=>'text-emerald-500','bg'=>'bg-emerald-50','label'=>'Kelola Presensi','desc'=>'Catat kehadiran siswa di kelas'],
+            ];
+        @endphp
+        @foreach($actions as $a)
+            <a href="{{ $a['href'] }}"
+               class="group bg-white rounded-2xl border-2 border-gray-100 hover:border-gray-300 hover:shadow-md transition-all duration-200 p-5 flex items-center gap-4">
+                <div class="w-12 h-12 {{ $a['bg'] }} rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <i class="fas {{ $a['icon'] }} {{ $a['color'] }} text-lg"></i>
+                </div>
                 <div>
-                    <p class="text-gray-600 text-xs sm:text-sm font-medium mb-2">Kelas</p>
-                    <p class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $totalClasses }}</p>
+                    <p class="font-bold text-gray-900 text-sm">{{ $a['label'] }}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ $a['desc'] }}</p>
                 </div>
-                <div class="bg-blue-100 p-3 rounded-lg flex-shrink-0">
-                    <i class="fas fa-chalkboard text-blue-500 text-lg sm:text-xl"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Siswa Total -->
-        <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-green-500">
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
-                <div>
-                    <p class="text-gray-600 text-xs sm:text-sm font-medium mb-2">Siswa Total</p>
-                    <p class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $totalStudents }}</p>
-                </div>
-                <div class="bg-green-100 p-3 rounded-lg flex-shrink-0">
-                    <i class="fas fa-users text-green-500 text-lg sm:text-xl"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Materi Diunggah -->
-        <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-red-500">
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
-                <div>
-                    <p class="text-gray-600 text-xs sm:text-sm font-medium mb-2">Materi Diunggah</p>
-                    <p class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $totalMaterials }}</p>
-                </div>
-                <div class="bg-red-100 p-3 rounded-lg flex-shrink-0">
-                    <i class="fas fa-file-alt text-red-500 text-lg sm:text-xl"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- QUICK ACTIONS -->
-    <div class="mb-8">
-        <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-            <i class="fas fa-lightning-bolt text-amber-500"></i>
-            Aksi Cepat
-        </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
-            <!-- Buat Materi -->
-            <a href="{{ route('guru.materials.create') }}" class="bg-white rounded-lg shadow-sm hover:shadow-md transition p-4 sm:p-6 text-center group border border-gray-100">
-                <div class="text-4xl text-amber-500 mb-4 group-hover:scale-110 transition">
-                    <i class="fas fa-plus-square"></i>
-                </div>
-                <h3 class="font-bold text-gray-900 mb-2 text-sm sm:text-base">Buat Materi</h3>
-                <p class="text-xs sm:text-sm text-gray-600">Tambahkan materi pembelajaran baru</p>
             </a>
-
-            <!-- Buat Tugas -->
-            <a href="{{ route('guru.assignments.create') }}" class="bg-white rounded-lg shadow-sm hover:shadow-md transition p-4 sm:p-6 text-center group border border-gray-100">
-                <div class="text-4xl text-blue-500 mb-4 group-hover:scale-110 transition">
-                    <i class="fas fa-tasks"></i>
-                </div>
-                <h3 class="font-bold text-gray-900 mb-2 text-sm sm:text-base">Buat Tugas</h3>
-                <p class="text-xs sm:text-sm text-gray-600">Buat tugas atau kuis untuk siswa</p>
-            </a>
-
-            <!-- Kelola Presensi -->
-            <a href="{{ route('guru.attendance.index') }}" class="bg-white rounded-lg shadow-sm hover:shadow-md transition p-4 sm:p-6 text-center group border border-gray-100">
-                <div class="text-4xl text-green-500 mb-4 group-hover:scale-110 transition">
-                    <i class="fas fa-clipboard-list"></i>
-                </div>
-                <h3 class="font-bold text-gray-900 mb-2 text-sm sm:text-base">Kelola Presensi</h3>
-                <p class="text-xs sm:text-sm text-gray-600">Catat kehadiran siswa di kelas</p>
-            </a>
-        </div>
+        @endforeach
     </div>
+</div>
 
-    <!-- MY CLASSES SECTION -->
-    <div class="mb-8">
-        <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-            <i class="fas fa-chalkboard text-amber-500"></i>
-            Mata Pelajaran Saya ({{ $totalClassSubjects }})
-        </h2>
+<div class="mb-8">
+    <h2 class="text-base font-extrabold text-gray-900 mb-4"><i class="fas fa-chalkboard text-[#A41E35] mr-2"></i>Mata Pelajaran Saya <span class="text-gray-400 font-normal">({{ $totalClassSubjects }})</span></h2>
 
-        @if($classSubjects->isEmpty())
-            <div class="bg-white rounded-lg shadow-sm p-12 text-center">
-                <i class="fas fa-inbox text-gray-300 text-5xl mb-4 block"></i>
-                <p class="text-gray-600 text-base">Belum ada mata pelajaran yang ditugaskan</p>
+    @if($classSubjects->isEmpty())
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
+            <div class="flex flex-col items-center justify-center py-16 text-center">
+                <div class="w-20 h-20 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center mb-4">
+                    <i class="fas fa-chalkboard text-3xl text-gray-300"></i>
+                </div>
+                <p class="text-gray-500 text-sm">Belum ada mata pelajaran yang ditugaskan.</p>
             </div>
-        @else
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                @foreach($classSubjects as $cs)
-                    <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition border border-gray-100 overflow-hidden">
-                        <div class="p-6">
-                            <div class="mb-4">
-                                <h3 class="text-lg font-bold text-gray-900 mb-1">
-                                    {{ $cs->eClass->name }}
-                                </h3>
-                                <p class="text-sm text-gray-600">{{ $cs->subject->name }}</p>
+        </div>
+    @else
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            @foreach($classSubjects as $cs)
+                <div class="group bg-white rounded-2xl border-2 border-gray-100 hover:border-[#A41E35] hover:shadow-lg transition-all duration-200 overflow-hidden">
+                    <div class="h-1 bg-gradient-to-r from-[#A41E35] to-rose-400"></div>
+                    <div class="p-5">
+                        <h3 class="text-base font-bold text-gray-900 truncate">{{ $cs->eClass->name }}</h3>
+                        <p class="text-xs text-gray-500 mt-0.5 mb-4">{{ $cs->subject->name }}</p>
+
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="text-center bg-blue-50 rounded-xl py-3">
+                                <p class="text-xl font-extrabold text-blue-600">{{ $cs->eClass->students->count() }}</p>
+                                <p class="text-xs text-gray-400 mt-0.5">Siswa</p>
                             </div>
-
-                            <div class="grid grid-cols-2 gap-4 mb-6 py-4 border-y border-gray-100">
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-blue-600">{{ $cs->eClass->students->count() }}</div>
-                                    <p class="text-xs text-gray-600 font-medium mt-1">Siswa</p>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-green-600">{{ $cs->eClass->materials->count() }}</div>
-                                    <p class="text-xs text-gray-600 font-medium mt-1">Materi</p>
-                                </div>
-                            </div>
-
-                            <div class="flex gap-2">
-                                <a href="{{ route('guru.materials.index', ['class' => $cs->eClass->id]) }}" class="flex-1 bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-2 px-4 rounded-lg text-sm transition text-center">
-                                    <i class="fas fa-book mr-1"></i> Materi
-                                </a>
-                                <a href="{{ route('guru.assignments.index', ['class' => $cs->eClass->id]) }}" class="flex-1 bg-[#A41E35] hover:bg-[#7D1627] text-white font-medium py-2 px-4 rounded-lg text-sm transition text-center">
-                                    <i class="fas fa-tasks mr-1"></i> Tugas
-                                </a>
+                            <div class="text-center bg-emerald-50 rounded-xl py-3">
+                                <p class="text-xl font-extrabold text-emerald-600">{{ $cs->eClass->materials->count() }}</p>
+                                <p class="text-xs text-gray-400 mt-0.5">Materi</p>
                             </div>
                         </div>
+
+                        <div class="flex gap-2">
+                            <a href="{{ route('guru.materials.index', ['class' => $cs->eClass->id]) }}"
+                               class="flex-1 inline-flex justify-center items-center gap-1.5 bg-[#A41E35] hover:bg-[#7D1627] text-white text-xs font-semibold py-2.5 rounded-xl transition shadow-sm hover:shadow-md">
+                                <i class="fas fa-book text-[10px]"></i> Materi
+                            </a>
+                            <a href="{{ route('guru.assignments.index', ['class' => $cs->eClass->id]) }}"
+                               class="flex-1 inline-flex justify-center items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold py-2.5 rounded-xl transition">
+                                <i class="fas fa-tasks text-[10px]"></i> Tugas
+                            </a>
+                        </div>
                     </div>
-                @endforeach
-            </div>
-        @endif
-    </div>
+                </div>
+            @endforeach
+        </div>
+    @endif
+</div>
 
-    <!-- RECENT ACTIVITY SECTION -->
-    <div class="mb-8">
-        <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-            <i class="fas fa-history text-amber-500"></i>
-            Aktivitas Terbaru
-        </h2>
-
-        <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="border-b border-gray-200 bg-gray-50">
-                            <th class="px-6 py-4 text-left font-semibold text-gray-900">Aksi</th>
-                            <th class="px-6 py-4 text-left font-semibold text-gray-900">Deskripsi</th>
-                            <th class="px-6 py-4 text-left font-semibold text-gray-900">Waktu</th>
+<div>
+    <h2 class="text-base font-extrabold text-gray-900 mb-4"><i class="fas fa-history text-gray-400 mr-2"></i>Aktivitas Terbaru</h2>
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Deskripsi</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Waktu</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse(\App\Models\ActivityLog::where('user_id', auth()->id())->orderBy('timestamp','desc')->take(10)->get() as $log)
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-5 py-3.5">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                    {{ $log->action }}
+                                </span>
+                            </td>
+                            <td class="px-5 py-3.5 text-gray-600 text-xs">{{ Str::limit($log->description, 60) }}</td>
+                            <td class="px-5 py-3.5 text-xs text-gray-400">{{ \Carbon\Carbon::parse($log->timestamp)->diffForHumans() }}</td>
                         </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        @forelse(\App\Models\ActivityLog::where('user_id', auth()->id())->orderBy('timestamp', 'desc')->take(10)->get() as $log)
-                            <tr class="hover:bg-gray-50 transition">
-                                <td class="px-6 py-4">
-                                    <span class="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full">
-                                        {{ $log->action }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-gray-700">{{ Str::limit($log->description, 60) }}</td>
-                                <td class="px-6 py-4 text-gray-600 text-xs">
-                                    {{ \Carbon\Carbon::parse($log->timestamp)->diffForHumans() }}
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="3" class="px-6 py-12 text-center text-gray-600">
-                                    <i class="fas fa-inbox text-gray-300 text-4xl mb-4 block"></i>
-                                    <p class="text-base">Belum ada aktivitas</p>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                    @empty
+                        <tr>
+                            <td colspan="3" class="py-12 text-center">
+                                <i class="fas fa-inbox text-gray-200 text-4xl mb-3 block"></i>
+                                <p class="text-gray-400 text-sm">Belum ada aktivitas.</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 @endsection

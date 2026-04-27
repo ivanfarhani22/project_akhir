@@ -12,7 +12,7 @@
             <i class="fas fa-door-open"></i> Kelas: <strong class="text-gray-700">{{ $class->name }}</strong>
         </span>
     </div>
-    <a href="{{ route('guru.materials.create', ['class_id' => $class->id]) }}"
+    <a href="{{ isset($classSubject) && $classSubject ? route('guru.materials.create', $classSubject) : route('guru.materials.index') }}"
        class="inline-flex items-center gap-2 bg-[#A41E35] hover:bg-[#7D1627] text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all whitespace-nowrap">
         <i class="fas fa-plus text-xs"></i> Upload Materi
     </a>
@@ -31,7 +31,7 @@
                     <i class="fas fa-folder-open text-3xl text-gray-300"></i>
                 </div>
                 <p class="text-gray-500 text-sm mb-4">Belum ada materi yang diupload.</p>
-                <a href="{{ route('guru.materials.create', ['class_id' => $class->id]) }}"
+                <a href="{{ isset($classSubject) && $classSubject ? route('guru.materials.create', $classSubject) : route('guru.materials.index') }}"
                    class="inline-flex items-center gap-2 bg-[#A41E35] hover:bg-[#7D1627] text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-md transition-all">
                     <i class="fas fa-plus text-xs"></i> Upload Materi Pertama
                 </a>

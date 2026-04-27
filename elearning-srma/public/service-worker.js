@@ -61,12 +61,31 @@ function isStaticAsset(requestUrl) {
   );
 }
 
+function shouldBypassCache(url) {
+  // Hindari caching untuk area yang biasanya butuh auth / sering berubah.
+  // Ini mencegah fetch error berulang akibat cache-first ke halaman dinamis.
+  return (
+    url.pathname.startsWith('/admin/') ||
+    url.pathname.startsWith('/guru/') ||
+    url.pathname.startsWith('/siswa/') ||
+    url.pathname.startsWith('/api/')
+  );
+}
+
+function safeFetch(request) {
+  // Beberapa browser/devtools bisa menampilkan "Uncaught (in promise)" kalau fetch reject.
+  // Wrapper ini memastikan reject ditangani dan tetap melempar agar strategi bisa fallback.
+  return fetch(request).catch((err) => {
+    throw err;
+  });
+}
+
 async function cacheFirst(request) {
   const cache = await caches.open(STATIC_CACHE);
   const cached = await cache.match(request);
   if (cached) return cached;
 
-  const fresh = await fetch(request);
+  const fresh = await safeFetch(request);
   // Only cache successful responses
   if (fresh && fresh.ok) {
     cache.put(request, fresh.clone());
@@ -77,7 +96,7 @@ async function cacheFirst(request) {
 async function networkFirst(request) {
   const cache = await caches.open(PAGE_CACHE);
   try {
-    const fresh = await fetch(request);
+    const fresh = await safeFetch(request);
     if (fresh && fresh.ok) {
       cache.put(request, fresh.clone());
     }
@@ -85,7 +104,8 @@ async function networkFirst(request) {
   } catch (err) {
     const cached = await cache.match(request);
     if (cached) return cached;
-    return cache.match(OFFLINE_URL);
+    const offline = await cache.match(OFFLINE_URL);
+    return offline || new Response('Offline', { status: 503, statusText: 'Offline' });
   }
 }
 
@@ -98,6 +118,19 @@ self.addEventListener('fetch', (event) => {
 
   // Bypass non-GET requests
   if (request.method !== 'GET') return;
+
+  // Bypass caching for dynamic/auth areas
+  if (shouldBypassCache(url)) {
+    // Untuk navigasi, tetap pakai networkFirst supaya ada fallback offline.
+    if (isNavigationRequest(request)) {
+      event.respondWith(networkFirst(request));
+      return;
+    }
+
+    // Untuk request non-navigasi (mis. fetch JSON), langsung ke network.
+    event.respondWith(safeFetch(request));
+    return;
+  }
 
   // Cache First for assets
   if (isStaticAsset(url)) {
