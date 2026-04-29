@@ -156,15 +156,26 @@ Route::middleware(['auth', 'role:guru'])
         Route::get('/dashboard', function () {
             $classSubjects = \App\Models\ClassSubject::where('teacher_id', auth()->id())
                 ->withCount(['materials', 'assignments'])
-                ->with(['eClass' => fn ($q) => $q->with('students'), 'subject'])
+                ->with([
+                    'eClass.students',
+                    'subject',
+                ])
                 ->orderBy('e_class_id')
                 ->get();
 
+            // 1 guru = many class_subject (mapel yang diajar)
             $totalClassSubjects = $classSubjects->count();
-            $totalClasses       = $classSubjects->pluck('eClass')->unique('id')->count();
-            $totalStudents      = $classSubjects->pluck('eClass')->unique('id')->sum(fn ($c) => $c->students->count());
-            $totalMaterials     = $classSubjects->sum('materials_count');
-            $totalAssignments   = $classSubjects->sum('assignments_count');
+
+            // Total kelas unik yang diajar (berdasarkan e_class_id)
+            $totalClasses = $classSubjects->pluck('e_class_id')->unique()->count();
+
+            // Total siswa unik tanpa double count antar mapel di kelas yang sama
+            $uniqueClasses = $classSubjects->pluck('eClass')->filter()->unique('id');
+            $totalStudents = $uniqueClasses->flatMap(fn ($c) => $c->students->pluck('id'))->unique()->count();
+
+            // Materi & tugas harus spesifik per class_subject (bukan global per kelas)
+            $totalMaterials   = (int) $classSubjects->sum('materials_count');
+            $totalAssignments = (int) $classSubjects->sum('assignments_count');
 
             return view('guru.dashboard', compact(
                 'classSubjects', 'totalClassSubjects', 'totalClasses',
@@ -182,6 +193,9 @@ Route::middleware(['auth', 'role:guru'])
 
             return view('guru.classes.index', compact('classSubjects'));
         })->name('classes.index');
+
+        // Classes show (detail)
+        Route::get('/classes/{classSubject}', [\App\Http\Controllers\Guru\ClassController::class, 'show'])->name('classes.show');
 
         // ── Class-Subject scoped Materials ─────────
         Route::get('/class-subjects/{classSubject}/materials', [\App\Http\Controllers\Guru\MaterialController::class, 'indexByClassSubject'])->name('class-subjects.materials.index');

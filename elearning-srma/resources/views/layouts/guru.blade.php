@@ -54,14 +54,78 @@
         ::-webkit-scrollbar-thumb { background: rgba(164,30,53,.4); border-radius: 99px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--red); }
 
+        /* ══ GLOBAL LOADING OVERLAY ══ */
+        #app-loading {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: grid;
+            place-items: center;
+            background:
+                radial-gradient(900px 500px at 20% 15%, rgba(164,30,53,.10), transparent 60%),
+                radial-gradient(900px 500px at 85% 75%, rgba(86,16,32,.10), transparent 60%),
+                rgba(13,10,11,.55);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity .18s ease, visibility .18s ease;
+        }
+        #app-loading.is-visible {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: none;
+        }
+        #app-loading, #app-loading * {
+            pointer-events: none;
+        }
+
+        .al-bars {
+            height: 34px;
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            padding: 14px 16px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.92);
+            border: 1px solid rgba(0,0,0,.06);
+            box-shadow: 0 18px 50px rgba(0,0,0,.28);
+            flex-shrink: 0;
+        }
+        html.dark .al-bars {
+            background: rgba(26,26,30,.86);
+            border-color: rgba(255,255,255,.08);
+        }
+        .al-bar {
+            width: 5px;
+            height: 10px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #f43f5e, var(--red));
+            transform-origin: bottom;
+            animation: alDance 0.9s ease-in-out infinite;
+        }
+        .al-bar:nth-child(2) { animation-delay: .08s; }
+        .al-bar:nth-child(3) { animation-delay: .16s; }
+        .al-bar:nth-child(4) { animation-delay: .24s; }
+        .al-bar:nth-child(5) { animation-delay: .32s; }
+
+        @keyframes alDance {
+            0%, 100% { transform: scaleY(.35); opacity: .75; }
+            50%       { transform: scaleY(1);   opacity: 1;   }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .al-bar { animation: none !important; }
+        }
+
         /* ══ SIDEBAR ══ */
         #sidebar {
             position: fixed; top: 0; left: 0;
             width: 240px; height: 100vh;
             background: var(--sidebar-bg);
             display: flex; flex-direction: column;
-            overflow-y: auto;
-            overflow-x: hidden;
+            overflow-y: auto; overflow-x: hidden;
             border-right: 1px solid var(--sidebar-border);
             z-index: 50;
             transition: width .28s cubic-bezier(.4,0,.2,1);
@@ -70,53 +134,36 @@
 
         /* ── header ── */
         .sb-header {
-            height: 60px;
-            padding: 0 12px;
+            height: 60px; padding: 0 12px;
             border-bottom: 1px solid var(--sidebar-border);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            display: flex; align-items: center; gap: 10px;
             flex-shrink: 0;
         }
         .sb-header-content {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex: 1;
-            min-width: 0;
-            overflow: hidden;
+            display: flex; align-items: center; gap: 10px;
+            flex: 1; min-width: 0; overflow: hidden;
         }
         .logo-mark {
-            width: 36px; height: 36px;
-            border-radius: 9px;
+            width: 36px; height: 36px; border-radius: 9px;
             background: #ffffff;
             display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-            overflow: hidden;
+            flex-shrink: 0; overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,.15);
         }
         .logo-mark img { width: 100%; height: 100%; object-fit: cover; border-radius: 9px; }
-        .brand-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            min-width: 0;
-            overflow: hidden;
-        }
+        .brand-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; overflow: hidden; }
         .brand-title { color: #fff; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
         .brand-sub   { color: rgba(255,255,255,.45); font-size: 9.5px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 
         .sb-collapse-btn {
-            width: 28px; height: 28px;
-            border-radius: 7px;
+            width: 28px; height: 28px; border-radius: 7px;
             background: rgba(196,30,58,.15);
             border: 1px solid rgba(196,30,58,.3);
             color: rgba(255,255,255,.7);
             cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            font-size: 11px;
-            flex-shrink: 0;
-            transition: background .2s, color .2s, transform .2s;
+            font-size: 11px; flex-shrink: 0;
+            transition: background .2s, color .2s;
         }
         .sb-collapse-btn:hover {
             background: rgba(196,30,58,.28);
@@ -124,88 +171,61 @@
             border-color: rgba(196,30,58,.5);
         }
 
-        /* compact header: centre logo only */
-        #sidebar.compact .sb-header { padding: 0; justify-content: center; gap: 0; }
+        #sidebar.compact .sb-header {
+            flex-direction: column; height: auto;
+            padding: 12px 0 8px; gap: 8px;
+            justify-content: center; align-items: center;
+        }
         #sidebar.compact .sb-header-content { flex: 0; }
         #sidebar.compact .brand-info { display: none; }
-
-        /* Compact: tombol pindah ke bawah header, full-width, ikon berubah arah */
-        #sidebar.compact .sb-header {
-            flex-direction: column;
-            height: auto;
-            padding: 12px 0 8px;
-            gap: 8px;
-            justify-content: center;
-            align-items: center;
-        }
-        #sidebar.compact .sb-collapse-btn {
-            display: flex;
-            width: 40px;
-            height: 28px;
-        }
+        #sidebar.compact .sb-collapse-btn { display: flex; width: 40px; height: 28px; }
 
         /* ── nav ── */
         .sb-body { flex: 1; padding: 6px 0 10px; }
 
         .sb-section {
             padding: 12px 16px 4px;
-            font-size: 9px;
-            font-weight: 700;
-            letter-spacing: .1em;
-            text-transform: uppercase;
-            color: rgba(255,255,255,.25);
-            white-space: nowrap;
+            font-size: 9px; font-weight: 700;
+            letter-spacing: .1em; text-transform: uppercase;
+            color: rgba(255,255,255,.25); white-space: nowrap;
         }
         #sidebar.compact .sb-section { display: none; }
 
         .sb-link {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            display: flex; align-items: center; gap: 10px;
             padding: 9px 12px 9px 14px;
-            margin: 1px 8px;
-            border-radius: 8px;
+            margin: 1px 8px; border-radius: 8px;
             color: rgba(255,255,255,.6);
-            font-size: 12.5px;
-            font-weight: 500;
+            font-size: 12.5px; font-weight: 500;
             text-decoration: none;
             transition: background .18s, color .18s;
-            position: relative;
-            white-space: nowrap;
-            overflow: hidden;
+            position: relative; white-space: nowrap; overflow: hidden;
         }
         .sb-link-text { flex: 1; min-width: 0; overflow: hidden; }
         .sb-link .sb-icon {
             width: 16px; height: 16px;
-            flex-shrink: 0;
-            opacity: .7;
+            flex-shrink: 0; opacity: .7;
             transition: opacity .18s;
         }
         .sb-link:hover { background: var(--sidebar-hover); color: rgba(255,255,255,.95); }
         .sb-link:hover .sb-icon { opacity: 1; }
-
         .sb-link.active {
-            background: var(--sidebar-active);
-            color: #fff;
+            background: var(--sidebar-active); color: #fff;
             border: 1px solid rgba(196,30,58,.35);
         }
         .sb-link.active .sb-icon { color: var(--red); opacity: 1; }
         .sb-link.active::before {
             content: '';
-            position: absolute;
-            left: 0; top: 50%;
+            position: absolute; left: 0; top: 50%;
             transform: translateY(-50%);
             width: 3px; height: 18px;
             background: linear-gradient(180deg, var(--red), var(--red-dark));
             border-radius: 0 3px 3px 0;
         }
 
-        /* compact links: perfectly centred icon */
         #sidebar.compact .sb-link {
-            justify-content: center;
-            padding: 10px 0;
-            margin: 1px 6px;
-            gap: 0;
+            justify-content: center; padding: 10px 0;
+            margin: 1px 6px; gap: 0;
             width: calc(100% - 12px);
         }
         #sidebar.compact .sb-link-text { display: none; }
@@ -219,19 +239,11 @@
         }
         #sidebar.compact .sb-badge { display: none; }
 
-        .sb-divider {
-            height: 1px;
-            background: var(--sidebar-border);
-            margin: 6px 16px;
-        }
+        .sb-divider { height: 1px; background: var(--sidebar-border); margin: 6px 16px; }
         #sidebar.compact .sb-divider { margin: 6px 8px; }
 
         /* ── footer ── */
-        .sb-footer {
-            flex-shrink: 0;
-            padding: 8px;
-            border-top: 1px solid var(--sidebar-border);
-        }
+        .sb-footer { flex-shrink: 0; padding: 8px; border-top: 1px solid var(--sidebar-border); }
         .sb-link.logout:hover { background: rgba(220,30,50,.22); color: #ff8080; }
 
         /* ══ TOPBAR ══ */
@@ -263,12 +275,14 @@
         .icon-btn:hover { background: #F9FAFB; color: var(--text-1); }
         .notif-dot {
             position: absolute; top: 6px; right: 6px;
-            width: 7px; height: 7px; background: var(--red); border-radius: 50%; border: 1.5px solid #fff;
+            width: 7px; height: 7px;
+            background: var(--red); border-radius: 50%; border: 1.5px solid #fff;
         }
         .user-chip {
             display: flex; align-items: center; gap: 8px;
             padding: 4px 12px 4px 5px;
-            border: 1px solid var(--border); border-radius: 100px; background: #fff; cursor: pointer;
+            border: 1px solid var(--border); border-radius: 100px;
+            background: #fff; cursor: pointer;
             transition: border-color .14s;
         }
         .user-chip:hover { border-color: #C0C4CC; }
@@ -285,8 +299,7 @@
         #profile-card {
             position: fixed; top: 70px; right: 26px;
             width: 320px; background: white;
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            border: 1px solid var(--border); border-radius: 12px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.12);
             z-index: 1200;
             display: none;
@@ -295,74 +308,56 @@
         #profile-card.active { display: block; }
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(-8px); }
-            to { opacity: 1; transform: translateY(0); }
+            to   { opacity: 1; transform: translateY(0); }
         }
         .profile-header {
             background: linear-gradient(135deg, var(--red), var(--red-dark));
-            padding: 20px;
-            text-align: center;
+            padding: 20px; text-align: center;
             border-radius: 11px 11px 0 0;
         }
         .profile-avatar {
-            width: 60px; height: 60px;
-            border-radius: 50%;
-            background: white;
-            color: var(--red);
+            width: 60px; height: 60px; border-radius: 50%;
+            background: white; color: var(--red);
             display: flex; align-items: center; justify-content: center;
             font-size: 24px; font-weight: 700;
             margin: 0 auto 12px;
         }
-        .profile-name { color: white; font-size: 16px; font-weight: 700; }
+        .profile-name  { color: white; font-size: 16px; font-weight: 700; }
         .profile-email { color: rgba(255,255,255,.75); font-size: 12px; margin-top: 4px; word-break: break-all; }
         .profile-role {
             display: inline-block;
-            background: rgba(255,255,255,.2);
-            color: white;
+            background: rgba(255,255,255,.2); color: white;
             font-size: 11px; font-weight: 600;
-            padding: 4px 12px;
-            border-radius: 20px;
-            margin-top: 8px;
+            padding: 4px 12px; border-radius: 20px; margin-top: 8px;
         }
-        .profile-body {
-            padding: 16px;
-            border-bottom: 1px solid var(--border);
-        }
+        .profile-body { padding: 16px; border-bottom: 1px solid var(--border); }
         .profile-item {
             display: flex; align-items: center; gap: 10px;
-            padding: 10px 0;
-            font-size: 13px;
-            color: var(--text-2);
+            padding: 10px 0; font-size: 13px; color: var(--text-2);
         }
         .profile-item i { color: var(--red); width: 16px; flex-shrink: 0; }
         .profile-item-value { color: var(--text-1); font-weight: 600; }
-        .profile-footer {
-            padding: 12px;
-            display: flex; gap: 8px;
-        }
+        .profile-footer { padding: 12px; display: flex; gap: 8px; }
         .profile-btn {
-            flex: 1;
-            padding: 10px 12px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: white;
-            color: var(--text-1);
-            font-size: 12px; font-weight: 600;
-            cursor: pointer;
+            flex: 1; padding: 10px 12px;
+            border: 1px solid var(--border); border-radius: 8px;
+            background: white; color: var(--text-1);
+            font-size: 12px; font-weight: 600; cursor: pointer;
             transition: background 0.15s, border-color 0.15s;
             text-decoration: none;
-            display: flex; align-items: center; justify-content: center;
-            gap: 6px;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
         }
         .profile-btn:hover { background: #F9FAFB; border-color: #D1D5DB; }
-        .profile-btn.logout {
-            background: #FEE2E2; color: #991B1B;
-            border-color: #FECACA;
-        }
+        .profile-btn.logout { background: #FEE2E2; color: #991B1B; border-color: #FECACA; }
         .profile-btn.logout:hover { background: #FCA5A5; }
 
         /* ══ LAYOUT ══ */
         .page-wrap { display: flex; min-height: 100vh; }
-        .main-col  { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; transition: margin-left .28s cubic-bezier(.4,0,.2,1); }
+        .main-col  {
+            margin-left: 240px; flex: 1;
+            display: flex; flex-direction: column; min-height: 100vh;
+            transition: margin-left .28s cubic-bezier(.4,0,.2,1);
+        }
         .main-col.compact { margin-left: 64px; }
         .content-area { flex: 1; padding: 26px; }
 
@@ -377,10 +372,19 @@
             .sb-collapse-btn { display: none; }
         }
     </style>
-
-    @stack('styles')
 </head>
 <body>
+
+<!-- Global Loading Overlay -->
+<div id="app-loading" aria-hidden="true">
+    <div class="al-bars" role="status" aria-live="polite" aria-label="Memuat">
+        <span class="al-bar"></span>
+        <span class="al-bar"></span>
+        <span class="al-bar"></span>
+        <span class="al-bar"></span>
+        <span class="al-bar"></span>
+    </div>
+</div>
 
 <div class="page-wrap">
 
@@ -494,16 +498,15 @@
                 </div>
             </div>
             <div class="topbar-right">
+
                 <!-- Notification Button -->
                 <div style="position: relative;">
                     <button class="icon-btn" id="notif-toggle" title="Notifikasi" onclick="toggleNotifications()">
                         <i class="fas fa-bell" style="font-size:13px;"></i>
                         <span class="notif-dot" id="notif-badge" style="display: none;"></span>
                     </button>
-                    
-                    <!-- Notification Dropdown -->
                     <div id="notif-dropdown" style="display: none; position: absolute; top: 45px; right: 0; width: 320px; background: white; border: 1px solid #E5E7EB; border-radius: 11px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 1000;">
-                        <div style="padding: 12px 16px; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="padding: 12px 16px; border-bottom: 1px solid #E7E7EB; display: flex; justify-content: space-between; align-items: center;">
                             <strong style="font-size: 14px; color: var(--text-1);">Notifikasi</strong>
                             <button onclick="clearNotifications()" style="background: none; border: none; color: var(--text-2); cursor: pointer; font-size: 12px;">Hapus Semua</button>
                         </div>
@@ -515,7 +518,8 @@
                         </div>
                     </div>
                 </div>
-                
+
+                <!-- User Chip -->
                 <div class="user-chip" onclick="toggleProfileCard()" style="cursor: pointer;">
                     <div class="uc-avatar">{{ substr(auth()->user()->name, 0, 1) }}</div>
                     <div>
@@ -564,11 +568,14 @@
                             <i class="fas fa-home"></i> Dashboard
                         </a>
                         <form method="POST" action="{{ route('logout') }}" style="display: none;" id="logout-form-profile">@csrf</form>
-                        <button type="button" onclick="showConfirmation('Apakah Anda yakin ingin keluar?', 'Konfirmasi Logout', function() { document.getElementById('logout-form-profile').submit(); })" class="profile-btn logout">
+                        <button type="button"
+                            onclick="showConfirmation('Apakah Anda yakin ingin keluar?', 'Konfirmasi Logout', function() { document.getElementById('logout-form-profile').submit(); })"
+                            class="profile-btn logout">
                             <i class="fas fa-sign-out-alt"></i> Keluar
                         </button>
                     </div>
                 </div>
+
             </div>
         </header>
 
@@ -600,161 +607,183 @@
 
 @stack('scripts')
 @include('components.popup')
+
 <script>
-    // Override browser alert dengan popup
     window.alert = function(message) {
         showPopup('info', message, 'Pemberitahuan');
     };
 </script>
+
 <script>
 (function () {
-    const toggle  = document.getElementById('sb-toggle');
+    // ─── Loading Overlay ───────────────────────────────────────────────────────
+    const overlay = document.getElementById('app-loading');
+    let visible = false;
+    let showAt  = 0;
+    const MIN_MS = 250;
+
+    const showLoading = () => {
+        if (!overlay || visible) return;
+        visible = true;
+        showAt  = Date.now();
+        overlay.classList.add('is-visible');
+        overlay.setAttribute('aria-hidden', 'false');
+    };
+
+    const hideLoading = () => {
+        if (!overlay) return;
+        const elapsed = Date.now() - showAt;
+        const wait    = Math.max(0, MIN_MS - elapsed);
+        window.setTimeout(() => {
+            visible = false;
+            overlay.classList.remove('is-visible');
+            overlay.setAttribute('aria-hidden', 'true');
+        }, wait);
+    };
+
+    window.AppLoading = { show: showLoading, hide: hideLoading };
+
+    // Tampilkan saat load pertama, sembunyikan setelah halaman siap
+    showLoading();
+    window.addEventListener('load', () => hideLoading(), { once: true });
+
+    // Tampilkan saat klik link navigasi (same-origin, bukan anchor/download)
+    document.addEventListener('click', (e) => {
+        const a = e.target.closest('a');
+        if (!a) return;
+        if (a.target && a.target !== '_self') return;
+        if (a.hasAttribute('download')) return;
+        const href = a.getAttribute('href') || '';
+        if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+        try {
+            const url = new URL(href, window.location.href);
+            if (url.origin !== window.location.origin) return;
+        } catch (_) {}
+        showLoading();
+    }, { capture: true });
+
+    // Tampilkan saat form submit
+    document.addEventListener('submit', (e) => {
+        if (!(e.target instanceof HTMLFormElement)) return;
+        showLoading();
+    }, { capture: true });
+
+    // Sembunyikan saat kembali dari bfcache (tombol back/forward browser)
+    window.addEventListener('pageshow', (e) => {
+        if (e.persisted) hideLoading();
+    });
+
+    // ─── Sidebar ───────────────────────────────────────────────────────────────
     const sidebar = document.getElementById('sidebar');
     const mainCol = document.querySelector('.main-col');
-    const overlay = document.createElement('div');
-    Object.assign(overlay.style, {
-        position:'fixed', inset:'0', background:'rgba(0,0,0,.45)',
-        zIndex:'49', display:'none', backdropFilter:'blur(2px)'
-    });
-    document.body.appendChild(overlay);
 
-    function openSidebar()  { sidebar.classList.add('open');    overlay.style.display = 'block'; document.body.style.overflow = 'hidden'; }
-    function closeSidebar() { sidebar.classList.remove('open'); overlay.style.display = 'none';  document.body.style.overflow = ''; }
-
-    if (toggle) toggle.addEventListener('click', () =>
-        sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
-    overlay.addEventListener('click', closeSidebar);
-    sidebar.querySelectorAll('.sb-link').forEach(a =>
-        a.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }));
-    window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
-
-    /* Sidebar Collapse Toggle */
     function updateCollapseBtn(isCompact) {
         const icon = document.getElementById('sb-collapse-icon');
         const btn  = document.getElementById('sb-collapse-btn');
-        if (isCompact) {
-            icon.className = 'fas fa-chevron-right';
-            btn.title = 'Expand sidebar';
-            btn.setAttribute('aria-label', 'Expand sidebar navigation');
-            btn.setAttribute('aria-expanded', 'false');
-        } else {
-            icon.className = 'fas fa-chevron-left';
-            btn.title = 'Collapse sidebar';
-            btn.setAttribute('aria-label', 'Collapse sidebar navigation');
-            btn.setAttribute('aria-expanded', 'true');
-        }
+        if (!icon || !btn) return;
+        icon.className = isCompact ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+        btn.title = isCompact ? 'Expand sidebar' : 'Collapse sidebar';
+        btn.setAttribute('aria-expanded', String(!isCompact));
     }
 
-    window.toggleSidebarCollapse = function() {
+    window.toggleSidebarCollapse = function () {
+        if (!sidebar || !mainCol) return;
         const isCompact = sidebar.classList.toggle('compact');
-        mainCol.classList.toggle('compact');
-        localStorage.setItem('sidebar_compact', isCompact);
+        mainCol.classList.toggle('compact', isCompact);
+        localStorage.setItem('sidebar_compact', String(isCompact));
         updateCollapseBtn(isCompact);
     };
 
-    // Load sidebar preference on page load
+    // Restore preferensi compact dari localStorage
     document.addEventListener('DOMContentLoaded', () => {
-        const isCompact = localStorage.getItem('sidebar_compact') === 'true';
-        if (isCompact) {
-            sidebar.classList.add('compact');
-            mainCol.classList.add('compact');
+        if (sidebar && mainCol) {
+            const isCompact = localStorage.getItem('sidebar_compact') === 'true';
+            if (isCompact) {
+                sidebar.classList.add('compact');
+                mainCol.classList.add('compact');
+            }
+            updateCollapseBtn(isCompact);
         }
-        updateCollapseBtn(isCompact);
+
+        // Mobile toggle
+        const sbToggle = document.getElementById('sb-toggle');
+        if (sbToggle && sidebar) {
+            sbToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+        }
     });
 
-    /* Toggle Profile Card */
-    window.toggleProfileCard = function() {
-        const card = document.getElementById('profile-card');
-        card.classList.toggle('active');
+    // ─── Profile Card ──────────────────────────────────────────────────────────
+    window.toggleProfileCard = function () {
+        document.getElementById('profile-card')?.classList.toggle('active');
+    };
+    window.closeProfileCard = function () {
+        document.getElementById('profile-card')?.classList.remove('active');
     };
 
-    window.closeProfileCard = function() {
-        const card = document.getElementById('profile-card');
-        card.classList.remove('active');
+    // ─── Notifications ─────────────────────────────────────────────────────────
+    window.toggleNotifications = function () {
+        const dd = document.getElementById('notif-dropdown');
+        if (!dd) return;
+        const isOpen = dd.style.display === 'block';
+        dd.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) window.loadNotifications();
     };
 
-    /* Notification Functions */
-    window.toggleNotifications = function() {
-        const dropdown = document.getElementById('notif-dropdown');
-        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-        if (dropdown.style.display === 'block') {
-            loadNotifications();
-        }
-    };
+    window.loadNotifications = function () {
+        const list  = document.getElementById('notif-list');
+        const badge = document.getElementById('notif-badge');
+        if (!list) return;
 
-    window.loadNotifications = function() {
-        fetch('/api/notifications', {
-            headers: { 'Accept': 'application/json' }
-        })
-        .then(r => r.json())
-        .then(data => {
-            const notifList = document.getElementById('notif-list');
-            const badge = document.getElementById('notif-badge');
-            
-            if (data.notifications && data.notifications.length > 0) {
-                const html = data.notifications.map(notif => `
-                    <div style="padding: 12px 16px; border-bottom: 1px solid #F3F4F6; cursor: pointer; transition: background 0.15s;" 
-                         onclick="${notif.url ? `window.location.href='${notif.url}'` : `markNotificationRead('${notif.id}')`}" 
-                         onmouseover="this.style.background = '#F9FAFB'" 
-                         onmouseout="this.style.background = 'transparent'">
-                        <div style="display: flex; gap: 10px;">
-                            <i class="${notif.icon}" style="color: var(--red); flex-shrink: 0; margin-top: 2px;"></i>
-                            <div style="flex: 1; min-width: 0;">
-                                <div style="font-size: 13px; font-weight: 600; color: var(--text-1); word-break: break-word;">${notif.title}</div>
-                                <div style="font-size: 12px; color: var(--text-2); margin-top: 2px;">${notif.message}</div>
-                                <div style="font-size: 11px; color: #9CA3AF; margin-top: 4px;">${notif.time}</div>
-                            </div>
-                            ${notif.unread ? '<div style="width: 8px; height: 8px; background: var(--red); border-radius: 50%; flex-shrink: 0; margin-top: 6px;"></div>' : ''}
+        fetch('/api/notifications', { headers: { 'Accept': 'application/json' } })
+            .then(r => r.json())
+            .then(data => {
+                const notifs = Array.isArray(data.notifications) ? data.notifications : [];
+                if (notifs.length > 0) {
+                    list.innerHTML = notifs.map(n => `
+                        <div style="padding:12px 16px;border-bottom:1px solid #E7E7EB">
+                            <div style="font-size:12px;color:var(--text-1);font-weight:600">${n.title ?? 'Notifikasi'}</div>
+                            <div style="font-size:12px;color:var(--text-2);margin-top:2px">${n.message ?? ''}</div>
+                            <div style="font-size:10px;color:var(--text-2);margin-top:6px;opacity:.85">${n.created_at ?? ''}</div>
                         </div>
-                    </div>
-                `).join('');
-                notifList.innerHTML = html;
-                badge.style.display = data.unread_count > 0 ? 'block' : 'none';
-            } else {
-                notifList.innerHTML = `
-                    <div style="padding: 20px; text-align: center; color: var(--text-2); font-size: 13px;">
-                        <i class="fas fa-inbox" style="display: block; font-size: 24px; margin-bottom: 8px; opacity: 0.5;"></i>
-                        Tidak ada notifikasi baru
-                    </div>
-                `;
-                badge.style.display = 'none';
-            }
-        })
-        .catch(err => console.error('Notification error:', err));
+                    `).join('');
+                    if (badge) badge.style.display = 'block';
+                } else {
+                    list.innerHTML = `
+                        <div style="padding:20px;text-align:center;color:var(--text-2);font-size:13px">
+                            <i class="fas fa-inbox" style="display:block;font-size:24px;margin-bottom:8px;opacity:0.5"></i>
+                            Tidak ada notifikasi baru
+                        </div>
+                    `;
+                    if (badge) badge.style.display = 'none';
+                }
+            })
+            .catch(() => {});
     };
 
-    window.markNotificationRead = function(notificationId) {
-        fetch(`/api/notifications/${notificationId}/read`, {
-            method: 'POST',
-            headers: { 'Accept': 'application/json' }
-        })
-        .then(() => loadNotifications())
-        .catch(err => console.error('Mark read error:', err));
-    };
-
-    window.clearNotifications = function() {
-        // No popup confirmation; clear immediately
+    window.clearNotifications = function () {
+        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         fetch('/api/notifications/clear', {
             method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            }
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': token },
         })
-        .then(async (res) => {
-            if (!res.ok) {
-                const text = await res.text();
-                throw new Error(text || 'Failed to clear notifications');
-            }
-            const dd = document.getElementById('notif-dropdown');
-            dd.style.display = 'none';
-            loadNotifications();
-        })
-        .catch(err => console.error('Clear notifications error:', err));
+            .then(() => {
+                const dd = document.getElementById('notif-dropdown');
+                if (dd) dd.style.display = 'none';
+                window.loadNotifications();
+            })
+            .catch(() => {});
     };
 
-    // PWA: Service Worker register
-    // (removed: now handled by /js/pwa-install.js)
+    // Tutup dropdown saat klik di luar
+    document.addEventListener('click', (e) => {
+        const notifDd = document.getElementById('notif-dropdown');
+        if (notifDd && !e.target.closest('#notif-toggle') && !e.target.closest('#notif-dropdown')) {
+            notifDd.style.display = 'none';
+        }
+        if (!e.target.closest('.user-chip') && !e.target.closest('#profile-card')) {
+            window.closeProfileCard();
+        }
+    });
 })();
 </script>
 

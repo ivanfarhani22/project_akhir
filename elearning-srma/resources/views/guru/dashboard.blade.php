@@ -87,17 +87,17 @@
                                 <p class="text-xs text-gray-400 mt-0.5">Siswa</p>
                             </div>
                             <div class="text-center bg-emerald-50 rounded-xl py-3">
-                                <p class="text-xl font-extrabold text-emerald-600">{{ $cs->eClass->materials->count() }}</p>
+                                <p class="text-xl font-extrabold text-emerald-600">{{ $cs->materials_count ?? 0 }}</p>
                                 <p class="text-xs text-gray-400 mt-0.5">Materi</p>
                             </div>
                         </div>
 
                         <div class="flex gap-2">
-                            <a href="{{ route('guru.materials.index', ['class' => $cs->eClass->id]) }}"
+                            <a href="{{ route('guru.materials.index', ['class_id' => $cs->eClass->id, 'class_subject_id' => $cs->id]) }}"
                                class="flex-1 inline-flex justify-center items-center gap-1.5 bg-[#A41E35] hover:bg-[#7D1627] text-white text-xs font-semibold py-2.5 rounded-xl transition shadow-sm hover:shadow-md">
                                 <i class="fas fa-book text-[10px]"></i> Materi
                             </a>
-                            <a href="{{ route('guru.assignments.index', ['class' => $cs->eClass->id]) }}"
+                            <a href="{{ route('guru.assignments.index', ['class_id' => $cs->eClass->id, 'class_subject_id' => $cs->id]) }}"
                                class="flex-1 inline-flex justify-center items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold py-2.5 rounded-xl transition">
                                 <i class="fas fa-tasks text-[10px]"></i> Tugas
                             </a>

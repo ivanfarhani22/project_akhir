@@ -21,9 +21,16 @@
                 // If counts are not loaded, fall back to 0 to avoid triggering queries from the view.
                 $materialsCount = is_null($materialsCount) ? 0 : $materialsCount;
                 $assignmentsCount = is_null($assignmentsCount) ? 0 : $assignmentsCount;
+
+                $detailUrl = route('guru.classes.show', $cs->id);
             @endphp
 
-            <div class="group bg-white rounded-2xl border-2 border-gray-100 hover:border-[#A41E35] hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col">
+            <div class="group bg-white rounded-2xl border-2 border-gray-100 hover:border-[#A41E35] hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col cursor-pointer hover:-translate-y-0.5"
+                 role="link"
+                 tabindex="0"
+                 onclick="window.location.href='{{ $detailUrl }}'"
+                 onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); window.location.href='{{ $detailUrl }}'; }">
+
                 <div class="h-1 bg-gradient-to-r from-[#A41E35] to-rose-400"></div>
 
                 <div class="p-5 flex flex-col flex-1">
@@ -54,12 +61,14 @@
                         </div>
                     </div>
 
-                    <div class="flex gap-2">
+                    <div class="flex gap-2" onclick="event.stopPropagation()">
                         <a href="{{ route('guru.materials.index', ['class_id' => $cs->eClass->id, 'class_subject_id' => $cs->id]) }}"
+                           onclick="event.stopPropagation()"
                            class="flex-1 inline-flex justify-center items-center gap-1.5 bg-[#A41E35] hover:bg-[#7D1627] text-white text-xs font-semibold py-2.5 px-3 rounded-xl transition-all shadow-sm hover:shadow-md">
                             <i class="fas fa-book text-[10px]"></i> Materi
                         </a>
                         <a href="{{ route('guru.assignments.index', ['class_id' => $cs->eClass->id, 'class_subject_id' => $cs->id]) }}"
+                           onclick="event.stopPropagation()"
                            class="flex-1 inline-flex justify-center items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold py-2.5 px-3 rounded-xl transition-all">
                             <i class="fas fa-tasks text-[10px]"></i> Tugas
                         </a>
