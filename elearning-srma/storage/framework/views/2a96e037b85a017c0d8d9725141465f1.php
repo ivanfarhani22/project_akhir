@@ -1,10 +1,10 @@
-@extends('layouts.admin')
 
-@section('title', 'Bulk Scheduling')
-@section('icon', 'calendar')
 
-@section('content')
-@php
+<?php $__env->startSection('title', 'Bulk Scheduling'); ?>
+<?php $__env->startSection('icon', 'calendar'); ?>
+
+<?php $__env->startSection('content'); ?>
+<?php
     $classSubjectsJson = $classSubjects->map(function ($cs) {
         return [
             'id' => $cs->id,
@@ -27,37 +27,38 @@
     })->values();
 
     $autoGenerateUrl = route('admin.schedules.bulk.autoGenerate', $class);
-@endphp
+?>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
     <div class="flex items-start justify-between gap-3 mb-6">
         <div>
             <h1 class="text-xl font-bold text-gray-900">Bulk Scheduling</h1>
-            <p class="text-sm text-gray-600 mt-1">Kelas: <span class="font-semibold">{{ $class->name }}</span> — pilih beberapa mapel, atur hari & jam, lalu simpan sekaligus.</p>
+            <p class="text-sm text-gray-600 mt-1">Kelas: <span class="font-semibold"><?php echo e($class->name); ?></span> — pilih beberapa mapel, atur hari & jam, lalu simpan sekaligus.</p>
         </div>
         <div class="flex gap-2">
-            <a href="{{ route('admin.classes.show', $class) }}" class="inline-flex items-center gap-2 bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gray-50">
+            <a href="<?php echo e(route('admin.classes.show', $class)); ?>" class="inline-flex items-center gap-2 bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gray-50">
                 Kembali
             </a>
         </div>
     </div>
 
-    @if ($errors->any())
+    <?php if($errors->any()): ?>
         <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
             <div class="font-semibold mb-1">Terjadi error:</div>
             <ul class="list-disc pl-5 space-y-1">
-                @foreach ($errors->all() as $err)
-                    <li>{{ $err }}</li>
-                @endforeach
+                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $err): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <li><?php echo e($err); ?></li>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </ul>
         </div>
-    @endif
+    <?php endif; ?>
 
-    @if (session('success'))
+    <?php if(session('success')): ?>
         <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
-            {{ session('success') }}
+            <?php echo e(session('success')); ?>
+
         </div>
-    @endif
+    <?php endif; ?>
 
     <div x-data="bulkScheduler()" class="grid grid-cols-1 lg:grid-cols-12 gap-4">
         <!-- Left: picker -->
@@ -201,7 +202,7 @@
             </div>
 
             <form method="POST" :action="postUrl" @submit.prevent="submitForm" class="mt-4">
-                @csrf
+                <?php echo csrf_field(); ?>
                 <input type="hidden" name="mode" :value="mode">
                 <template x-for="(r, idx) in rows" :key="'hidden-' + r.class_subject_id">
                     <div>
@@ -227,9 +228,9 @@
 
 <script>
 function bulkScheduler() {
-    const classSubjects = @json($classSubjectsJson);
-    const teachers = @json($teachers);
-    const existingSchedules = @json($existingSchedulesJson);
+    const classSubjects = <?php echo json_encode($classSubjectsJson, 15, 512) ?>;
+    const teachers = <?php echo json_encode($teachers, 15, 512) ?>;
+    const existingSchedules = <?php echo json_encode($existingSchedulesJson, 15, 512) ?>;
 
     return {
         q: '',
@@ -289,18 +290,18 @@ function bulkScheduler() {
             return this.classSubjects.filter(x => !q || (x.subject_name || '').toLowerCase().includes(q));
         },
         get postUrl() {
-            return @json(route('admin.schedules.bulk.store', $class));
+            return <?php echo json_encode(route('admin.schedules.bulk.store', $class), 512) ?>;
         },
         async autoGenerate() {
             if (this.selectedIds.length === 0) return;
 
             this.aiLoading = true;
             try {
-                const res = await fetch(@json($autoGenerateUrl), {
+                const res = await fetch(<?php echo json_encode($autoGenerateUrl, 15, 512) ?>, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': @json(csrf_token()),
+                        'X-CSRF-TOKEN': <?php echo json_encode(csrf_token(), 15, 512) ?>,
                         'Accept': 'application/json',
                     },
                     body: JSON.stringify({
@@ -419,4 +420,6 @@ function bulkScheduler() {
     };
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH E:\xampp\htdocs\Project Akhir\elearning-srma\resources\views/admin/schedules/bulk.blade.php ENDPATH**/ ?>

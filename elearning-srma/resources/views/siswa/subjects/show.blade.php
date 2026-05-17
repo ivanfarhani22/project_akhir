@@ -1,5 +1,5 @@
 @extends('layouts.siswa')
-@section('title', $class->subject->name)
+@section('title', $classSubject->subject->name)
 @section('icon', 'fas fa-book')
 
 @section('content')
@@ -7,9 +7,9 @@
 <div class="flex justify-between items-start gap-4 mb-8">
     <div>
         <p class="text-xs text-gray-400 uppercase tracking-widest mb-1"><i class="fas fa-book mr-1"></i> Siswa / Mata Pelajaran</p>
-        <h1 class="text-2xl font-extrabold text-gray-900">{{ $class->subject->name }}</h1>
+        <h1 class="text-2xl font-extrabold text-gray-900">{{ $classSubject->subject->name }}</h1>
         <span class="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full mt-1">
-            {{ $class->name }} • {{ $class->teacher->name }}
+            {{ $classSubject->eClass->name }} • {{ $classSubject->teacher->name }}
         </span>
     </div>
     <a href="{{ route('siswa.subjects.index') }}"
@@ -27,14 +27,24 @@
         <div class="divide-y divide-gray-100">
             <div class="px-5 py-3">
                 <p class="text-xs text-gray-400 uppercase tracking-wider mb-0.5">Pengajar</p>
-                <p class="text-sm font-bold text-gray-900">{{ $class->teacher->name }}</p>
+                <p class="text-sm font-bold text-gray-900">{{ $classSubject->teacher->name }}</p>
             </div>
             <div class="px-5 py-3">
                 <p class="text-xs text-gray-400 uppercase tracking-wider mb-0.5">Jadwal</p>
-                @if($class->schedules && $class->schedules->count() > 0)
-                    @php $sch = $class->schedules->first(); @endphp
+                @php
+                    $daysOrder = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+                    $dayLabels = ['monday'=>'Senin','tuesday'=>'Selasa','wednesday'=>'Rabu','thursday'=>'Kamis','friday'=>'Jumat','saturday'=>'Sabtu','sunday'=>'Minggu'];
+
+                    $sch = $classSubject->schedules
+                        ->sortBy(fn ($s) => [
+                            array_search(strtolower($s->day_of_week), $daysOrder),
+                            $s->start_time,
+                        ])
+                        ->first();
+                @endphp
+                @if($sch)
                     <p class="text-sm font-bold text-gray-900">
-                        {{ ucfirst($sch->day_of_week) }}
+                        {{ $dayLabels[strtolower($sch->day_of_week)] ?? ucfirst($sch->day_of_week) }}
                         @if($sch->start_time)
                             • {{ \Carbon\Carbon::createFromTimeString($sch->start_time)->format('H:i') }}
                             @if($sch->end_time)
@@ -46,10 +56,10 @@
                     <p class="text-sm text-gray-400">TBA</p>
                 @endif
             </div>
-            @if($class->description)
+            @if($classSubject->eClass->description)
                 <div class="px-5 py-3">
                     <p class="text-xs text-gray-400 uppercase tracking-wider mb-0.5">Deskripsi</p>
-                    <p class="text-sm text-gray-700">{{ $class->description }}</p>
+                    <p class="text-sm text-gray-700">{{ $classSubject->eClass->description }}</p>
                 </div>
             @endif
         </div>
@@ -62,15 +72,15 @@
         </div>
         <div class="grid grid-cols-3 divide-x divide-gray-100">
             <div class="text-center py-6">
-                <p class="text-2xl font-extrabold text-blue-600">{{ $class->materials->count() }}</p>
+                <p class="text-2xl font-extrabold text-blue-600">{{ $materials->count() }}</p>
                 <p class="text-xs text-gray-400 mt-1">Materi</p>
             </div>
             <div class="text-center py-6">
-                <p class="text-2xl font-extrabold text-amber-600">{{ $class->assignments->count() }}</p>
+                <p class="text-2xl font-extrabold text-amber-600">{{ $assignments->count() }}</p>
                 <p class="text-xs text-gray-400 mt-1">Tugas</p>
             </div>
             <div class="text-center py-6">
-                <p class="text-2xl font-extrabold text-emerald-600">{{ $class->students->count() }}</p>
+                <p class="text-2xl font-extrabold text-emerald-600">{{ $classSubject->eClass->students->count() }}</p>
                 <p class="text-xs text-gray-400 mt-1">Siswa</p>
             </div>
         </div>
@@ -83,9 +93,9 @@
         <h2 class="font-bold text-gray-900"><i class="fas fa-file-alt mr-2 text-gray-400"></i>Materi Pembelajaran</h2>
     </div>
     <div class="p-5">
-        @if($class->materials->count() > 0)
+        @if($materials->count() > 0)
             <div class="space-y-3">
-                @foreach($class->materials as $material)
+                @foreach($materials as $material)
                     <div class="flex items-start justify-between gap-4 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:border-gray-300 transition">
                         <div class="flex-1 min-w-0">
                             <h4 class="font-semibold text-gray-900 text-sm truncate">{{ $material->title }}</h4>
@@ -94,10 +104,16 @@
                             @endif
                             <p class="text-xs text-gray-400 mt-1"><i class="fas fa-clock mr-1"></i>{{ $material->created_at->diffForHumans() }}</p>
                         </div>
-                        <a href="{{ route('siswa.materials.download', $material) }}"
-                           class="inline-flex items-center gap-1.5 bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white border border-blue-200 text-xs font-semibold px-3 py-2 rounded-lg transition whitespace-nowrap">
-                            <i class="fas fa-download text-[10px]"></i> Buka
-                        </a>
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('siswa.materials.preview', $material) }}" target="_blank"
+                               class="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white border border-emerald-200 text-xs font-semibold px-3 py-2 rounded-lg transition whitespace-nowrap">
+                                <i class="fas fa-eye text-[10px]"></i> Preview
+                            </a>
+                            <a href="{{ route('siswa.materials.download', $material) }}"
+                               class="inline-flex items-center gap-1.5 bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white border border-blue-200 text-xs font-semibold px-3 py-2 rounded-lg transition whitespace-nowrap">
+                                <i class="fas fa-download text-[10px]"></i> Download
+                            </a>
+                        </div>
                     </div>
                 @endforeach
             </div>
@@ -116,9 +132,9 @@
         <h2 class="font-bold text-gray-900"><i class="fas fa-tasks mr-2 text-gray-400"></i>Tugas dan Penilaian</h2>
     </div>
     <div class="p-5">
-        @if($class->assignments->count() > 0)
+        @if($assignments->count() > 0)
             <div class="space-y-3">
-                @foreach($class->assignments as $assignment)
+                @foreach($assignments as $assignment)
                     @php
                         $sub = \App\Models\Submission::where('student_id', auth()->id())->where('assignment_id', $assignment->id)->first();
                         $done = $sub && $sub->submitted_at;
@@ -159,43 +175,33 @@
     </div>
     <div class="p-5">
         @php
-            $openSessions = [];
-            foreach($class->classSubjects as $cs) {
-                $sess = $cs->attendanceSessions()->where('status','open')->where('attendance_date', today())->first();
-                if ($sess) $openSessions[$cs->id] = $sess;
-            }
+            $allSessions = $classSubject->attendanceSessions()->where('status','!=','cancelled')->with('records')->orderBy('attendance_date','desc')->take(10)->get();
         @endphp
 
-        @if(count($openSessions) > 0)
-            <div class="flex items-start gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 mb-4">
-                <i class="fas fa-circle-notch animate-spin text-emerald-500 mt-0.5 text-xs"></i>
-                <p class="text-sm font-semibold text-emerald-700">Presensi Terbuka Hari Ini</p>
-            </div>
+        @if($allSessions->count() > 0)
             <div class="space-y-2 mb-4">
-                @foreach($openSessions as $csId => $sess)
-                    <a href="{{ route('siswa.attendance.show', $class->classSubjects->find($csId)) }}"
-                       class="w-full inline-flex justify-center items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold py-2.5 rounded-xl transition">
-                        <i class="fas fa-check-circle text-xs"></i> Absensi — {{ $class->classSubjects->find($csId)->subject->name }}
-                    </a>
+                @foreach($allSessions as $sess)
+                    <div class="flex items-center justify-between gap-3 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">{{ \Carbon\Carbon::parse($sess->attendance_date)->format('d M Y') }}</p>
+                            <p class="text-xs text-gray-400">Status: {{ $sess->status }}</p>
+                        </div>
+                        <a href="{{ route('siswa.attendance.show', $classSubject) }}"
+                           class="text-xs font-semibold text-blue-600 hover:text-blue-800">Lihat</a>
+                    </div>
                 @endforeach
             </div>
         @else
             <div class="flex flex-col items-center py-8 text-center mb-3">
                 <i class="fas fa-inbox text-gray-200 text-3xl mb-2"></i>
-                <p class="text-xs text-gray-400">Belum ada presensi hari ini</p>
+                <p class="text-xs text-gray-400">Belum ada riwayat presensi</p>
             </div>
         @endif
 
-        @if($class->classSubjects->count() > 0)
-            <div class="space-y-1 pt-3 border-t border-gray-100">
-                @foreach($class->classSubjects as $cs)
-                    <a href="{{ route('siswa.attendance.show', $cs) }}"
-                       class="flex items-center gap-2 text-xs text-blue-500 hover:text-blue-700 font-semibold transition py-1">
-                        <i class="fas fa-history text-[10px]"></i> Riwayat — {{ $cs->subject->name }}
-                    </a>
-                @endforeach
-            </div>
-        @endif
+        <a href="{{ route('siswa.attendance.show', $classSubject) }}"
+           class="w-full inline-flex justify-center items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold py-2.5 rounded-xl transition">
+            <i class="fas fa-check-circle text-xs"></i> Buka Presensi
+        </a>
     </div>
 </div>
 @endsection

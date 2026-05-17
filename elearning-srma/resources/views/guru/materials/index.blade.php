@@ -4,6 +4,10 @@
 @section('icon', 'fas fa-book')
 
 @section('content')
+@php
+    $csid = request('class_subject_id');
+@endphp
+
 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
     <div>
         <p class="text-xs text-gray-400 uppercase tracking-widest mb-1"><i class="fas fa-chalkboard-teacher mr-1"></i> Guru / Materi</p>
@@ -12,7 +16,7 @@
             <i class="fas fa-door-open"></i> Kelas: <strong class="text-gray-700">{{ $class->name }}</strong>
         </span>
     </div>
-    <a href="{{ isset($classSubject) && $classSubject ? route('guru.materials.create', $classSubject) : route('guru.materials.index') }}"
+    <a href="{{ isset($classSubject) && $classSubject ? route('guru.class-subjects.materials.create', $classSubject) : ($csid ? route('guru.class-subjects.materials.create', $csid) : route('guru.materials.create', request()->only(['class_id','class_subject_id']))) }}"
        class="inline-flex items-center gap-2 bg-[#A41E35] hover:bg-[#7D1627] text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all whitespace-nowrap">
         <i class="fas fa-plus text-xs"></i> Upload Materi
     </a>
@@ -31,7 +35,7 @@
                     <i class="fas fa-folder-open text-3xl text-gray-300"></i>
                 </div>
                 <p class="text-gray-500 text-sm mb-4">Belum ada materi yang diupload.</p>
-                <a href="{{ isset($classSubject) && $classSubject ? route('guru.materials.create', $classSubject) : route('guru.materials.index') }}"
+                <a href="{{ isset($classSubject) && $classSubject ? route('guru.class-subjects.materials.create', $classSubject) : ($csid ? route('guru.class-subjects.materials.create', $csid) : route('guru.materials.create', request()->only(['class_id','class_subject_id']))) }}"
                    class="inline-flex items-center gap-2 bg-[#A41E35] hover:bg-[#7D1627] text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-md transition-all">
                     <i class="fas fa-plus text-xs"></i> Upload Materi Pertama
                 </a>
@@ -86,7 +90,7 @@
 </div>
 
 <div class="mt-6">
-    <a href="{{ url()->previous() ?? route('guru.dashboard') }}"
+    <a href="{{ route('guru.materials.index') }}"
        class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm px-5 py-2.5 rounded-xl transition-all">
         <i class="fas fa-arrow-left"></i> Kembali
     </a>

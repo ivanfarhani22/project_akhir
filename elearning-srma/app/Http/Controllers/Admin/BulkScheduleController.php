@@ -7,6 +7,7 @@ use App\Models\ClassSubject;
 use App\Models\EClass;
 use App\Models\Schedule;
 use App\Models\User;
+use App\Services\ScheduleAutoGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -120,5 +121,56 @@ class BulkScheduleController extends Controller
         return redirect()
             ->route('admin.classes.show', $class)
             ->with('success', 'Bulk scheduling berhasil disimpan.');
+    }
+
+    /**
+     * Generate rekomendasi jadwal otomatis (anti bentrok kelas & guru).
+     *
+     * Return JSON agar bisa langsung mengisi rows di UI bulk.
+     */
+    public function autoGenerate(Request $request, EClass $class, ScheduleAutoGenerator $generator)
+    {
+        $validated = $request->validate([
+            'class_subject_ids' => ['required', 'array', 'min:1'],
+            'class_subject_ids.*' => ['integer', 'exists:class_subjects,id'],
+
+            'days' => ['nullable', 'array'],
+            'days.*' => ['string', 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday'],
+
+            'day_start' => ['nullable', 'date_format:H:i'],
+            'day_end' => ['nullable', 'date_format:H:i'],
+            'slot_minutes' => ['nullable', 'integer', 'min:30', 'max:180'],
+            'break_minutes' => ['nullable', 'integer', 'min:0', 'max:60'],
+            'room' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        // Ensure selected subjects belong to this class
+        $ids = collect($validated['class_subject_ids'])->unique()->values();
+        $validCount = ClassSubject::query()
+            ->where('e_class_id', $class->id)
+            ->whereIn('id', $ids)
+            ->count();
+
+        if ($validCount !== $ids->count()) {
+            return response()->json([
+                'message' => 'Ada mata pelajaran yang tidak valid untuk kelas ini.'
+            ], 422);
+        }
+
+        $options = [
+            'days' => $validated['days'] ?? ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+            'day_start' => $validated['day_start'] ?? '07:00',
+            'day_end' => $validated['day_end'] ?? '15:00',
+            'slot_minutes' => (int) ($validated['slot_minutes'] ?? 60),
+            'break_minutes' => (int) ($validated['break_minutes'] ?? 0),
+            'room' => $validated['room'] ?? null,
+        ];
+
+        $items = $generator->generateForClass($class, $ids->all(), $options);
+
+        return response()->json([
+            'items' => $items,
+            'unscheduled_count' => max(0, $ids->count() - count($items)),
+        ]);
     }
 }

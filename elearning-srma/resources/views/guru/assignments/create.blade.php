@@ -75,7 +75,7 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <a href="{{ url()->previous() ?? route('guru.assignments.index') }}"
+                    <a href="{{ route('guru.assignments.index', ['class_id' => request('class_id')]) }}"
                        class="flex-1 inline-flex justify-center items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-6 rounded-xl text-sm transition">
                         <i class="fas fa-arrow-left text-xs"></i> Kembali
                     </a>

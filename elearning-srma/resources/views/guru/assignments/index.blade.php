@@ -106,9 +106,9 @@
 </div>
 
 <div class="mt-6">
-    <a href="{{ url()->previous() ?? route('guru.dashboard') }}"
-       class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm px-5 py-2.5 rounded-xl transition">
-        <i class="fas fa-arrow-left text-xs"></i> Kembali
+    <a href="{{ route('guru.assignments.index') }}"
+       class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm px-5 py-2.5 rounded-xl transition-all">
+        <i class="fas fa-arrow-left"></i> Kembali
     </a>
 </div>
 

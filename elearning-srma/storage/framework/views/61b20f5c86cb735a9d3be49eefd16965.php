@@ -102,7 +102,7 @@
                     <?php if($schedule->room): ?>
                         <p class="text-xs text-gray-500"><i class="fas fa-door-open mr-1 text-gray-300"></i><?php echo e($schedule->room); ?></p>
                     <?php endif; ?>
-                    <a href="<?php echo e(route('siswa.subjects.show', $class->id)); ?>"
+                    <a href="<?php echo e($class->classSubjects?->first() ? route('siswa.subjects.show', $class->classSubjects->first()) : route('siswa.subjects.index')); ?>"
                        class="mt-2 w-full inline-flex justify-center items-center gap-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold py-2.5 px-4 rounded-xl transition">
                         <i class="fas fa-arrow-right text-[10px]"></i> Lihat Detail
                     </a>

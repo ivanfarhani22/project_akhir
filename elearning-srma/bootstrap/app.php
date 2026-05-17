@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
+
+        // NOTE: Back button handling is implemented without custom middleware.
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

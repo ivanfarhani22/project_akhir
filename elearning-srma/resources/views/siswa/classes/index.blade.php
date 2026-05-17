@@ -30,7 +30,7 @@
                         <p class="text-xs text-gray-400 line-clamp-2 mb-4">{{ $class->description }}</p>
                     @endif
                     <div class="flex gap-2 mt-auto pt-3 border-t border-gray-100">
-                        <a href="{{ route('siswa.subjects.show', $class->id) }}"
+                        <a href="{{ $class->classSubjects->first() ? route('siswa.subjects.show', $class->classSubjects->first()) : route('siswa.subjects.index') }}"
                            class="flex-1 inline-flex justify-center items-center gap-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold py-2.5 px-3 rounded-xl transition">
                             <i class="fas fa-book text-[10px]"></i> Materi
                         </a>

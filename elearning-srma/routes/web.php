@@ -127,6 +127,7 @@ Route::middleware(['auth', 'role:admin_elearning'])
         // Bulk Schedules
         Route::get('/classes/{class}/schedules/bulk', [\App\Http\Controllers\Admin\BulkScheduleController::class, 'edit'])->name('schedules.bulk.edit');
         Route::post('/classes/{class}/schedules/bulk', [\App\Http\Controllers\Admin\BulkScheduleController::class, 'store'])->name('schedules.bulk.store');
+        Route::post('/classes/{class}/schedules/bulk/auto-generate', [\App\Http\Controllers\Admin\BulkScheduleController::class, 'autoGenerate'])->name('schedules.bulk.autoGenerate');
 
         // ── Class Students ─────────────────────────
         Route::get('/classes/{class}/students', [\App\Http\Controllers\Admin\ClassStudentController::class, 'index'])->name('classes.students');
@@ -275,27 +276,56 @@ Route::middleware(['auth', 'role:siswa'])
             return view('siswa.dashboard', compact('myClasses', 'totalAssignments', 'totalSubmissions', 'averageGrade'));
         })->name('dashboard');
 
-        // ── Subjects ───────────────────────────────
+        // ── Subjects (class_subject scoped) ───────
         Route::get('/subjects', function () {
-            $classes = auth()->user()->classes()
-                ->with(['classSubjects.subject', 'classSubjects.teacher', 'schedules', 'materials', 'assignments'])
+            // List all subjects the student is enrolled in (by class_subject)
+            $myClassIds = auth()->user()->classes()->pluck('e_classes.id');
+
+            $classSubjects = \App\Models\ClassSubject::query()
+                ->whereIn('e_class_id', $myClassIds)
+                ->with([
+                    'eClass',
+                    'subject',
+                    'teacher',
+                ])
+                ->orderBy('e_class_id')
                 ->get();
 
-            return view('siswa.subjects.index', compact('classes'));
+            return view('siswa.subjects.index', compact('classSubjects'));
         })->name('subjects.index');
 
-        Route::get('/subjects/{class}', function (\App\Models\EClass $class) {
-            abort_if(! auth()->user()->classes->contains($class), 403);
-            $class->load(['classSubjects.subject', 'classSubjects.teacher', 'schedules', 'materials', 'assignments', 'students']);
+        Route::get('/subjects/{classSubject}', function (\App\Models\ClassSubject $classSubject) {
+            // Ensure student belongs to that class
+            abort_if(! auth()->user()->classes->contains($classSubject->eClass), 403);
 
-            return view('siswa.subjects.show', compact('class'));
+            $classSubject->load([
+                'eClass.students',
+                'subject',
+                'teacher',
+                'eClass.schedules',
+            ]);
+
+            $materials = \App\Models\Material::query()
+                ->where('class_subject_id', $classSubject->id)
+                ->orderByDesc('created_at')
+                ->get();
+
+            $assignments = \App\Models\Assignment::query()
+                ->where('class_subject_id', $classSubject->id)
+                ->orderByDesc('deadline')
+                ->get();
+
+            return view('siswa.subjects.show', compact('classSubject', 'materials', 'assignments'));
         })->name('subjects.show');
 
         // ── Schedule ───────────────────────────────
         Route::get('/schedule', function () {
             $classes = auth()->user()
                 ->classes()
-                ->with(['classSubjects' => fn ($q) => $q->with(['subject', 'teacher']), 'schedules'])
+                ->with([
+                    'classSubjects' => fn ($q) => $q->with(['subject', 'teacher']),
+                    'schedules' => fn ($q) => $q->with(['classSubject.subject', 'classSubject.teacher']),
+                ])
                 ->get();
 
             return view('siswa.schedule.index', compact('classes'));
@@ -401,6 +431,40 @@ Route::middleware(['auth', 'role:siswa'])
         // ── Attendance ─────────────────────────────
         Route::get('/attendance/{classSubject}', [\App\Http\Controllers\Siswa\AttendanceController::class, 'show'])->name('attendance.show');
         Route::post('/attendance/{session}/submit', [\App\Http\Controllers\Siswa\AttendanceController::class, 'store'])->name('attendance.store');
+
+        // ── Materials Preview (inline) ─────────────
+        Route::get('/materials/{material}/preview', function (\App\Models\Material $material) {
+            abort_if(! auth()->user()->classes->contains($material->eClass), 403);
+
+            $relative   = ltrim($material->file_path ?? '', '/');
+            abort_if($relative === '', 404);
+
+            $normalized = preg_replace('#^storage/#', '', $relative);
+
+            $fullPath = collect([
+                storage_path('app/public/' . $normalized),
+                storage_path('app/' . $relative),
+                storage_path('app/' . $normalized),
+            ])->first(fn ($p) => file_exists($p));
+
+            abort_unless($fullPath, 404);
+
+            $mime = mime_content_type($fullPath) ?: 'application/octet-stream';
+
+            // Prefer a friendly filename if available
+            $baseName = $material->display_name ?: $material->title ?: basename($fullPath);
+            $ext = pathinfo($fullPath, PATHINFO_EXTENSION);
+            $filename = trim($baseName);
+            if ($ext && ! str_ends_with(strtolower($filename), '.' . strtolower($ext))) {
+                $filename .= '.' . $ext;
+            }
+
+            return response()->file($fullPath, [
+                'Content-Type' => $mime,
+                'Content-Disposition' => 'inline; filename="' . addslashes($filename) . '"',
+                'X-Content-Type-Options' => 'nosniff',
+            ]);
+        })->name('materials.preview');
 
         // ── Materials Download ──────────────────────
         Route::get('/materials/{material}/download', function (\App\Models\Material $material) {

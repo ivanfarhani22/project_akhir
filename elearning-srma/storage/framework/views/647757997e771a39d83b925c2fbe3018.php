@@ -91,7 +91,7 @@ unset($__errorArgs, $__bag); ?>
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <a href="<?php echo e(url()->previous() ?? (isset($classSubject) ? route('guru.class-subjects.materials.index', $classSubject) : route('guru.materials.index'))); ?>"
+                    <a href="<?php echo e(session('_back_url') ?? url()->previous() ?? (isset($classSubject) ? route('guru.class-subjects.materials.index', $classSubject) : route('guru.materials.index'))); ?>"
                        class="flex-1 inline-flex justify-center items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-6 rounded-xl text-sm transition">
                         <i class="fas fa-arrow-left text-xs"></i> Kembali
                     </a>

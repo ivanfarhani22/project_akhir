@@ -783,6 +783,14 @@
         if (!e.target.closest('.user-chip') && !e.target.closest('#profile-card')) {
             window.closeProfileCard();
         }
+        // Tutup sidebar mobile saat klik di luar
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar && sidebar.classList.contains('open')) {
+            // Hanya berlaku di mobile (<=768px)
+            if (window.innerWidth <= 768 && !e.target.closest('#sidebar') && !e.target.closest('#sb-toggle')) {
+                sidebar.classList.remove('open');
+            }
+        }
     });
 })();
 </script>

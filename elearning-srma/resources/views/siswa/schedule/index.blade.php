@@ -44,7 +44,11 @@
                     @foreach($daysOrder as $day)
                         @php $daySchedules = $schedules->filter(fn($s) => strtolower($s->day_of_week) === $day)->sortBy('start_time'); @endphp
                         @foreach($daySchedules as $schedule)
-                            @php $hasAny = true; $class = $schedule->class; @endphp
+                            @php
+                                $hasAny = true;
+                                $class = $schedule->class;
+                                $cs = $schedule->classSubject;
+                            @endphp
                             <tr class="hover:bg-gray-50 transition">
                                 <td class="px-5 py-3.5">
                                     @if($loop->first)
@@ -53,9 +57,9 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td class="px-5 py-3.5 font-semibold text-gray-800">{{ $class->classSubjects?->first()?->subject?->name ?? '—' }}</td>
+                                <td class="px-5 py-3.5 font-semibold text-gray-800">{{ $cs?->subject?->name ?? '—' }}</td>
                                 <td class="px-5 py-3.5 text-gray-500 text-xs">{{ $class->name }}</td>
-                                <td class="px-5 py-3.5 text-gray-500 text-xs">{{ $class->classSubjects?->first()?->teacher?->name ?? '—' }}</td>
+                                <td class="px-5 py-3.5 text-gray-500 text-xs">{{ $cs?->teacher?->name ?? '—' }}</td>
                                 <td class="px-5 py-3.5">
                                     @if($schedule->start_time)
                                         <span class="inline-flex items-center gap-1 text-xs font-semibold text-gray-600 bg-gray-100 px-2.5 py-1 rounded-lg">
@@ -79,12 +83,16 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         @foreach($schedules->sortBy(fn($s) => array_search(strtolower($s->day_of_week), $daysOrder)) as $schedule)
-            @php $class = $schedule->class; $dc = $dayColors[strtolower($schedule->day_of_week)] ?? 'bg-indigo-500'; @endphp
+            @php
+                $class = $schedule->class;
+                $cs = $schedule->classSubject;
+                $dc = $dayColors[strtolower($schedule->day_of_week)] ?? 'bg-indigo-500';
+            @endphp
             <div class="bg-white rounded-2xl border-2 border-gray-100 hover:border-blue-300 hover:shadow-lg transition-all duration-200 overflow-hidden">
                 <div class="h-1 bg-gradient-to-r from-blue-400 to-indigo-400"></div>
                 <div class="flex justify-between items-start gap-3 p-4 border-b border-gray-100">
                     <div class="min-w-0">
-                        <h3 class="font-bold text-gray-900 text-sm truncate">{{ $class->classSubjects?->first()?->subject?->name ?? 'Mata Pelajaran' }}</h3>
+                        <h3 class="font-bold text-gray-900 text-sm truncate">{{ $cs?->subject?->name ?? 'Mata Pelajaran' }}</h3>
                         <p class="text-xs text-gray-400 mt-0.5">{{ $class->name }}</p>
                     </div>
                     <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-bold text-white {{ $dc }} flex-shrink-0">
@@ -92,14 +100,14 @@
                     </span>
                 </div>
                 <div class="p-4 space-y-2">
-                    <p class="text-xs text-gray-500"><i class="fas fa-chalkboard-teacher mr-1 text-gray-300"></i>{{ $class->classSubjects?->first()?->teacher?->name ?? '—' }}</p>
+                    <p class="text-xs text-gray-500"><i class="fas fa-chalkboard-teacher mr-1 text-gray-300"></i>{{ $cs?->teacher?->name ?? '—' }}</p>
                     @if($schedule->start_time)
                         <p class="text-xs text-gray-500"><i class="fas fa-clock mr-1 text-gray-300"></i>{{ \Carbon\Carbon::createFromTimeString($schedule->start_time)->format('H:i') }}{{ $schedule->end_time ? ' – '.\Carbon\Carbon::createFromTimeString($schedule->end_time)->format('H:i') : '' }}</p>
                     @endif
                     @if($schedule->room)
                         <p class="text-xs text-gray-500"><i class="fas fa-door-open mr-1 text-gray-300"></i>{{ $schedule->room }}</p>
                     @endif
-                    <a href="{{ route('siswa.subjects.show', $class->id) }}"
+                    <a href="{{ $cs ? route('siswa.subjects.show', $cs) : route('siswa.subjects.index') }}"
                        class="mt-2 w-full inline-flex justify-center items-center gap-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold py-2.5 px-4 rounded-xl transition">
                         <i class="fas fa-arrow-right text-[10px]"></i> Lihat Detail
                     </a>
