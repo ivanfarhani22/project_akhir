@@ -27,7 +27,19 @@ class AssignmentController extends Controller
         ->withCount([
             'submissions as submissions_count',
             'submissions as pending_count' => fn($q) => $q->whereNull('submitted_at'),
-        ]);
+        ])
+        // Hide internal quiz-generated assignments from the Assignments UI.
+        // Preferred marker: type = 'quiz'
+        // Legacy fallback (only for old rows without `type` backfilled yet): description = 'Quiz'
+        ->where(function ($q) {
+            $q->where('type', '!=', 'quiz')
+                ->orWhereNull('type');
+        })
+        ->where(function ($q) {
+            $q->whereNotNull('type')
+                ->orWhereNull('description')
+                ->orWhere('description', '!=', 'Quiz');
+        });
 
         if ($classId) {
             // Support both schemas:

@@ -10,6 +10,12 @@
     $isLate = $submission && $submission->submitted_at && $deadline && $submission->submitted_at > $deadline;
     $isOverdue = $deadline && now() > $deadline && (!$submission || !$submission->submitted_at);
     $deadlineIso = $deadline?->toIso8601String();
+
+    // Preferred (new flow): assignment scoped by class_subject
+    $cs = $assignment->classSubject;
+    $subjectName = $cs?->subject?->name ?? $assignment->eClass?->subject?->name ?? '-';
+    $className = $cs?->eClass?->name ?? $assignment->eClass?->name ?? '-';
+    $teacherName = $cs?->teacher?->name ?? $assignment->eClass?->teacher?->name ?? '-';
 @endphp
 
 <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8">
@@ -17,7 +23,7 @@
         <p class="text-xs text-gray-400 uppercase tracking-widest mb-1"><i class="fas fa-tasks mr-1"></i> Siswa / Tugas / Detail</p>
         <h1 class="text-2xl font-extrabold text-gray-900">{{ $assignment->title }}</h1>
         <span class="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full mt-1">
-            {{ $assignment->eClass->subject->name }} • {{ $assignment->eClass->name }}
+            {{ $subjectName }} • {{ $className }}
         </span>
     </div>
     <a href="{{ route('siswa.assignments.index') }}"
@@ -208,15 +214,15 @@
             <div class="divide-y divide-gray-100">
                 <div class="px-5 py-3">
                     <p class="text-xs text-gray-400 uppercase tracking-wider mb-0.5">Mata Pelajaran</p>
-                    <p class="text-sm font-bold text-gray-900">{{ $assignment->eClass->subject->name }}</p>
+                    <p class="text-sm font-bold text-gray-900">{{ $subjectName }}</p>
                 </div>
                 <div class="px-5 py-3">
                     <p class="text-xs text-gray-400 uppercase tracking-wider mb-0.5">Kelas</p>
-                    <p class="text-sm font-bold text-gray-900">{{ $assignment->eClass->name }}</p>
+                    <p class="text-sm font-bold text-gray-900">{{ $className }}</p>
                 </div>
                 <div class="px-5 py-3">
                     <p class="text-xs text-gray-400 uppercase tracking-wider mb-0.5">Pengajar</p>
-                    <p class="text-sm font-bold text-gray-900">{{ $assignment->eClass->teacher->name }}</p>
+                    <p class="text-sm font-bold text-gray-900">{{ $teacherName }}</p>
                 </div>
             </div>
         </div>

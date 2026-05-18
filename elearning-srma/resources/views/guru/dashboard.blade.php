@@ -41,7 +41,8 @@
         @php
             $actions = [
                 ['href'=>route('guru.materials.index'),'icon'=>'fa-plus-square','color'=>'text-amber-500','bg'=>'bg-amber-50','label'=>'Buat Materi','desc'=>'Tambahkan materi pembelajaran baru'],
-                ['href'=>route('guru.assignments.create'),'icon'=>'fa-tasks','color'=>'text-blue-500','bg'=>'bg-blue-50','label'=>'Buat Tugas','desc'=>'Buat tugas atau kuis untuk siswa'],
+                // Buat Tugas harus lewat pemilihan ClassSubject (class_subject_id)
+                ['href'=>route('guru.assignments.create'),'icon'=>'fa-tasks','color'=>'text-blue-500','bg'=>'bg-blue-50','label'=>'Buat Tugas','desc'=>'Buat tugas untuk siswa'],
                 ['href'=>route('guru.attendance.index'),'icon'=>'fa-clipboard-list','color'=>'text-emerald-500','bg'=>'bg-emerald-50','label'=>'Kelola Presensi','desc'=>'Catat kehadiran siswa di kelas'],
             ];
         @endphp

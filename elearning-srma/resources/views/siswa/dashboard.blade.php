@@ -127,7 +127,6 @@
                     $quickLinks = [
                         ['href'=>route('siswa.subjects.index'),'icon'=>'fa-book','bg'=>'bg-emerald-50','color'=>'text-emerald-500','label'=>'Mata Pelajaran','desc'=>'Lihat semua kelas Anda'],
                         ['href'=>route('siswa.assignments.index'),'icon'=>'fa-tasks','bg'=>'bg-amber-50','color'=>'text-amber-500','label'=>'Semua Tugas','desc'=>'Kelola tugas Anda'],
-                        ['href'=>route('siswa.schedule.index'),'icon'=>'fa-calendar-alt','bg'=>'bg-blue-50','color'=>'text-blue-500','label'=>'Jadwal Lengkap','desc'=>'Lihat jadwal mingguan'],
                     ];
                 @endphp
                 @foreach($quickLinks as $l)

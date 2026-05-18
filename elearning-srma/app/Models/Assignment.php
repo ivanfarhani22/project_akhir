@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Assignment extends Model
 {
-    protected $fillable = ['e_class_id', 'class_subject_id', 'title', 'description', 'file_path', 'deadline'];
+    protected $fillable = ['e_class_id', 'class_subject_id', 'title', 'type', 'description', 'file_path', 'deadline'];
     protected $casts = [
         'deadline' => 'datetime',
     ];
@@ -20,6 +20,11 @@ class Assignment extends Model
     public function classSubject()
     {
         return $this->belongsTo(ClassSubject::class, 'class_subject_id');
+    }
+
+    public function quiz()
+    {
+        return $this->hasOne(Quiz::class);
     }
 
     public function submissions()

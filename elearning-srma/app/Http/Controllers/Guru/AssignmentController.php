@@ -16,7 +16,28 @@ class AssignmentController extends Controller
      */
     public function index()
     {
+        $classSubjectId = request('class_subject_id');
+        if ($classSubjectId) {
+            $classSubject = ClassSubject::findOrFail($classSubjectId);
+            return $this->indexByClassSubject($classSubject);
+        }
+
+        // Backward-compat: masih dukung class_id untuk beberapa halaman lama
         $classId = request('class_id');
+
+        // Hide internal quiz-generated assignments from the Assignments UI.
+        // Preferred marker: type = 'quiz'
+        // Legacy fallback (only for old rows without `type` backfilled yet): description = 'Quiz'
+        $hideQuizAssignments = function ($q) {
+            $q->where(function ($qq) {
+                $qq->where('type', '!=', 'quiz')
+                    ->orWhereNull('type');
+            })->where(function ($qq) {
+                $qq->whereNotNull('type')
+                    ->orWhereNull('description')
+                    ->orWhere('description', '!=', 'Quiz');
+            });
+        };
 
         if ($classId) {
             // View assignments untuk kelas tertentu
@@ -27,15 +48,17 @@ class AssignmentController extends Controller
             }
 
             $assignments = Assignment::where('e_class_id', $classId)
+                ->where($hideQuizAssignments)
                 ->with(['classSubject' => fn($q) => $q->with(['subject', 'teacher', 'eClass']), 'submissions'])
                 ->orderBy('deadline', 'desc')
                 ->get();
 
             return view('guru.assignments.index', compact('class', 'assignments'));
         } else {
-            // View semua assignments untuk guru
+            // View semua assignments untuk guru (dipertahankan untuk admin/legacy page)
             $classes = EClass::whereHas('classSubjects', fn($q) => $q->where('teacher_id', auth()->id()))->get();
             $assignments = Assignment::whereHas('eClass', fn($q) => $q->whereHas('classSubjects', fn($q2) => $q2->where('teacher_id', auth()->id())))
+                ->where($hideQuizAssignments)
                 ->with(['eClass', 'classSubject' => fn($q) => $q->with(['subject', 'teacher', 'eClass']), 'submissions', 'submissions.student'])
                 ->orderBy('deadline', 'desc')
                 ->get();
@@ -67,24 +90,26 @@ class AssignmentController extends Controller
      */
     public function create()
     {
-        $classId = request('class_id');
+        $classSubjectId = request('class_subject_id');
 
-        if ($classId) {
-            $class = EClass::with(['classSubjects' => fn($q) => $q->where('teacher_id', auth()->id())])->findOrFail($classId);
+        // Required: create harus scoped ke class_subject
+        if ($classSubjectId) {
+            $classSubject = ClassSubject::findOrFail($classSubjectId);
+            abort_if($classSubject->teacher_id !== auth()->id(), 403, 'Unauthorized');
 
-            if (!$class->isTeachedBy(auth()->id())) {
-                abort(403, 'Unauthorized');
-            }
+            $classSubject->load(['eClass', 'subject']);
+            $class = $classSubject->eClass;
 
-            // For consistency with admin assignment schema
-            $classSubjectId = optional($class->classSubjects->first())->id;
-
-            return view('guru.assignments.create', compact('class', 'classSubjectId'));
-        } else {
-            // Show form untuk pilih kelas dulu
-            $classes = EClass::whereHas('classSubjects', fn($q) => $q->where('teacher_id', auth()->id()))->get();
-            return view('guru.assignments.create-select-class', compact('classes'));
+            return view('guru.assignments.create', compact('class', 'classSubject'));
         }
+
+        // Default: show selector list by class_subject (mapel) like Materials
+        $classSubjects = ClassSubject::where('teacher_id', auth()->id())
+            ->with(['eClass' => fn ($q) => $q->withCount('students'), 'subject'])
+            ->orderBy('e_class_id')
+            ->get();
+
+        return view('guru.assignments.create-select-class', compact('classSubjects'));
     }
 
     /**
@@ -104,54 +129,20 @@ class AssignmentController extends Controller
      */
     public function store(Request $request)
     {
+        // Note: tetap ada untuk backward-compat, tapi wajib ada class_subject_id
         $validated = $request->validate([
-            'e_class_id' => 'required|exists:e_classes,id',
+            'class_subject_id' => 'required|exists:class_subjects,id',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'deadline' => 'required|date|after:now',
-            // max_score sengaja dihapus dari input/validasi. Nilai diberikan saat siswa mengumpulkan tugas.
             'file' => 'nullable|file|max:' . config('upload.assignment_max_kb'),
         ]);
 
-        $class = EClass::findOrFail($validated['e_class_id']);
-        if (!$class->isTeachedBy(auth()->id())) {
-            abort(403, 'Unauthorized');
-        }
+        $classSubject = ClassSubject::findOrFail($validated['class_subject_id']);
+        abort_if($classSubject->teacher_id !== auth()->id(), 403, 'Unauthorized');
 
-        // Upload file if provided
-        $filePath = null;
-        if ($request->hasFile('file')) {
-            $filePath = FileUploadService::uploadAssignment($request->file('file'));
-            if (!$filePath) {
-                return back()->withErrors('File upload failed')->withInput();
-            }
-            // Normalize to storage/... (consistent with admin)
-            $filePath = str_starts_with($filePath, 'storage/') ? $filePath : ('storage/' . ltrim($filePath, '/'));
-        }
-
-        // Create assignment
-        $assignment = Assignment::create([
-            'e_class_id' => $validated['e_class_id'],
-            'class_subject_id' => $validated['class_subject_id'],
-            'title' => $validated['title'],
-            'description' => $validated['description'],
-            'file_path' => $filePath,
-            'deadline' => $validated['deadline'],
-            'created_by' => auth()->id(),
-        ]);
-
-        // Log activity (use internal ActivityLog model, same style as admin)
-        \App\Models\ActivityLog::create([
-            'user_id' => auth()->id(),
-            'action' => 'create_assignment',
-            'description' => "Guru buat tugas '{$assignment->title}' untuk kelas {$class->name}",
-            'ip_address' => $request->ip(),
-            'timestamp' => now(),
-        ]);
-
-        return redirect()
-            ->route('guru.assignments.index', ['class_id' => $class->id])
-            ->with('success', 'Assignment created successfully');
+        // Delegate to preferred flow
+        return $this->storeByClassSubject($request, $classSubject);
     }
 
     /**

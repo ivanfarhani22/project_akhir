@@ -445,7 +445,16 @@
                     <polyline points="9 11 12 14 22 4"/>
                     <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
                 </svg>
-                <span class="sb-link-text">Tugas & Soal</span>
+                <span class="sb-link-text">Tugas</span>
+            </a>
+
+            <a href="{{ route('guru.quizzes.index') }}"
+               class="sb-link @if(request()->routeIs('guru.quizzes.*')) active @endif">
+                <svg class="sb-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M9 11l3 3L22 4"/>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                </svg>
+                <span class="sb-link-text">Quiz</span>
             </a>
 
             <a href="{{ route('guru.grades.index') }}"
@@ -736,7 +745,7 @@
 
         fetch('/api/notifications', { headers: { 'Accept': 'application/json' } })
             .then(r => r.json())
-            .then(data => {
+            .then((data) => {
                 const notifs = Array.isArray(data.notifications) ? data.notifications : [];
                 if (notifs.length > 0) {
                     list.innerHTML = notifs.map(n => `

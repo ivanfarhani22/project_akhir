@@ -521,6 +521,15 @@
                 <span class="sb-link-text">Materi</span>
             </a>
 
+            <a href="{{ route('admin.quizzes.index') }}"
+               class="sb-link @if(request()->routeIs('admin.quizzes.*')) active @endif">
+                <svg class="sb-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M9 11l3 3L22 4"/>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                </svg>
+                <span class="sb-link-text">Quiz</span>
+            </a>
+
             <a href="{{ route('admin.assignments.index') }}"
                class="sb-link @if(request()->routeIs('admin.assignments.*')) active @endif">
                 <svg class="sb-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

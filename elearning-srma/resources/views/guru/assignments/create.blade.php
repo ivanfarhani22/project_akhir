@@ -4,16 +4,27 @@
 
 @section('content')
 
+@php
+    /**
+     * Support both flows:
+     * - legacy: controller provides $class + $classSubjectId
+     * - preferred: controller provides $class + $classSubject
+     */
+    $resolvedClassSubjectId = $classSubjectId ?? ($classSubject->id ?? null);
+@endphp
+
 <div class="mb-8">
     <p class="text-xs text-gray-400 uppercase tracking-widest mb-1"><i class="fas fa-tasks mr-1"></i> Guru / Tugas / Buat</p>
     <h1 class="text-2xl font-extrabold text-gray-900"><i class="fas fa-plus-circle text-[#A41E35] mr-2"></i>Buat Tugas Baru</h1>
     <span class="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full mt-1">
         <i class="fas fa-door-open"></i> Kelas: <strong class="text-gray-700">{{ $class->name }}</strong>
-        <span class="mx-1 text-gray-300">•</span> {{ $class->subject->name }}
+        @if(!empty($classSubject))
+            <span class="mx-1 text-gray-300">•</span> {{ $classSubject->subject?->name }}
+        @endif
     </span>
 </div>
 
-@if(empty($classSubjectId))
+@if(empty($resolvedClassSubjectId))
     <div class="flex items-start gap-3 bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-xl mb-6">
         <i class="fas fa-exclamation-triangle mt-0.5 flex-shrink-0"></i>
         <p class="text-sm font-semibold">Mapel untuk kelas ini belum terhubung ke guru Anda, tugas tidak bisa dibuat.</p>
@@ -27,17 +38,22 @@
     </div>
 @endif
 
-<div class="max-w-2xl">
+<div class="max-w-2xl mx-auto">
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div class="h-1 bg-gradient-to-r from-[#A41E35] to-rose-400"></div>
         <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
             <h2 class="font-bold text-gray-900">Form Buat Tugas</h2>
         </div>
         <div class="p-6">
-            <form method="POST" action="{{ route('guru.assignments.store') }}" enctype="multipart/form-data">
+            <form method="POST"
+                  action="{{ !empty($classSubject) ? route('guru.class-subjects.assignments.store', $classSubject) : route('guru.assignments.store') }}"
+                  enctype="multipart/form-data">
                 @csrf
-                <input type="hidden" name="e_class_id" value="{{ $class->id }}">
-                <input type="hidden" name="class_subject_id" value="{{ $classSubjectId }}">
+
+                @if(empty($classSubject))
+                    <input type="hidden" name="e_class_id" value="{{ $class->id }}">
+                    <input type="hidden" name="class_subject_id" value="{{ $resolvedClassSubjectId }}">
+                @endif
 
                 <div class="mb-5">
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Judul Tugas <span class="text-red-500">*</span></label>
@@ -49,6 +65,7 @@
 
                 <div class="mb-5">
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Deskripsi</label>
+
                     <textarea name="description" rows="4" placeholder="Jelaskan detail tugas, instruksi, dan kriteria penilaian..."
                         class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#A41E35] focus:ring-2 focus:ring-red-100 transition resize-none">{{ old('description') }}</textarea>
                     @error('description')<span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>@enderror
@@ -64,6 +81,7 @@
 
                 <div class="mb-6">
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">File Soal <span class="text-gray-400 font-normal">(Opsional)</span></label>
+
                     <div id="dropzone" class="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center bg-gray-50 hover:border-[#A41E35] hover:bg-red-50 transition cursor-pointer">
                         <i class="fas fa-cloud-upload-alt text-3xl text-gray-300 mb-3 block"></i>
                         <p class="text-sm font-semibold text-gray-700 mb-1">Klik atau drag file di sini</p>
@@ -75,13 +93,14 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <a href="{{ route('guru.assignments.index', ['class_id' => request('class_id')]) }}"
+                    <a href="{{ !empty($classSubject) ? route('guru.class-subjects.assignments.index', $classSubject) : route('guru.assignments.index', ['class_id' => request('class_id')]) }}"
                        class="flex-1 inline-flex justify-center items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-6 rounded-xl text-sm transition">
                         <i class="fas fa-arrow-left text-xs"></i> Kembali
                     </a>
-                    <button type="submit"
-                        class="flex-1 inline-flex justify-center items-center gap-2 bg-[#A41E35] hover:bg-[#7D1627] text-white font-semibold py-2.5 px-6 rounded-xl text-sm transition shadow-md hover:shadow-lg">
-                        <i class="fas fa-save text-xs"></i> Simpan Tugas
+
+                    <button type="submit" @disabled(empty($resolvedClassSubjectId))
+                       class="flex-1 inline-flex justify-center items-center gap-2 bg-[#A41E35] hover:bg-[#7D1627] text-white font-semibold py-2.5 px-6 rounded-xl text-sm transition">
+                        <i class="fas fa-save text-xs"></i> Simpan
                     </button>
                 </div>
             </form>
@@ -89,19 +108,48 @@
     </div>
 </div>
 
-<script>
-    const dropzone = document.getElementById('dropzone'), fileInput = document.getElementById('file'), filename = document.getElementById('filename');
-    const MAX = 10 * 1024 * 1024;
-    dropzone.addEventListener('click', () => fileInput.click());
-    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('border-[#A41E35]','bg-red-50'); });
-    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('border-[#A41E35]','bg-red-50'));
-    dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('border-[#A41E35]','bg-red-50'); fileInput.files = e.dataTransfer.files; updateFilename(); });
-    fileInput.addEventListener('change', updateFilename);
-    function updateFilename() {
-        const f = fileInput.files[0];
-        if (!f) return;
-        if (f.size > MAX) { alert('Ukuran file terlalu besar. Maksimal 10 MB.'); fileInput.value = ''; filename.textContent = ''; return; }
-        filename.textContent = `✓ ${f.name} (${(f.size/1048576).toFixed(2)} MB)`;
-    }
-</script>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file');
+    const filename = document.getElementById('filename');
+
+    if (!dropzone || !fileInput) return;
+
+    const setFileName = () => {
+        if (!filename) return;
+        filename.textContent = fileInput.files && fileInput.files[0] ? fileInput.files[0].name : '';
+    };
+
+    dropzone.addEventListener('click', () => fileInput.click());
+
+    ;['dragenter', 'dragover'].forEach(evt => {
+        dropzone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.add('border-[#A41E35]', 'bg-red-50');
+        });
+    });
+
+    ;['dragleave', 'drop'].forEach(evt => {
+        dropzone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.remove('border-[#A41E35]', 'bg-red-50');
+        });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        if (!e.dataTransfer || !e.dataTransfer.files || e.dataTransfer.files.length === 0) return;
+        fileInput.files = e.dataTransfer.files;
+        setFileName();
+    });
+
+    fileInput.addEventListener('change', setFileName);
+    setFileName();
+})();
+</script>
+@endpush

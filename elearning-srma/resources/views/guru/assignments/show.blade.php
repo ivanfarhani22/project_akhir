@@ -24,6 +24,7 @@
            class="inline-flex items-center gap-2 bg-[#A41E35] hover:bg-[#7D1627] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-sm">
             <i class="fas fa-pen text-xs"></i> Edit
         </a>
+
         <a href="{{ route('guru.assignments.index', ['class_id' => request('class_id')]) }}"
            class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold px-4 py-2.5 rounded-xl transition">
             <i class="fas fa-arrow-left text-xs"></i> Kembali

@@ -1,0 +1,9 @@
+# ignore runtime/compiled files
+elearning-srma/storage/framework/views/
+elearning-srma/storage/framework/cache/
+elearning-srma/storage/logs/
+elearning-srma/bootstrap/cache/
+portal-srma/storage/framework/views/
+portal-srma/storage/framework/cache/
+portal-srma/storage/logs/
+portal-srma/bootstrap/cache/

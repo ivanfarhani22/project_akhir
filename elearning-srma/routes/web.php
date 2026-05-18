@@ -142,6 +142,16 @@ Route::middleware(['auth', 'role:admin_elearning'])
         Route::get('/storage', [\App\Http\Controllers\Admin\StorageController::class, 'index'])->name('storage.index');
         Route::post('/storage/delete', [\App\Http\Controllers\Admin\StorageController::class, 'delete'])->name('storage.delete');
         Route::post('/storage/cleanup', [\App\Http\Controllers\Admin\StorageController::class, 'cleanup'])->name('storage.cleanup');
+
+        // ── Quizzes ─────────────────────────────────────────────
+        Route::get('/quizzes', \App\Http\Controllers\Admin\QuizIndexController::class)->name('quizzes.index');
+
+        // ── Quizzes (Emergency / Admin override) ─────────────────
+        Route::post('/assignments/{assignment}/quiz', [\App\Http\Controllers\Admin\QuizController::class, 'upsert'])->name('assignments.quiz.upsert');
+        Route::get('/assignments/{assignment}/quiz/manage', [\App\Http\Controllers\Admin\QuizQuestionController::class, 'index'])->name('quizzes.manage');
+        Route::post('/assignments/{assignment}/quiz/questions', [\App\Http\Controllers\Admin\QuizQuestionController::class, 'store'])->name('quizzes.questions.store');
+        Route::put('/assignments/{assignment}/quiz/questions/{question}', [\App\Http\Controllers\Admin\QuizQuestionController::class, 'update'])->name('quizzes.questions.update');
+        Route::delete('/assignments/{assignment}/quiz/questions/{question}', [\App\Http\Controllers\Admin\QuizQuestionController::class, 'destroy'])->name('quizzes.questions.destroy');
     });
 
 // ─────────────────────────────────────────────
@@ -255,6 +265,15 @@ Route::middleware(['auth', 'role:guru'])
         // ── Rekap Nilai ────────────────────────────
         Route::get('/rekap-nilai', [\App\Http\Controllers\Guru\RekapNilaiController::class, 'index'])->name('rekap-nilai.index');
         Route::get('/rekap-nilai/export', [\App\Http\Controllers\Guru\RekapNilaiController::class, 'export'])->name('rekap-nilai.export');
+
+        // ── Quizzes ─────────────────────────────────────────────
+        Route::get('/quizzes', \App\Http\Controllers\Guru\QuizIndexController::class)->name('quizzes.index');
+        Route::post('/quizzes/create-assignment', [\App\Http\Controllers\Guru\QuizIndexController::class, 'storeQuizAssignment'])->name('quizzes.create-assignment');
+        Route::post('/assignments/{assignment}/quiz', [\App\Http\Controllers\Guru\QuizController::class, 'upsert'])->name('assignments.quiz.upsert');
+        Route::get('/assignments/{assignment}/quiz/manage', [\App\Http\Controllers\Guru\QuizQuestionController::class, 'index'])->name('quizzes.manage');
+        Route::post('/assignments/{assignment}/quiz/questions', [\App\Http\Controllers\Guru\QuizQuestionController::class, 'store'])->name('quizzes.questions.store');
+        Route::put('/assignments/{assignment}/quiz/questions/{question}', [\App\Http\Controllers\Guru\QuizQuestionController::class, 'update'])->name('quizzes.questions.update');
+        Route::delete('/assignments/{assignment}/quiz/questions/{question}', [\App\Http\Controllers\Guru\QuizQuestionController::class, 'destroy'])->name('quizzes.questions.destroy');
     });
 
 // ─────────────────────────────────────────────
@@ -275,6 +294,10 @@ Route::middleware(['auth', 'role:siswa'])
 
             return view('siswa.dashboard', compact('myClasses', 'totalAssignments', 'totalSubmissions', 'averageGrade'));
         })->name('dashboard');
+
+        // Jadwal (Schedule)
+        Route::get('/jadwal', [\App\Http\Controllers\Siswa\ScheduleController::class, 'index'])
+            ->name('schedule.index');
 
         // ── Subjects (class_subject scoped) ───────
         Route::get('/subjects', function () {
@@ -312,31 +335,76 @@ Route::middleware(['auth', 'role:siswa'])
 
             $assignments = \App\Models\Assignment::query()
                 ->where('class_subject_id', $classSubject->id)
+                // Hide internal quiz-generated assignments from the Assignments UI.
+                // Preferred marker: type = 'quiz'
+                // Legacy fallback (only for old rows tanpa `type` backfilled yet): description = 'Quiz'
+                ->where(function ($q) {
+                    $q->where('type', '!=', 'quiz')
+                        ->orWhereNull('type');
+                })
+                ->where(function ($q) {
+                    $q->whereNotNull('type')
+                        ->orWhereNull('description')
+                        ->orWhere('description', '!=', 'Quiz');
+                })
                 ->orderByDesc('deadline')
                 ->get();
 
             return view('siswa.subjects.show', compact('classSubject', 'materials', 'assignments'));
         })->name('subjects.show');
 
-        // ── Schedule ───────────────────────────────
-        Route::get('/schedule', function () {
-            $classes = auth()->user()
-                ->classes()
-                ->with([
-                    'classSubjects' => fn ($q) => $q->with(['subject', 'teacher']),
-                    'schedules' => fn ($q) => $q->with(['classSubject.subject', 'classSubject.teacher']),
-                ])
-                ->get();
-
-            return view('siswa.schedule.index', compact('classes'));
-        })->name('schedule.index');
-
         // ── Assignments ────────────────────────────
         Route::get('/assignments', function () {
+            // Preferred: filter by class_subject (mapel) agar konsisten dengan flow baru
+            $classSubjectId = request('class_subject_id');
+
+            if ($classSubjectId) {
+                $classSubject = \App\Models\ClassSubject::findOrFail($classSubjectId);
+
+                // Ensure student belongs to that class
+                abort_if(! auth()->user()->classes->contains($classSubject->eClass), 403);
+
+                $assignments = \App\Models\Assignment::query()
+                    ->where('class_subject_id', $classSubject->id)
+                    // Hide internal quiz-generated assignments from the Assignments UI.
+                    // Preferred marker: type = 'quiz'
+                    // Legacy fallback (only for old rows tanpa `type` backfilled yet): description = 'Quiz'
+                    ->where(function ($q) {
+                        $q->where('type', '!=', 'quiz')
+                            ->orWhereNull('type');
+                    })
+                    ->where(function ($q) {
+                        $q->whereNotNull('type')
+                            ->orWhereNull('description')
+                            ->orWhere('description', '!=', 'Quiz');
+                    })
+                    ->with(['eClass', 'classSubject.subject', 'classSubject.teacher'])
+                    ->orderBy('deadline', 'desc')
+                    ->get();
+
+                return view('siswa.assignments.index', compact('assignments', 'classSubject'));
+            }
+
+            // Backward-compat: beberapa halaman lama passing class (e_class_id)
+            $classId = request('class');
+
             $myClassIds = auth()->user()->classes()->pluck('e_classes.id');
 
             $assignments = \App\Models\Assignment::query()
+                ->when($classId, fn ($q) => $q->where('e_class_id', $classId))
                 ->whereIn('e_class_id', $myClassIds)
+                // Hide internal quiz-generated assignments from the Assignments UI.
+                // Preferred marker: type = 'quiz'
+                // Legacy fallback (only for old rows tanpa `type` backfilled yet): description = 'Quiz'
+                ->where(function ($q) {
+                    $q->where('type', '!=', 'quiz')
+                        ->orWhereNull('type');
+                })
+                ->where(function ($q) {
+                    $q->whereNotNull('type')
+                        ->orWhereNull('description')
+                        ->orWhere('description', '!=', 'Quiz');
+                })
                 ->with(['eClass', 'classSubject.subject', 'classSubject.teacher'])
                 ->orderBy('deadline', 'desc')
                 ->get();
@@ -426,7 +494,13 @@ Route::middleware(['auth', 'role:siswa'])
         })->name('submissions.download');
 
         // ── Quizzes ────────────────────────────────
-        Route::get('/quizzes', fn () => view('siswa.quizzes.index'))->name('quizzes.index');
+        Route::get('/quizzes', \App\Http\Controllers\Siswa\QuizIndexController::class)->name('quizzes.index');
+
+        // New quiz flow (quiz is tied to an assignment)
+        Route::get('/assignments/{assignment}/quiz', [\App\Http\Controllers\Siswa\QuizController::class, 'show'])->name('quizzes.show');
+        Route::post('/assignments/{assignment}/quiz/submit', [\App\Http\Controllers\Siswa\QuizController::class, 'submit'])->name('quizzes.submit');
+        Route::get('/assignments/{assignment}/quiz/result/{attempt}', [\App\Http\Controllers\Siswa\QuizController::class, 'result'])->name('quizzes.result');
+        Route::get('/assignments/{assignment}/quiz/time-up', [\App\Http\Controllers\Siswa\QuizController::class, 'timeUp'])->name('quizzes.timeup');
 
         // ── Attendance ─────────────────────────────
         Route::get('/attendance/{classSubject}', [\App\Http\Controllers\Siswa\AttendanceController::class, 'show'])->name('attendance.show');
