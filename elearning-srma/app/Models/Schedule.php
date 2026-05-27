@@ -28,11 +28,30 @@ class Schedule extends Model
 
     public function subject()
     {
-        return $this->classSubject->subject();
+        return $this->hasOneThrough(
+            Subject::class,
+            ClassSubject::class,
+            'id',
+            'id',
+            'class_subject_id',
+            'subject_id'
+        );
     }
 
     public function teacher()
     {
-        return $this->classSubject->teacher();
+        return $this->hasOneThrough(
+            User::class,
+            ClassSubject::class,
+            'id',
+            'id',
+            'class_subject_id',
+            'teacher_id'
+        );
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(ScheduleActivity::class);
     }
 }

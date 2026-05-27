@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assignment;
+use App\Models\ClassSubject;
 use App\Models\Grade;
 use App\Models\Submission;
 use Illuminate\Http\Request;
@@ -11,19 +12,16 @@ use App\Models\ActivityLog;
 
 class GradeController extends Controller
 {
-    /**
-     * Display a listing of submissions for grading.
-     */
     public function index()
     {
-        $assignmentId = request('assignment_id');
-        
+        $assignmentId   = request('assignment_id');
+        $classSubjectId = request('class_subject_id');
+
         if ($assignmentId) {
-            // View submissions untuk assignment tertentu
+            // ── View per tugas ──────────────────────────────────────────
             $assignment = Assignment::findOrFail($assignmentId);
-            
-            // Verify teacher owns this assignment
-            if (!$assignment->eClass->isTeachedBy(auth()->id())) {
+
+            if (! $assignment->eClass->isTeachedBy(auth()->id())) {
                 abort(403, 'Unauthorized');
             }
 
@@ -33,21 +31,37 @@ class GradeController extends Controller
                 ->get();
 
             return view('guru.grades.index', compact('assignment', 'submissions'));
-        } else {
-            // View semua submissions untuk guru
-            $assignments = Assignment::whereHas('eClass', fn($q) => $q->whereHas('classSubjects', fn($q2) => $q2->where('teacher_id', auth()->id())))->get();
-            $submissions = Submission::whereHas('assignment.eClass', fn($q) => $q->whereHas('classSubjects', fn($q2) => $q2->where('teacher_id', auth()->id())))
-                ->with(['student', 'assignment', 'grade'])
-                ->orderBy('submitted_at', 'desc')
-                ->get();
-
-            return view('guru.grades.index-all', compact('assignments', 'submissions'));
         }
+
+        // ── View semua / filter by class_subject ───────────────────────
+        $classSubjects = ClassSubject::where('teacher_id', auth()->id())
+            ->with(['eClass', 'subject'])
+            ->orderByDesc('id')
+            ->get();
+
+        // Dropdown tugas: hanya muncul jika class_subject dipilih
+        $assignments = $classSubjectId
+            ? Assignment::where('class_subject_id', $classSubjectId)
+                ->orderBy('title')
+                ->get()
+            : collect();
+
+        $query = Submission::with(['student', 'assignment.eClass', 'assignment.classSubject.subject', 'grade'])
+            ->whereHas('assignment.classSubject', fn ($q) => $q->where('teacher_id', auth()->id()));
+
+        if ($classSubjectId) {
+            $query->whereHas('assignment', fn ($q) => $q->where('class_subject_id', $classSubjectId));
+        }
+
+        if ($assignmentId) {
+            $query->where('assignment_id', $assignmentId);
+        }
+
+        $submissions = $query->orderBy('submitted_at', 'desc')->get();
+
+        return view('guru.grades.index-all', compact('assignments', 'submissions', 'classSubjects', 'classSubjectId'));
     }
 
-    /**
-     * Show the form for grading a submission.
-     */
     public function edit(Submission $submission)
     {
         $assignment = $submission->assignment;
@@ -56,7 +70,7 @@ class GradeController extends Controller
         $class = $assignment->eClass;
         abort_unless($class, 404);
 
-        if (!$class->isTeachedBy(auth()->id())) {
+        if (! $class->isTeachedBy(auth()->id())) {
             abort(403, 'Unauthorized');
         }
 
@@ -65,9 +79,6 @@ class GradeController extends Controller
         return view('guru.grades.edit', compact('submission', 'assignment'));
     }
 
-    /**
-     * Store/Update grade for a submission.
-     */
     public function update(Request $request, Submission $submission)
     {
         $assignment = $submission->assignment;
@@ -76,69 +87,50 @@ class GradeController extends Controller
         $class = $assignment->eClass;
         abort_unless($class, 404);
 
-        if (!$class->isTeachedBy(auth()->id())) {
+        if (! $class->isTeachedBy(auth()->id())) {
             abort(403, 'Unauthorized');
         }
 
         $validated = $request->validate([
-            'score' => 'required|numeric|min:0|max:100',
+            'score'    => 'required|numeric|min:0|max:100',
             'feedback' => 'nullable|string',
         ]);
 
-        // Find or create grade
         $grade = Grade::where('submission_id', $submission->id)->first();
-        
+
         if ($grade) {
             $grade->update([
-                'score' => $validated['score'],
-                'feedback' => $validated['feedback'],
+                'score'     => $validated['score'],
+                'feedback'  => $validated['feedback'],
                 'graded_at' => now(),
             ]);
         } else {
             $grade = Grade::create([
                 'submission_id' => $submission->id,
-                'student_id' => $submission->student_id,
+                'student_id'    => $submission->student_id,
                 'assignment_id' => $assignment->id,
-                'score' => $validated['score'],
-                'feedback' => $validated['feedback'],
-                'graded_at' => now(),
+                'score'         => $validated['score'],
+                'feedback'      => $validated['feedback'],
+                'graded_at'     => now(),
             ]);
         }
 
-        // Log aktivitas (tanpa ketergantungan helper activity())
         ActivityLog::create([
-            'user_id' => auth()->id(),
-            'action' => 'grade_saved',
+            'user_id'     => auth()->id(),
+            'action'      => 'grade_saved',
             'description' => 'Grade given to ' . $submission->student->name . ': ' . $validated['score'],
-            'model_type' => Grade::class,
-            'model_id' => $grade->id,
+            'model_type'  => Grade::class,
+            'model_id'    => $grade->id,
         ]);
 
+        // Kembali ke halaman sebelumnya dengan konteks filter terjaga
         return redirect()
             ->route('guru.grades.index', ['assignment_id' => $assignment->id])
-            ->with('success', 'Grade saved successfully');
+            ->with('success', 'Nilai berhasil disimpan.');
     }
 
-    /**
-     * Not used - grading only via edit/update.
-     */
-    public function create()
-    {
-        abort(403, 'Not available');
-    }
-
-    public function store(Request $request)
-    {
-        abort(403, 'Not available');
-    }
-
-    public function show(string $id)
-    {
-        abort(403, 'Not available');
-    }
-
-    public function destroy(string $id)
-    {
-        abort(403, 'Not available');
-    }
+    public function create()  { abort(403); }
+    public function store()   { abort(403); }
+    public function show()    { abort(403); }
+    public function destroy() { abort(403); }
 }

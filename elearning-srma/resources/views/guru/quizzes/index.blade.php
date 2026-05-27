@@ -3,148 +3,131 @@
 @section('icon', 'fas fa-question-circle')
 
 @section('content')
-<div class="max-w-6xl mx-auto">
-    <div class="flex items-start justify-between gap-4 mb-6">
-        <div>
-            <div class="text-[11px] text-slate-500">Guru / Quiz</div>
-            <h1 class="text-[18px] font-extrabold tracking-tight text-slate-900">Quiz</h1>
-            <p class="text-[12.5px] text-slate-500 mt-1">Buat dan kelola quiz untuk mapel yang Anda ampu.</p>
-        </div>
-        <div class="hidden sm:block text-[12px] text-slate-400 text-right">
-            Nilai quiz otomatis masuk ke rekap nilai.
-        </div>
+
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+    <div>
+        <p class="text-xs text-gray-400 uppercase tracking-widest mb-1"><i class="fas fa-question-circle mr-1"></i> Guru / Quiz</p>
+        <h1 class="text-2xl font-extrabold text-gray-900"><i class="fas fa-question-circle text-[#A41E35] mr-2"></i>Quiz</h1>
+        <p class="text-sm text-gray-500 mt-1">Buat dan kelola quiz untuk mapel yang Anda ampu.</p>
     </div>
+</div>
 
-    @if($errors->any())
-        <div class="mb-5 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-4">
-            <div class="font-semibold text-[13px]">Terjadi kesalahan</div>
-            <ul class="mt-2 text-[12.5px] list-disc pl-5 space-y-1">
-                @foreach($errors->all() as $e)
-                    <li>{{ $e }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden mb-6">
-        <div class="px-5 py-4 border-b border-slate-200">
-            <div class="font-semibold text-slate-900">Buat Quiz Baru</div>
-            <div class="text-[12px] text-slate-500 mt-0.5">Lengkapi informasi dasar, lalu kelola soal.</div>
-        </div>
-        <div class="p-5">
-            <form method="POST" action="{{ route('guru.quizzes.create-assignment') }}" class="space-y-4">
-                @csrf
-
-                <div>
-                    <label class="block text-[12.5px] font-semibold text-slate-700 mb-1">Mapel <span class="text-rose-600">*</span></label>
-                    <select name="class_subject_id" required
-                            class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-[13px] focus:outline-none focus:ring-2 focus:ring-[#C41E3A]/25 focus:border-[#C41E3A]">
-                        <option value="" selected disabled>Pilih mapel...</option>
-                        @foreach($classSubjects as $cs)
-                            <option value="{{ $cs->id }}">
-                                {{ $cs->eClass?->name }} — {{ $cs->subject?->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-[12.5px] font-semibold text-slate-700 mb-1">Judul <span class="text-rose-600">*</span></label>
-                    <input name="title" type="text" value="{{ old('title') }}" required
-                           placeholder="Contoh: Quiz Bab 1"
-                           class="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-[#C41E3A]/25 focus:border-[#C41E3A]" />
-                </div>
-
-                <div>
-                    <label class="block text-[12.5px] font-semibold text-slate-700 mb-1">Deskripsi <span class="text-slate-400 font-normal">(opsional)</span></label>
-                    <textarea name="description" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-[#C41E3A]/25 focus:border-[#C41E3A] resize-none"
-                              placeholder="Instruksi singkat...">{{ old('description') }}</textarea>
-                </div>
-
-                <div>
-                    <label class="block text-[12.5px] font-semibold text-slate-700 mb-1">Deadline <span class="text-rose-600">*</span></label>
-                    <input type="datetime-local" name="deadline" value="{{ old('deadline') }}" required
-                           class="w-full px-3 py-2 border border-slate-300 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-[#C41E3A]/25 focus:border-[#C41E3A]" />
-                    <p class="text-[11.5px] text-slate-500 mt-1">Deadline mengikuti deadline penilaian.</p>
-                </div>
-
-                <button type="submit"
-                        class="w-full inline-flex justify-center items-center px-4 py-2 rounded-lg bg-[#C41E3A] hover:bg-[#9B1630] text-white font-bold text-[13px]">
-                    Buat & Kelola
-                </button>
-            </form>
-        </div>
+@if($errors->any())
+    <div class="flex items-start gap-3 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl mb-6">
+        <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+        <ul class="text-sm space-y-0.5">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
     </div>
+@endif
 
-    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
-        <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+{{-- BUAT QUIZ BARU --}}
+<div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6">
+    <div class="h-1 bg-gradient-to-r from-[#A41E35] to-rose-400"></div>
+    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+        <h2 class="font-bold text-gray-900">Buat Quiz Baru</h2>
+        <p class="text-xs text-gray-400 mt-0.5">Isi informasi dasar, lalu kelola soal di halaman berikutnya.</p>
+    </div>
+    <div class="p-6">
+        <form method="POST" action="{{ route('guru.quizzes.create-assignment') }}" class="space-y-4 max-w-xl">
+            @csrf
             <div>
-                <div class="font-semibold text-slate-900">Daftar Quiz</div>
-                <div class="text-[12px] text-slate-500 mt-0.5">Quiz yang sudah dibuat untuk mapel yang Anda ajar.</div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Mapel <span class="text-red-500">*</span></label>
+                <select name="class_subject_id" required
+                    class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#A41E35] focus:ring-2 focus:ring-red-100 transition bg-white">
+                    <option value="" disabled selected>Pilih mapel...</option>
+                    @foreach($classSubjects as $cs)
+                        <option value="{{ $cs->id }}">{{ $cs->eClass?->name }} — {{ $cs->subject?->name }}</option>
+                    @endforeach
+                </select>
             </div>
-            <span class="text-[12px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">{{ $quizzes->total() }}</span>
-        </div>
-
-        @if($quizzes->count() === 0)
-            <div class="p-8 text-center text-slate-600">
-                <div class="text-[13px] font-semibold">Belum ada quiz</div>
-                <div class="text-[12px] text-slate-500 mt-1">Buat quiz dari formulir di atas.</div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Judul Quiz <span class="text-red-500">*</span></label>
+                <input type="text" name="title" value="{{ old('title') }}" required placeholder="Contoh: Quiz Bab 1 — Fotosintesis"
+                    class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#A41E35] focus:ring-2 focus:ring-red-100 transition">
             </div>
-        @else
-            <div class="overflow-x-auto">
-                <table class="min-w-full text-[13px]">
-                    <thead class="bg-slate-50 text-slate-600">
-                        <tr>
-                            <th class="text-left font-semibold px-5 py-3">Judul</th>
-                            <th class="text-left font-semibold px-5 py-3">Kelas</th>
-                            <th class="text-left font-semibold px-5 py-3">Mapel</th>
-                            <th class="text-left font-semibold px-5 py-3">Status</th>
-                            <th class="text-left font-semibold px-5 py-3">Diupdate</th>
-                            <th class="text-right font-semibold px-5 py-3">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        @foreach($quizzes as $quiz)
-                            <tr class="hover:bg-slate-50/60">
-                                <td class="px-5 py-3">
-                                    <div class="font-semibold text-slate-900">{{ $quiz->assignment?->title ?? '—' }}</div>
-                                </td>
-                                <td class="px-5 py-3 text-slate-700">{{ $quiz->assignment?->eClass?->name ?? '—' }}</td>
-                                <td class="px-5 py-3 text-slate-700">{{ $quiz->assignment?->classSubject?->subject?->name ?? '—' }}</td>
-                                <td class="px-5 py-3">
-                                    @if($quiz->status === 'published')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                            Published
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
-                                            Draft
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="px-5 py-3 text-slate-600">{{ optional($quiz->updated_at)->format('d/m/Y H:i') }}</td>
-                                <td class="px-5 py-3 text-right">
-                                    @if($quiz->assignment)
-                                        <a href="{{ route('guru.quizzes.manage', $quiz->assignment) }}"
-                                           class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#C41E3A] text-white text-[12.5px] font-bold hover:bg-[#9B1630]">
-                                            Kelola
-                                        </a>
-                                    @else
-                                        <span class="text-[12px] text-slate-400">—</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Deskripsi <span class="text-gray-400 font-normal">(opsional)</span></label>
+                <textarea name="description" rows="2" placeholder="Instruksi singkat untuk siswa..."
+                    class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#A41E35] focus:ring-2 focus:ring-red-100 transition resize-none">{{ old('description') }}</textarea>
             </div>
-
-            <div class="px-5 py-4 border-t border-slate-200">
-                {{ $quizzes->links() }}
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Deadline <span class="text-red-500">*</span></label>
+                <input type="datetime-local" name="deadline" value="{{ old('deadline') }}" required
+                    class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#A41E35] focus:ring-2 focus:ring-red-100 transition">
             </div>
-        @endif
+            <button type="submit"
+                class="inline-flex justify-center items-center gap-2 bg-[#A41E35] hover:bg-[#7D1627] text-white font-semibold py-2.5 px-6 rounded-xl text-sm transition shadow-md hover:shadow-lg">
+                <i class="fas fa-plus text-xs"></i> Buat & Kelola Soal
+            </button>
+        </form>
     </div>
+</div>
+
+{{-- DAFTAR QUIZ --}}
+<div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50">
+        <h2 class="font-bold text-gray-900">Daftar Quiz</h2>
+        <span class="bg-gray-900 text-white text-xs font-bold px-3 py-1 rounded-full">{{ $quizzes->total() }}</span>
+    </div>
+
+    @if($quizzes->count() === 0)
+        <div class="flex flex-col items-center justify-center py-16 text-center">
+            <div class="w-20 h-20 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center mb-4">
+                <i class="fas fa-question-circle text-3xl text-gray-300"></i>
+            </div>
+            <p class="text-gray-500 text-sm">Belum ada quiz. Buat dari formulir di atas.</p>
+        </div>
+    @else
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Judul</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kelas / Mapel</th>
+                        <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Soal</th>
+                        <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Diupdate</th>
+                        <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @foreach($quizzes as $quiz)
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-5 py-3.5 font-semibold text-gray-900">{{ $quiz->assignment?->title ?? '—' }}</td>
+                            <td class="px-5 py-3.5">
+                                <p class="text-gray-800 font-medium">{{ $quiz->assignment?->eClass?->name ?? '—' }}</p>
+                                <p class="text-xs text-gray-400 mt-0.5">{{ $quiz->assignment?->classSubject?->subject?->name ?? '—' }}</p>
+                            </td>
+                            <td class="px-5 py-3.5 text-center">
+                                <span class="text-sm font-bold text-gray-700">{{ $quiz->questions->count() }}</span>
+                            </td>
+                            <td class="px-5 py-3.5 text-center">
+                                @if($quiz->status === 'published')
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Published
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span> Draft
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-5 py-3.5 text-xs text-gray-400">{{ optional($quiz->updated_at)->format('d/m/Y H:i') }}</td>
+                            <td class="px-5 py-3.5 text-center">
+                                @if($quiz->assignment)
+                                    <a href="{{ route('guru.quizzes.manage', $quiz->assignment) }}"
+                                       class="inline-flex items-center gap-1.5 bg-[#A41E35] hover:bg-[#7D1627] text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">
+                                        <i class="fas fa-pen text-[10px]"></i> Kelola
+                                    </a>
+                                @else
+                                    <span class="text-gray-300 text-xs">—</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        <div class="px-5 py-4 border-t border-gray-100">{{ $quizzes->links() }}</div>
+    @endif
 </div>
 @endsection

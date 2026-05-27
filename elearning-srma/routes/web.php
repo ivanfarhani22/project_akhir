@@ -27,6 +27,7 @@ Route::get('/', function () {
     return match (auth()->user()->role) {
         'admin_elearning' => redirect()->route('admin.dashboard'),
         'guru'            => redirect()->route('guru.dashboard'),
+        'orang_tua'       => redirect()->route('orang-tua.dashboard'),
         default           => redirect()->route('siswa.dashboard'),
     };
 })->name('home');
@@ -145,6 +146,8 @@ Route::middleware(['auth', 'role:admin_elearning'])
 
         // ── Quizzes ─────────────────────────────────────────────
         Route::get('/quizzes', \App\Http\Controllers\Admin\QuizIndexController::class)->name('quizzes.index');
+        Route::post('/quizzes/create-assignment', [\App\Http\Controllers\Admin\QuizIndexController::class, 'storeQuizAssignment'])
+            ->name('quizzes.create-assignment');
 
         // ── Quizzes (Emergency / Admin override) ─────────────────
         Route::post('/assignments/{assignment}/quiz', [\App\Http\Controllers\Admin\QuizController::class, 'upsert'])->name('assignments.quiz.upsert');
@@ -152,6 +155,12 @@ Route::middleware(['auth', 'role:admin_elearning'])
         Route::post('/assignments/{assignment}/quiz/questions', [\App\Http\Controllers\Admin\QuizQuestionController::class, 'store'])->name('quizzes.questions.store');
         Route::put('/assignments/{assignment}/quiz/questions/{question}', [\App\Http\Controllers\Admin\QuizQuestionController::class, 'update'])->name('quizzes.questions.update');
         Route::delete('/assignments/{assignment}/quiz/questions/{question}', [\App\Http\Controllers\Admin\QuizQuestionController::class, 'destroy'])->name('quizzes.questions.destroy');
+
+        // ── Orang Tua ↔ Siswa (mapping) ─────────────────────────
+        Route::get('/parent-students', [\App\Http\Controllers\Admin\ParentStudentController::class, 'index'])
+            ->name('parent-students.index');
+        Route::put('/parent-students/{parent}', [\App\Http\Controllers\Admin\ParentStudentController::class, 'update'])
+            ->name('parent-students.update');
     });
 
 // ─────────────────────────────────────────────
@@ -229,13 +238,17 @@ Route::middleware(['auth', 'role:guru'])
 
         // ── Attendance ─────────────────────────────
         Route::resource('attendance', \App\Http\Controllers\Guru\AttendanceController::class);
-        Route::post('attendance/{attendance}/close', [\App\Http\Controllers\Guru\AttendanceController::class, 'close'])->name('attendance.close');
-        Route::post('attendance/{attendance}/cancel', [\App\Http\Controllers\Guru\AttendanceController::class, 'cancel'])->name('attendance.cancel');
 
-        // Backward-compat: old views posting to {session}
-        Route::model('session', AttendanceSession::class);
-        Route::post('attendance/{session}/close', [\App\Http\Controllers\Guru\AttendanceController::class, 'close']);
-        Route::post('attendance/{session}/cancel', [\App\Http\Controllers\Guru\AttendanceController::class, 'cancel']);
+        // Manual attendance input (like admin, restricted to guru's own class_subject)
+        Route::get('attendance-manual/create', [\App\Http\Controllers\Guru\AttendanceController::class, 'createManual'])->name('attendance.manual.create');
+        Route::post('attendance-manual', [\App\Http\Controllers\Guru\AttendanceController::class, 'storeManual'])->name('attendance.manual.store');
+        Route::get('attendance-manual/{attendance}/edit', [\App\Http\Controllers\Guru\AttendanceController::class, 'editManual'])->name('attendance.manual.edit');
+        Route::put('attendance-manual/{attendance}', [\App\Http\Controllers\Guru\AttendanceController::class, 'updateManual'])->name('attendance.manual.update');
+
+        // ── Jurnal Harian (Daily Reports) ─────────
+        // Legacy snapshot-based daily_reports is deprecated; use daily-activities + parent daily report generator.
+        // Route::resource('daily-reports', \App\Http\Controllers\Guru\DailyReportController::class)
+        //     ->only(['index', 'create', 'store', 'show', 'edit', 'update', 'destroy']);
 
         // ── Submission Download ─────────────────────
         Route::get('/submissions/{submission}/download', function (\App\Models\Submission $submission) {
@@ -274,6 +287,12 @@ Route::middleware(['auth', 'role:guru'])
         Route::post('/assignments/{assignment}/quiz/questions', [\App\Http\Controllers\Guru\QuizQuestionController::class, 'store'])->name('quizzes.questions.store');
         Route::put('/assignments/{assignment}/quiz/questions/{question}', [\App\Http\Controllers\Guru\QuizQuestionController::class, 'update'])->name('quizzes.questions.update');
         Route::delete('/assignments/{assignment}/quiz/questions/{question}', [\App\Http\Controllers\Guru\QuizQuestionController::class, 'destroy'])->name('quizzes.questions.destroy');
+
+        // ── Aktivitas Harian (per Schedule) ─────────
+        Route::get('daily-activities/create', [\App\Http\Controllers\Guru\DailyActivityController::class, 'create'])
+            ->name('daily-activities.create');
+        Route::post('daily-activities', [\App\Http\Controllers\Guru\DailyActivityController::class, 'store'])
+            ->name('daily-activities.store');
     });
 
 // ─────────────────────────────────────────────
@@ -563,4 +582,24 @@ Route::middleware(['auth', 'role:siswa'])
         // ── Legacy / Backward-compat ───────────────
         Route::get('/classes', fn () => view('siswa.subjects.index', ['classes' => auth()->user()->classes]))->name('classes.index');
         Route::get('/grades', fn () => view('siswa.grades.index', ['grades' => auth()->user()->grades]))->name('grades.index');
+    });
+
+// ─────────────────────────────────────────────
+// Orang Tua
+// ─────────────────────────────────────────────
+
+Route::middleware(['auth', 'role:orang_tua'])
+    ->prefix('orang-tua')
+    ->name('orang-tua.')
+    ->group(function () {
+
+        Route::get('/dashboard', fn () => view('orang-tua.dashboard'))->name('dashboard');
+
+        Route::get('/daily-reports', [\App\Http\Controllers\OrangTua\DailyReportController::class, 'index'])
+            ->name('daily-reports.index');
+
+        Route::get('/daily-reports/pdf', [\App\Http\Controllers\OrangTua\DailyReportController::class, 'pdf'])
+            ->name('daily-reports.pdf');
+
+        // NOTE: detail page removed; report is generated per date on index.
     });

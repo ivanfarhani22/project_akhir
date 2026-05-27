@@ -12,10 +12,16 @@
             <i class="fas fa-door-open"></i> Kelas: <strong class="text-gray-700">{{ $class->name }}</strong>
         </span>
     </div>
-    <a href="{{ route('guru.attendance.create', ['class_id' => $class->id]) }}"
-       class="inline-flex items-center gap-2 bg-[#A41E35] hover:bg-[#7D1627] text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition whitespace-nowrap">
-        <i class="fas fa-plus text-xs"></i> Buat Sesi Presensi
-    </a>
+    <div class="flex flex-wrap items-center gap-2">
+        <a href="{{ route('guru.attendance.manual.create', ['class_id' => $class->id]) }}"
+           class="inline-flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-800 text-sm font-bold px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition whitespace-nowrap border border-gray-200">
+            <i class="fas fa-pen-to-square text-xs text-[#A41E35]"></i> Presensi Manual
+        </a>
+        <a href="{{ route('guru.attendance.create', ['class_id' => $class->id]) }}"
+           class="inline-flex items-center gap-2 bg-[#A41E35] hover:bg-[#7D1627] text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition whitespace-nowrap">
+            <i class="fas fa-plus text-xs"></i> Buat Sesi Presensi
+        </a>
+    </div>
 </div>
 
 @if(session('success'))

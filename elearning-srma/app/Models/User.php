@@ -77,4 +77,22 @@ class User extends Authenticatable
     {
         return $this->hasMany(ActivityLog::class);
     }
+
+    /**
+     * Orang tua → siswa yang dimonitor.
+     */
+    public function children()
+    {
+        return $this->belongsToMany(self::class, 'parent_student', 'parent_id', 'student_id')
+            ->withTimestamps();
+    }
+
+    /**
+     * Siswa → orang tua.
+     */
+    public function parents()
+    {
+        return $this->belongsToMany(self::class, 'parent_student', 'student_id', 'parent_id')
+            ->withTimestamps();
+    }
 }

@@ -60,7 +60,7 @@ class UsersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFai
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
-            'role' => ['required', 'in:admin_elearning,guru,siswa'],
+            'role' => ['required', 'in:admin_elearning,guru,siswa,orang_tua'],
             'password' => ['nullable', 'string', 'min:6'],
         ];
     }
@@ -72,7 +72,7 @@ class UsersImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFai
             'email.required' => 'Kolom email wajib diisi.',
             'email.email' => 'Format email tidak valid.',
             'role.required' => 'Kolom role wajib diisi.',
-            'role.in' => 'Role harus salah satu dari: admin_elearning, guru, siswa.',
+            'role.in' => 'Role harus salah satu dari: admin_elearning, guru, siswa, orang_tua.',
             'password.min' => 'Password minimal 6 karakter.',
         ];
     }

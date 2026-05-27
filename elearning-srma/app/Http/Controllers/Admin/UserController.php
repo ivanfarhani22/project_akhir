@@ -51,7 +51,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6',
-            'role' => 'required|in:admin_elearning,guru,siswa',
+            'role' => 'required|in:admin_elearning,guru,siswa,orang_tua',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
@@ -93,7 +93,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'role' => 'required|in:admin_elearning,guru,siswa',
+            'role' => 'required|in:admin_elearning,guru,siswa,orang_tua',
         ]);
 
         if ($request->filled('password')) {

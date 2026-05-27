@@ -38,6 +38,9 @@
                                     @case('siswa')
                                         <i class="fas fa-book"></i> Siswa
                                         @break
+                                    @case('orang_tua')
+                                        <i class="fas fa-people-roof"></i> Orang Tua
+                                        @break
                                 @endswitch
                             </span>
                         </div>
@@ -47,6 +50,21 @@
 
             <!-- User Details -->
             <div class="p-3 sm:p-6 divide-y divide-gray-200">
+                
+                @if($user->role === 'orang_tua')
+                    <div class="pb-4 sm:pb-6 first:pt-0">
+                        <p class="text-gray-500 text-xs sm:text-sm font-semibold uppercase tracking-wide mb-1">
+                            <i class="fas fa-children text-red-500"></i> Siswa Dimonitor
+                        </p>
+                        <p class="text-gray-900 text-sm sm:text-base font-semibold">
+                            {{ $user->children?->pluck('name')->join(', ') ?: '—' }}
+                        </p>
+                        <a href="{{ route('admin.parent-students.index') }}" class="inline-flex items-center gap-2 mt-2 text-red-600 hover:text-red-700 text-xs sm:text-sm font-semibold">
+                            <i class="fas fa-link"></i> Kelola relasi orang tua → siswa
+                        </a>
+                    </div>
+                @endif
+
                 <!-- Name -->
                 <div class="pb-4 sm:pb-6 first:pt-0">
                     <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
@@ -93,6 +111,11 @@
                                     @case('siswa')
                                         <span class="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs sm:text-sm font-semibold">
                                             <i class="fas fa-book"></i> Siswa
+                                        </span>
+                                        @break
+                                    @case('orang_tua')
+                                        <span class="inline-block px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs sm:text-sm font-semibold">
+                                            <i class="fas fa-people-roof"></i> Orang Tua
                                         </span>
                                         @break
                                 @endswitch

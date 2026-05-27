@@ -23,34 +23,25 @@ class QuizQuestionController extends Controller
         $quiz = Quiz::firstOrCreate(['assignment_id' => $assignment->id]);
 
         $validated = $request->validate([
-            'question' => 'required|string',
-            'type' => 'required|in:multiple_choice,true_false,short_answer',
-            'points' => 'required|integer|min:0',
-            'options_text' => 'nullable|string',
+            'question'       => 'required|string',
+            'type'           => 'required|in:multiple_choice,checkbox,short_answer',
+            'points'         => 'required|integer|min:0',
+            'options_text'   => 'nullable|string',
             'correct_answer' => 'nullable|string',
         ]);
 
-        $options = null;
-        if ($validated['type'] === 'multiple_choice') {
-            $raw = (string) ($validated['options_text'] ?? '');
-            $lines = collect(preg_split('/\r\n|\r|\n/', $raw))
-                ->map(fn ($s) => trim($s))
-                ->filter(fn ($s) => $s !== '')
-                ->values();
-
-            $options = $lines->all();
-        }
+        $options = $this->parseOptions($validated['type'], $validated['options_text'] ?? '');
 
         $maxOrder = (int) QuizQuestion::where('quiz_id', $quiz->id)->max('order');
 
         QuizQuestion::create([
-            'quiz_id' => $quiz->id,
-            'question' => $validated['question'],
-            'type' => $validated['type'],
-            'points' => (int) $validated['points'],
-            'options' => $options,
+            'quiz_id'        => $quiz->id,
+            'question'       => $validated['question'],
+            'type'           => $validated['type'],
+            'points'         => (int) $validated['points'],
+            'options'        => $options,
             'correct_answer' => $validated['correct_answer'] ?? null,
-            'order' => $maxOrder + 1,
+            'order'          => $maxOrder + 1,
         ]);
 
         return back()->with('success', 'Soal quiz berhasil ditambahkan.');
@@ -62,29 +53,20 @@ class QuizQuestionController extends Controller
         abort_if($question->quiz_id !== $quiz->id, 404);
 
         $validated = $request->validate([
-            'question' => 'required|string',
-            'type' => 'required|in:multiple_choice,true_false,short_answer',
-            'points' => 'required|integer|min:0',
-            'options_text' => 'nullable|string',
+            'question'       => 'required|string',
+            'type'           => 'required|in:multiple_choice,checkbox,short_answer',
+            'points'         => 'required|integer|min:0',
+            'options_text'   => 'nullable|string',
             'correct_answer' => 'nullable|string',
         ]);
 
-        $options = null;
-        if ($validated['type'] === 'multiple_choice') {
-            $raw = (string) ($validated['options_text'] ?? '');
-            $lines = collect(preg_split('/\r\n|\r|\n/', $raw))
-                ->map(fn ($s) => trim($s))
-                ->filter(fn ($s) => $s !== '')
-                ->values();
-
-            $options = $lines->all();
-        }
+        $options = $this->parseOptions($validated['type'], $validated['options_text'] ?? '');
 
         $question->update([
-            'question' => $validated['question'],
-            'type' => $validated['type'],
-            'points' => (int) $validated['points'],
-            'options' => $options,
+            'question'       => $validated['question'],
+            'type'           => $validated['type'],
+            'points'         => (int) $validated['points'],
+            'options'        => $options,
             'correct_answer' => $validated['correct_answer'] ?? null,
         ]);
 
@@ -99,5 +81,23 @@ class QuizQuestionController extends Controller
         $question->delete();
 
         return back()->with('success', 'Soal quiz berhasil dihapus.');
+    }
+
+    /**
+     * Parse options_text jadi array untuk tipe yang butuh opsi.
+     * Untuk short_answer → null.
+     */
+    private function parseOptions(string $type, string $raw): ?array
+    {
+        if (! in_array($type, ['multiple_choice', 'checkbox'])) {
+            return null;
+        }
+
+        $lines = collect(preg_split('/\r\n|\r|\n/', $raw))
+            ->map(fn ($s) => trim($s))
+            ->filter(fn ($s) => $s !== '')
+            ->values();
+
+        return $lines->isNotEmpty() ? $lines->all() : null;
     }
 }

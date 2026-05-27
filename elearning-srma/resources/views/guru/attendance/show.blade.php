@@ -59,6 +59,13 @@
             </button>
         </form>
     </div>
+@else
+    <div class="mb-6">
+        <a href="{{ route('guru.attendance.manual.edit', $session) }}"
+           class="w-full sm:w-auto inline-flex justify-center items-center gap-2 bg-[#A41E35] hover:bg-[#7D1627] text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition shadow-md hover:shadow-lg">
+            <i class="fas fa-pen-to-square text-xs"></i> Edit Presensi Manual
+        </a>
+    </div>
 @endif
 
 <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">

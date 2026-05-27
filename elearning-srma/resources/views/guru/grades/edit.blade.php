@@ -6,12 +6,19 @@
 
 <div class="mb-8">
     <p class="text-xs text-gray-400 uppercase tracking-widest mb-1"><i class="fas fa-star mr-1"></i> Guru / Penilaian / Beri Nilai</p>
-    <h1 class="text-2xl font-extrabold text-gray-900"><i class="fas fa-star text-yellow-400 mr-2"></i>Beri Nilai Tugas</h1>
-    <span class="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full mt-1">
-        <i class="fas fa-tasks"></i> {{ $assignment->title }}
-        <span class="mx-1 text-gray-300">•</span>
-        <i class="fas fa-user"></i> {{ $submission->student->name }}
-    </span>
+    <h1 class="text-2xl font-extrabold text-gray-900"><i class="fas fa-star text-yellow-400 mr-2"></i>Beri Nilai</h1>
+    <div class="flex flex-wrap items-center gap-2 mt-1">
+        <span class="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+            <i class="fas fa-chalkboard text-[10px]"></i>
+            {{ $assignment->eClass?->name }} — {{ $assignment->classSubject?->subject?->name }}
+        </span>
+        <span class="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+            <i class="fas fa-tasks text-[10px]"></i> {{ Str::limit($assignment->title, 35) }}
+        </span>
+        <span class="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+            <i class="fas fa-user text-[10px]"></i> {{ $submission->student->name }}
+        </span>
+    </div>
 </div>
 
 @if($errors->any())
@@ -21,11 +28,11 @@
     </div>
 @endif
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div class="h-1 bg-gradient-to-r from-[#A41E35] to-rose-400"></div>
-        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
-            <h3 class="font-bold text-gray-900"><i class="fas fa-file-check mr-2 text-gray-400"></i>Info Submission</h3>
+        <div class="px-5 py-4 border-b border-gray-100 bg-gray-50">
+            <h3 class="font-bold text-gray-900 text-sm"><i class="fas fa-file-check mr-2 text-gray-400"></i>Info Submission</h3>
         </div>
         <div class="p-5 space-y-4">
             <div>
@@ -48,7 +55,7 @@
                 @if($submission->submitted_at > $assignment->deadline)
                     <div class="flex items-start gap-2 bg-red-50 border border-red-200 px-3 py-2.5 rounded-xl">
                         <i class="fas fa-exclamation-triangle text-red-500 mt-0.5 text-xs flex-shrink-0"></i>
-                        <p class="text-xs text-red-700 font-semibold">Terlambat! {{ $submission->submitted_at->diffForHumans($assignment->deadline) }}</p>
+                        <p class="text-xs text-red-700 font-semibold">Terlambat {{ $submission->submitted_at->diffForHumans($assignment->deadline) }}</p>
                     </div>
                 @endif
             @endif
@@ -66,12 +73,12 @@
 
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div class="h-1 bg-gradient-to-r from-[#A41E35] to-rose-400"></div>
-        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
-            <h3 class="font-bold text-gray-900"><i class="fas fa-info-circle mr-2 text-gray-400"></i>Info Tugas</h3>
+        <div class="px-5 py-4 border-b border-gray-100 bg-gray-50">
+            <h3 class="font-bold text-gray-900 text-sm"><i class="fas fa-info-circle mr-2 text-gray-400"></i>Info Tugas</h3>
         </div>
-        <div class="p-5 space-y-4">
+        <div class="p-5 space-y-3">
             <div>
-                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Batas Waktu</p>
+                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Deadline</p>
                 <p class="text-sm font-bold text-gray-900">{{ $assignment->deadline->format('d M Y H:i') }}</p>
             </div>
             @if($assignment->description)
@@ -96,7 +103,7 @@
 
                 <div class="mb-5">
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nilai (0–100) <span class="text-red-500">*</span></label>
-                    <input type="number" name="score" min="0" max="100" step="1" placeholder="Masukkan nilai 0–100"
+                    <input type="number" name="score" min="0" max="100" step="1" placeholder="0–100"
                         class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition"
                         value="{{ old('score', $submission->grade->score ?? '') }}" required>
                     @error('score')<span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>@enderror
@@ -104,13 +111,13 @@
 
                 <div class="mb-6">
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Komentar / Feedback</label>
-                    <textarea name="feedback" rows="4" placeholder="Berikan feedback atau komentar untuk siswa..."
+                    <textarea name="feedback" rows="4" placeholder="Berikan feedback untuk siswa..."
                         class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100 transition resize-none">{{ old('feedback', $submission->grade->feedback ?? '') }}</textarea>
                     @error('feedback')<span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>@enderror
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <a href="{{ route('guru.grades.index', ['class_id' => request('class_id')]) }}"
+                    <a href="{{ url()->previous() ?? route('guru.grades.index') }}"
                        class="flex-1 inline-flex justify-center items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-6 rounded-xl text-sm transition">
                         <i class="fas fa-arrow-left text-xs"></i> Kembali
                     </a>

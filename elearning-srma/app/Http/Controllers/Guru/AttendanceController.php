@@ -229,4 +229,136 @@ class AttendanceController extends Controller
     {
         abort(403, 'Only admin can delete attendance');
     }
+
+    /**
+     * Manual attendance input (like admin), but restricted to teacher's own class_subject.
+     */
+    public function createManual()
+    {
+        $classSubjects = ClassSubject::where('teacher_id', auth()->id())
+            ->with('eClass.students', 'subject')
+            ->orderBy('e_class_id')
+            ->get();
+
+        if ($classSubjects->isEmpty()) {
+            return back()->withErrors('Anda tidak mengajar mata pelajaran apapun');
+        }
+
+        return view('guru.attendance.manual-create', compact('classSubjects'));
+    }
+
+    /**
+     * Store manual attendance session + records (like admin).
+     */
+    public function storeManual(Request $request)
+    {
+        $validated = $request->validate([
+            'class_subject_id' => 'required|exists:class_subjects,id',
+            'attendance_date'  => 'required|date',
+            'attendance'       => 'required|array',
+            'attendance.*'     => 'required|in:present,absent,late,sick,excused',
+            'notes'            => 'nullable|string',
+        ]);
+
+        $classSubject = ClassSubject::with('eClass.students', 'subject', 'eClass')
+            ->findOrFail($validated['class_subject_id']);
+
+        abort_if((int) $classSubject->teacher_id !== (int) auth()->id(), 403, 'Unauthorized');
+
+        $existing = AttendanceSession::where('class_subject_id', $classSubject->id)
+            ->whereDate('attendance_date', $validated['attendance_date'])
+            ->first();
+
+        if ($existing) {
+            return redirect()
+                ->route('guru.attendance.manual.edit', $existing)
+                ->with('error', 'Session presensi untuk mapel & tanggal ini sudah ada. Silakan edit.');
+        }
+
+        $session = AttendanceSession::create([
+            'class_subject_id' => $classSubject->id,
+            'attendance_date'  => $validated['attendance_date'],
+            'notes'            => $validated['notes'] ?? null,
+            'opened_by'        => auth()->id(),
+            // For manual input, mark as closed immediately.
+            'status'           => 'closed',
+            'opened_at'        => now()->format('H:i:s'),
+            'closed_at'        => now()->format('H:i:s'),
+        ]);
+
+        foreach ($validated['attendance'] as $studentId => $status) {
+            // Ensure the student is in the class.
+            abort_if(! $classSubject->eClass->students->contains('id', (int) $studentId), 422, 'Siswa tidak valid untuk kelas ini');
+
+            AttendanceRecord::create([
+                'attendance_session_id' => $session->id,
+                'student_id'            => $studentId,
+                'status'                => $status,
+                'checked_in_at'         => now(),
+            ]);
+        }
+
+        return redirect()
+            ->route('guru.attendance.show', $session)
+            ->with('success', 'Presensi manual berhasil dicatat.');
+    }
+
+    /**
+     * Edit manual attendance (update records of existing session).
+     */
+    public function editManual(AttendanceSession $attendance)
+    {
+        $attendance->load(['classSubject.eClass.students', 'classSubject.subject', 'records.student']);
+
+        abort_if(! $attendance->classSubject, 404);
+        abort_if((int) $attendance->classSubject->teacher_id !== (int) auth()->id(), 403, 'Unauthorized');
+
+        return view('guru.attendance.manual-edit', ['session' => $attendance]);
+    }
+
+    /**
+     * Update manual attendance records.
+     */
+    public function updateManual(Request $request, AttendanceSession $attendance)
+    {
+        $validated = $request->validate([
+            'attendance'       => 'required|array',
+            'attendance.*'     => 'required|in:present,absent,late,sick,excused',
+            'notes'            => 'nullable|string',
+        ]);
+
+        $attendance->load(['classSubject.eClass.students']);
+
+        abort_if(! $attendance->classSubject, 404);
+        abort_if((int) $attendance->classSubject->teacher_id !== (int) auth()->id(), 403, 'Unauthorized');
+
+        if ($request->has('notes')) {
+            $attendance->update(['notes' => $validated['notes'] ?? null]);
+        }
+
+        foreach ($validated['attendance'] as $studentId => $status) {
+            abort_if(! $attendance->classSubject->eClass->students->contains('id', (int) $studentId), 422, 'Siswa tidak valid untuk kelas ini');
+
+            AttendanceRecord::updateOrCreate(
+                [
+                    'attendance_session_id' => $attendance->id,
+                    'student_id'            => $studentId,
+                ],
+                [
+                    'status'        => $status,
+                    'checked_in_at' => now(),
+                ]
+            );
+        }
+
+        // Force closed for manual edit flow.
+        $attendance->update([
+            'status'    => 'closed',
+            'closed_at' => $attendance->closed_at ?: now()->format('H:i:s'),
+        ]);
+
+        return redirect()
+            ->route('guru.attendance.show', $attendance)
+            ->with('success', 'Presensi manual berhasil diperbarui.');
+    }
 }

@@ -94,6 +94,7 @@
                             <option value="admin_elearning" @selected($user->role === 'admin_elearning')>Admin E-Learning</option>
                             <option value="guru" @selected($user->role === 'guru')>Guru</option>
                             <option value="siswa" @selected($user->role === 'siswa')>Siswa</option>
+                            <option value="orang_tua" @selected($user->role === 'orang_tua')>Orang Tua</option>
                         </select>
                         @error('role')
                             <span class="text-red-500 text-xs mt-2 block">❌ {{ $message }}</span>

@@ -68,6 +68,7 @@ function shouldBypassCache(url) {
     url.pathname.startsWith('/admin/') ||
     url.pathname.startsWith('/guru/') ||
     url.pathname.startsWith('/siswa/') ||
+    url.pathname.startsWith('/orang-tua/') ||
     url.pathname.startsWith('/api/')
   );
 }
