@@ -41,7 +41,11 @@ class BulkScheduleController extends Controller
         $validated = $request->validate([
             'mode' => ['nullable', 'in:replace_day,merge'],
             'items' => ['required', 'array', 'min:1'],
-            'items.*.class_subject_id' => ['required', 'integer', 'exists:class_subjects,id'],
+
+            'items.*.entry_type' => ['required', 'in:mapel,custom'],
+            'items.*.class_subject_id' => ['nullable', 'required_if:items.*.entry_type,mapel', 'integer', 'exists:class_subjects,id'],
+            'items.*.custom_title' => ['nullable', 'required_if:items.*.entry_type,custom', 'string', 'max:255'],
+
             'items.*.day_of_week' => ['required', 'string', 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday'],
             'items.*.start_time' => ['required', 'date_format:H:i'],
             'items.*.end_time' => ['required', 'date_format:H:i'],
@@ -52,17 +56,25 @@ class BulkScheduleController extends Controller
         $mode = $validated['mode'] ?? 'replace_day';
         $items = collect($validated['items']);
 
-        // Ensure all class_subject_id belong to this class
-        $classSubjectIds = $items->pluck('class_subject_id')->unique()->values();
-        $validCount = ClassSubject::query()
-            ->where('e_class_id', $class->id)
-            ->whereIn('id', $classSubjectIds)
-            ->count();
+        // Ensure all mapel class_subject_id belong to this class
+        $classSubjectIds = $items
+            ->where('entry_type', 'mapel')
+            ->pluck('class_subject_id')
+            ->filter()
+            ->unique()
+            ->values();
 
-        if ($validCount !== $classSubjectIds->count()) {
-            return back()->withErrors([
-                'items' => 'Ada mata pelajaran yang tidak valid untuk kelas ini.'
-            ])->withInput();
+        if ($classSubjectIds->isNotEmpty()) {
+            $validCount = ClassSubject::query()
+                ->where('e_class_id', $class->id)
+                ->whereIn('id', $classSubjectIds)
+                ->count();
+
+            if ($validCount !== $classSubjectIds->count()) {
+                return back()->withErrors([
+                    'items' => 'Ada mata pelajaran yang tidak valid untuk kelas ini.'
+                ])->withInput();
+            }
         }
 
         // Basic time validation
@@ -99,9 +111,19 @@ class BulkScheduleController extends Controller
             }
 
             foreach ($items as $it) {
-                // Unique index: (e_class_id, day_of_week, start_time, end_time)
-                // - merge: update jika slot sudah ada
-                // - replace_day: biasanya sudah terhapus, tapi tetap aman
+                $payload = [
+                    'class_subject_id' => null,
+                    'custom_title' => null,
+                    'room' => $it['room'] ?? null,
+                    'notes' => $it['notes'] ?? null,
+                ];
+
+                if (($it['entry_type'] ?? 'mapel') === 'mapel') {
+                    $payload['class_subject_id'] = (int) $it['class_subject_id'];
+                } else {
+                    $payload['custom_title'] = $it['custom_title'];
+                }
+
                 Schedule::updateOrCreate(
                     [
                         'e_class_id' => $class->id,
@@ -109,11 +131,7 @@ class BulkScheduleController extends Controller
                         'start_time' => $it['start_time'],
                         'end_time' => $it['end_time'],
                     ],
-                    [
-                        'class_subject_id' => $it['class_subject_id'],
-                        'room' => $it['room'] ?? null,
-                        'notes' => $it['notes'] ?? null,
-                    ]
+                    $payload
                 );
             }
         });

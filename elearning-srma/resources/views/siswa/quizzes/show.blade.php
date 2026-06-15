@@ -65,6 +65,16 @@
                                         </label>
                                     @endforeach
                                 </div>
+                            @elseif($q->type === 'checkbox')
+                                @php $opts = $q->options ?? []; @endphp
+                                <div class="space-y-2">
+                                    @foreach($opts as $opt)
+                                        <label class="flex items-start gap-2 text-[13px] text-slate-700 cursor-pointer">
+                                            <input type="checkbox" name="answers[{{ $q->id }}][]" value="{{ $opt }}" class="mt-0.5 text-[#C41E3A]">
+                                            <span class="leading-relaxed">{{ $opt }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
                             @elseif($q->type === 'true_false')
                                 <div class="flex gap-6 text-[13px] text-slate-700">
                                     <label class="flex items-center gap-2 cursor-pointer">

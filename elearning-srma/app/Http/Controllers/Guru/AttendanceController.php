@@ -90,11 +90,17 @@ class AttendanceController extends Controller
         // Create attendance records for all students in class
         $students = $classSubject->eClass->students;
         foreach ($students as $student) {
-            AttendanceRecord::create([
-                'attendance_session_id' => $session->id,
-                'student_id' => $student->id,
-                'status' => 'absent',
-            ]);
+            // Use updateOrCreate to avoid duplicate entry if records already exist
+            AttendanceRecord::updateOrCreate(
+                [
+                    'attendance_session_id' => $session->id,
+                    'student_id' => $student->id,
+                ],
+                [
+                    'status' => 'absent',
+                    'checked_in_at' => null,
+                ]
+            );
         }
 
         return redirect()

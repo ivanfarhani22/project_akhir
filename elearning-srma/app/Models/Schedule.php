@@ -9,6 +9,7 @@ class Schedule extends Model
     protected $fillable = [
         'e_class_id',
         'class_subject_id',
+        'custom_title',
         'day_of_week',
         'start_time',
         'end_time',
@@ -47,6 +48,20 @@ class Schedule extends Model
             'id',
             'class_subject_id',
             'teacher_id'
+        );
+    }
+
+    /**
+     * Judul yang ditampilkan di jadwal.
+     * - Jika schedule terhubung mapel: pakai nama Subject
+     * - Jika custom (non mapel): pakai custom_title
+     */
+    public function getDisplayTitleAttribute(): string
+    {
+        return (string) (
+            $this->classSubject?->subject?->name
+            ?? $this->custom_title
+            ?? '-'
         );
     }
 

@@ -111,6 +111,7 @@
                     <option value="admin_elearning" {{ request('role') === 'admin_elearning' ? 'selected' : '' }}>Admin</option>
                     <option value="guru" {{ request('role') === 'guru' ? 'selected' : '' }}>Guru</option>
                     <option value="siswa" {{ request('role') === 'siswa' ? 'selected' : '' }}>Siswa</option>
+                    <option value="orang_tua" {{ request('role') === 'orang_tua' ? 'selected' : '' }}>Orang Tua</option>
                 </select>
             </div>
 
@@ -180,6 +181,10 @@
                                     @elseif ($user->role === 'guru')
                                         <span class="inline-flex items-center gap-1 sm:gap-2 bg-green-100 text-green-800 px-2 sm:px-3 py-1 rounded-full text-xs font-semibold group-hover:bg-green-200 transition">
                                             <i class="fas fa-chalkboard-user hidden sm:inline"></i> Guru
+                                        </span>
+                                    @elseif ($user->role === 'orang_tua')
+                                        <span class="inline-flex items-center gap-1 sm:gap-2 bg-purple-100 text-purple-800 px-2 sm:px-3 py-1 rounded-full text-xs font-semibold group-hover:bg-purple-200 transition">
+                                            <i class="fas fa-user-shield hidden sm:inline"></i> Orang Tua
                                         </span>
                                     @else
                                         <span class="inline-flex items-center gap-1 sm:gap-2 bg-blue-100 text-blue-800 px-2 sm:px-3 py-1 rounded-full text-xs font-semibold group-hover:bg-blue-200 transition">

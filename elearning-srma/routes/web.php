@@ -239,6 +239,12 @@ Route::middleware(['auth', 'role:guru'])
         // ── Attendance ─────────────────────────────
         Route::resource('attendance', \App\Http\Controllers\Guru\AttendanceController::class);
 
+        // Extra actions for attendance sessions
+        Route::post('attendance/{attendance}/close', [\App\Http\Controllers\Guru\AttendanceController::class, 'close'])
+            ->name('attendance.close');
+        Route::post('attendance/{attendance}/cancel', [\App\Http\Controllers\Guru\AttendanceController::class, 'cancel'])
+            ->name('attendance.cancel');
+
         // Manual attendance input (like admin, restricted to guru's own class_subject)
         Route::get('attendance-manual/create', [\App\Http\Controllers\Guru\AttendanceController::class, 'createManual'])->name('attendance.manual.create');
         Route::post('attendance-manual', [\App\Http\Controllers\Guru\AttendanceController::class, 'storeManual'])->name('attendance.manual.store');

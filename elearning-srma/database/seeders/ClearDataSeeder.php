@@ -9,22 +9,42 @@ class ClearDataSeeder extends Seeder
 {
     public function run(): void
     {
-        // Disable foreign key checks
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        // Disable foreign key checks (MySQL only)
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        }
 
         // Clear all tables except users and migrations
-        DB::table('activity_logs')->truncate();
-        DB::table('submissions')->truncate();
-        DB::table('grades')->truncate();
-        DB::table('assignments')->truncate();
-        DB::table('materials')->truncate();
-        DB::table('class_student')->truncate();
-        DB::table('e_classes')->truncate();
-        DB::table('subjects')->truncate();
+        $tables = [
+            'attendance_sessions',
+            'attendances',
+            'schedules',
+            'schedule_activities',
+            'class_subjects',
+            'materials',
+            'assignments',
+            'submissions',
+            'grades',
+            'activity_logs',
+            'class_student',
+            'e_classes',
+            'subjects',
+            'settings',
+        ];
+
+        foreach ($tables as $table) {
+            try {
+                DB::table($table)->truncate();
+            } catch (\Throwable $e) {
+                // ignore if table doesn't exist in current schema
+            }
+        }
 
         // Re-enable foreign key checks
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        }
 
-        $this->command->info('✅ Data berhasil dikosongkan! (Users tetap tersimpan)');
+        $this->command->info('✅ Data e-learning berhasil dikosongkan! (Users tetap tersimpan)');
     }
 }

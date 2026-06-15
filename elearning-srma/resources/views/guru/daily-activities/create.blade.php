@@ -83,6 +83,17 @@
         @forelse($schedules as $sch)
             @php
                 $session = $attendanceSessions->get($sch->class_subject_id);
+                // Fallback: jika tidak ditemukan session berdasarkan class_subject_id,
+                // coba cari session berdasarkan e_class_id yang sama (grouped by class)
+                if (! $session) {
+                    $eClassId = $sch->classSubject?->e_class_id ?? $classId;
+                    if (! empty($eClassId) && isset($attendanceSessionsByClass) && $attendanceSessionsByClass->has($eClassId)) {
+                        $group = $attendanceSessionsByClass->get($eClassId);
+                        // Ambil session pertama untuk kelas itu sebagai fallback
+                        $session = $group->first() ?? null;
+                    }
+                }
+
                 $recordByStudent = $session ? $session->records->keyBy('student_id') : collect();
                 $subjectName = optional($sch->classSubject->subject)->name ?? 'Kegiatan';
                 $timeRange = substr((string)$sch->start_time, 0, 5) . ' – ' . substr((string)$sch->end_time, 0, 5);
@@ -101,11 +112,13 @@
                             <i class="fas fa-calendar mr-1"></i>{{ \Carbon\Carbon::parse($date)->format('d M Y') }}
                         </p>
                     </div>
-                    <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border self-start sm:self-auto
-                        {{ $session ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-500 border-gray-200' }}">
-                        <span class="w-1.5 h-1.5 rounded-full {{ $session ? 'bg-emerald-500' : 'bg-gray-400' }}"></span>
-                        {{ $session ? 'Ada Sesi Presensi' : 'Belum Ada Sesi' }}
-                    </span>
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border self-start sm:self-auto
+                            {{ $session ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-500 border-gray-200' }}">
+                            <span class="w-1.5 h-1.5 rounded-full {{ $session ? 'bg-emerald-500' : 'bg-gray-400' }}"></span>
+                            {{ $session ? 'Ada Sesi Presensi' : 'Belum Ada Sesi' }}
+                        </span>
+                    </div>
                 </div>
 
                 {{-- TABEL DESKTOP --}}
@@ -143,6 +156,7 @@
                                     <td class="px-5 py-3">
                                         <input type="hidden" name="entries[{{ $rowIndex }}][schedule_id]" value="{{ $sch->id }}">
                                         <input type="hidden" name="entries[{{ $rowIndex }}][student_id]" value="{{ $stu->id }}">
+                                        {{-- no attendance_session_id persisted in original flow --}}
                                         <input type="number" min="0" max="100"
                                             name="entries[{{ $rowIndex }}][score]"
                                             value="{{ old('entries.'.$rowIndex.'.score', $a?->score) }}"
@@ -187,6 +201,7 @@
                             </div>
                             <input type="hidden" name="entries[{{ $rowIndex }}][schedule_id]" value="{{ $sch->id }}">
                             <input type="hidden" name="entries[{{ $rowIndex }}][student_id]" value="{{ $stu->id }}">
+                            {{-- no attendance_session_id persisted in original flow --}}
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Nilai (0–100)</label>

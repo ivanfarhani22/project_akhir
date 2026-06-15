@@ -254,9 +254,12 @@ class AssignmentController extends Controller
             'feedback' => 'nullable|string',
         ]);
 
+        // Ensure student_id and assignment_id are stored on the grade record (DB requires them)
         $grade = Grade::updateOrCreate(
             ['submission_id' => $submission->id],
             [
+                'student_id' => $submission->student_id,
+                'assignment_id' => $submission->assignment_id,
                 'score' => $validated['score'],
                 'feedback' => $validated['feedback'],
                 'graded_by' => auth()->id(),

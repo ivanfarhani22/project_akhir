@@ -208,44 +208,27 @@
                     <p class="text-gray-500 text-xs sm:text-sm">Jadwal akan ditampilkan ketika ada data</p>
                 </div>
             @else
-                <div class="overflow-x-auto">
-                    <table class="w-full text-xs sm:text-sm">
-                        <thead>
-                            <tr class="bg-gray-50 border-b-2 border-gray-200">
-                                <th class="px-3 sm:px-6 py-3 sm:py-4 text-left font-semibold text-gray-900">Hari</th>
-                                <th class="px-3 sm:px-6 py-3 sm:py-4 text-left font-semibold text-gray-900 hidden sm:table-cell">Waktu</th>
-                                <th class="px-3 sm:px-6 py-3 sm:py-4 text-left font-semibold text-gray-900">Pelajaran</th>
-                                <th class="px-3 sm:px-6 py-3 sm:py-4 text-left font-semibold text-gray-900 hidden md:table-cell">Guru</th>
-                                <th class="px-3 sm:px-6 py-3 sm:py-4 text-left font-semibold text-gray-900 hidden lg:table-cell">Ruangan</th>
-                                <th class="px-3 sm:px-6 py-3 sm:py-4 text-center font-semibold text-gray-900">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($class->schedules as $schedule)
-                                <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
-                                    <td class="px-3 sm:px-6 py-3 sm:py-4 font-semibold text-gray-900">{{ $dayTranslate[$schedule->day_of_week] ?? $schedule->day_of_week }}</td>
-                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-gray-700 hidden sm:table-cell"><strong>{{ $schedule->start_time }} – {{ $schedule->end_time }}</strong></td>
-                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-gray-700 truncate">{{ $schedule->classSubject->subject->name }}</td>
-                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-gray-700 hidden md:table-cell truncate">{{ $schedule->classSubject->teacher->name }}</td>
-                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-gray-700 hidden lg:table-cell">{{ $schedule->room ?? '—' }}</td>
-                                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-center">
-                                        <div class="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-center">
-                                            <a href="{{ route('admin.schedules.edit', [$class, $schedule]) }}" class="inline-flex items-center justify-center gap-1 bg-blue-500 text-white px-2 sm:px-3 py-1 rounded text-xs font-semibold hover:bg-blue-600 transition whitespace-nowrap">
-                                                <i class="fas fa-edit"></i> <span class="hidden sm:inline">Edit</span><span class="sm:hidden">Ed</span>
-                                            </a>
-                                            <form method="POST" action="{{ route('admin.schedules.destroy', [$class, $schedule]) }}" class="inline delete-form">
-                                                @csrf @method('DELETE')
-                                                <button type="button" onclick="confirmDelete(event, '{{ $schedule->day }}')" class="inline-flex items-center justify-center gap-1 bg-red-600 text-white px-2 sm:px-3 py-1 rounded text-xs font-semibold hover:bg-red-700 transition whitespace-nowrap w-full sm:w-auto">
-                                                    <i class="fas fa-trash"></i> <span class="hidden sm:inline">Hapus</span><span class="sm:hidden">Del</span>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                @foreach($class->schedules->sortBy(fn($s) => [$s->day_of_week, $s->start_time]) as $schedule)
+                    <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                        <div>
+                            <div class="font-semibold text-gray-900">
+                                {{ $schedule->display_title }}
+                                @if(empty($schedule->class_subject_id))
+                                    <span class="ml-2 inline-flex items-center text-[10px] font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded">Custom</span>
+                                @endif
+                            </div>
+                            <div class="text-xs text-gray-500">
+                                {{ ucfirst($schedule->day_of_week) }} • {{ substr((string) $schedule->start_time, 0, 5) }} - {{ substr((string) $schedule->end_time, 0, 5) }}
+                                @if($schedule->room)
+                                    • Ruang: {{ $schedule->room }}
+                                @endif
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            {{ $schedule->classSubject?->teacher?->name ?? '—' }}
+                        </div>
+                    </div>
+                @endforeach
             @endif
         </div>
     </div>
@@ -325,6 +308,10 @@
         <!-- Modal Body -->
         <form method="POST" action="{{ route('admin.classes.students.store', $class) }}" id="addStudentForm" class="flex-1 overflow-y-auto p-3 sm:p-6">
             @csrf
+
+            {{-- Keep selections across pagination: selected IDs are stored here as hidden inputs --}}
+            <div id="selectedHidden"></div>
+
             @if ($availableStudents->isEmpty())
                 <div class="text-center py-8 sm:py-12">
                     <i class="fas fa-check-circle text-3xl sm:text-4xl text-green-500 mb-3 inline-block"></i>
@@ -387,12 +374,22 @@
 const StudentModal = (() => {
     const STUDENTS = @json($availableStudents->map(fn($s) => ['id'=>$s->id,'name'=>$s->name,'email'=>$s->email])->values()->toArray());
     const PER_PAGE = 8;
-    
+
     let filteredStudents = [...STUDENTS];
     let currentPage = 1;
     let selectedIds = new Set();
 
     const getElement = (id) => document.getElementById(id);
+
+    function syncHiddenInputs() {
+        const box = getElement('selectedHidden');
+        if (!box) return;
+
+        // rebuild (simple + consistent)
+        box.innerHTML = Array.from(selectedIds).map(id =>
+            `<input type="hidden" name="student_ids[]" value="${id}">`
+        ).join('');
+    }
 
     function renderStudents() {
         const listEl = getElement('studentList');
@@ -412,7 +409,7 @@ const StudentModal = (() => {
 
         const noResults = getElement('noResults');
         if (noResults) noResults.classList.add('hidden');
-        
+
         const pagination = getElement('pagination');
         if (pagination) pagination.classList.toggle('hidden', filteredStudents.length <= PER_PAGE);
 
@@ -422,7 +419,7 @@ const StudentModal = (() => {
 
         listEl.innerHTML = pageStudents.map(student => `
             <label class="flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-100 ${selectedIds.has(student.id) ? 'bg-blue-100' : ''}">
-                <input type="checkbox" name="student_ids[]" value="${student.id}"
+                <input type="checkbox" value="${student.id}"
                        ${selectedIds.has(student.id) ? 'checked' : ''}
                        onchange="StudentModal.toggleStudent(${student.id}, this.checked)"
                        class="w-4 h-4 accent-red-600">
@@ -457,6 +454,11 @@ const StudentModal = (() => {
             modal.classList.add('flex');
             document.body.style.overflow = 'hidden';
         }
+
+        // reset state each time modal opened (prevents stale selections)
+        selectedIds = new Set();
+        syncHiddenInputs();
+
         const search = getElement('studentSearch');
         if (search) search.value = '';
         filteredStudents = [...STUDENTS];
@@ -480,6 +482,8 @@ const StudentModal = (() => {
         } else {
             selectedIds.delete(id);
         }
+
+        syncHiddenInputs();
         renderStudents();
         updateSelectedCount();
     }

@@ -17,12 +17,8 @@ class ScheduleController extends Controller
     {
         // Hanya ambil class subjects yang ada
         $classSubjects = $class->classSubjects()->with('subject', 'teacher')->get();
-        
-        if ($classSubjects->isEmpty()) {
-            return redirect()->route('admin.classes.show', $class)
-                            ->with('error', 'Tambahkan mata pelajaran terlebih dahulu sebelum membuat jadwal.');
-        }
 
+        // NOTE: sekarang schedule juga bisa custom (non mapel), jadi jangan block jika kosong.
         return view('admin.schedules.create', compact('class', 'classSubjects'));
     }
 
@@ -32,7 +28,14 @@ class ScheduleController extends Controller
     public function store(Request $request, EClass $class)
     {
         $validated = $request->validate([
-            'class_subject_id' => 'required|exists:class_subjects,id',
+            'entry_type' => 'required|in:mapel,custom',
+
+            // mapel
+            'class_subject_id' => 'nullable|required_if:entry_type,mapel|exists:class_subjects,id',
+
+            // custom
+            'custom_title' => 'nullable|required_if:entry_type,custom|string|max:255',
+
             'day_of_week' => 'required|string|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
@@ -40,10 +43,17 @@ class ScheduleController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        // Verifikasi class_subject belongs to class
-        $classSubject = ClassSubject::where('id', $validated['class_subject_id'])
-                                   ->where('e_class_id', $class->id)
-                                   ->firstOrFail();
+        if (($validated['entry_type'] ?? 'mapel') === 'mapel') {
+            // Verifikasi class_subject belongs to class
+            ClassSubject::where('id', $validated['class_subject_id'])
+                ->where('e_class_id', $class->id)
+                ->firstOrFail();
+
+            $validated['custom_title'] = null;
+        } else {
+            // Custom activity: detach from class_subject
+            $validated['class_subject_id'] = null;
+        }
 
         $validated['e_class_id'] = $class->id;
 
@@ -58,7 +68,7 @@ class ScheduleController extends Controller
         ]);
 
         return redirect()->route('admin.classes.show', $class)
-                        ->with('success', 'Jadwal berhasil ditambahkan!');
+            ->with('success', 'Jadwal berhasil ditambahkan!');
     }
 
     /**
@@ -85,7 +95,11 @@ class ScheduleController extends Controller
         }
 
         $validated = $request->validate([
-            'class_subject_id' => 'required|exists:class_subjects,id',
+            'entry_type' => 'required|in:mapel,custom',
+
+            'class_subject_id' => 'nullable|required_if:entry_type,mapel|exists:class_subjects,id',
+            'custom_title' => 'nullable|required_if:entry_type,custom|string|max:255',
+
             'day_of_week' => 'required|string|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
@@ -93,10 +107,15 @@ class ScheduleController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        // Verifikasi class_subject belongs to class
-        $classSubject = ClassSubject::where('id', $validated['class_subject_id'])
-                                   ->where('e_class_id', $class->id)
-                                   ->firstOrFail();
+        if (($validated['entry_type'] ?? 'mapel') === 'mapel') {
+            ClassSubject::where('id', $validated['class_subject_id'])
+                ->where('e_class_id', $class->id)
+                ->firstOrFail();
+
+            $validated['custom_title'] = null;
+        } else {
+            $validated['class_subject_id'] = null;
+        }
 
         $schedule->update($validated);
 
@@ -109,7 +128,7 @@ class ScheduleController extends Controller
         ]);
 
         return redirect()->route('admin.classes.show', $class)
-                        ->with('success', 'Jadwal berhasil diperbarui!');
+            ->with('success', 'Jadwal berhasil diperbarui!');
     }
 
     /**
@@ -132,6 +151,6 @@ class ScheduleController extends Controller
         ]);
 
         return redirect()->route('admin.classes.show', $class)
-                        ->with('success', 'Jadwal berhasil dihapus!');
+            ->with('success', 'Jadwal berhasil dihapus!');
     }
 }

@@ -62,17 +62,54 @@ class DailyActivityController extends Controller
         // Jika tidak ada jadwal, JANGAN redirect ke URL yang sama (bisa menimbulkan redirect loop).
         // Kembalikan view create dan tampilkan pesan ramah.
         if ($schedules->isEmpty()) {
-            $request->session()->flash('error', 'Tidak ada jadwal untuk kelas & tanggal yang dipilih (atau Anda tidak mengajar jadwal tersebut).');
+            // Still attempt to load class students and any attendance sessions for the
+            // selected class/date so teachers can view sessions opened outside a
+            // scheduled slot (fallback behavior). Only show the "no schedule" error
+            // if there truly are no attendance sessions for that class/date.
+            $classModel = EClass::with(['students' => fn($q) => $q->orderBy('name')])->find($classId);
+            $students = $classModel ? $classModel->students->values() : collect();
 
+            $attendanceSessions = AttendanceSession::query()
+                ->whereDate('attendance_date', $date)
+                ->whereHas('classSubject', fn($q) => $q->where('e_class_id', $classId))
+                ->with(['records', 'classSubject'])
+                ->get()
+                ->keyBy('class_subject_id');
+
+            $attendanceSessionsByClass = $attendanceSessions->filter(fn($s) => $s->classSubject)
+                ->groupBy(fn($s) => $s->classSubject->e_class_id)
+                ->map(fn($group) => $group->sortByDesc(fn($s) => $s->created_at));
+
+            // If there are no sessions either, show the friendly error as before.
+            if ($attendanceSessions->isEmpty()) {
+                $request->session()->flash('error', 'Tidak ada jadwal untuk kelas & tanggal yang dipilih (atau Anda tidak mengajar jadwal tersebut).');
+
+                return view('guru.daily-activities.create', [
+                    'classes' => $classes,
+                    'classId' => $classId,
+                    'date' => $date,
+                    'dayOfWeek' => $dayOfWeek,
+                    'schedules' => collect(),
+                    'students' => $students,
+                    'existing' => collect(),
+                    'attendanceSessions' => $attendanceSessions,
+                    'attendanceSessionsByClass' => $attendanceSessionsByClass,
+                ]);
+            }
+
+            // There are attendance sessions for this class/date even though no
+            // schedules exist for that day — render view without flashing error so
+            // teacher can inspect and use the session data.
             return view('guru.daily-activities.create', [
                 'classes' => $classes,
                 'classId' => $classId,
                 'date' => $date,
                 'dayOfWeek' => $dayOfWeek,
                 'schedules' => collect(),
-                'students' => collect(),
+                'students' => $students,
                 'existing' => collect(),
-                'attendanceSessions' => collect(),
+                'attendanceSessions' => $attendanceSessions,
+                'attendanceSessionsByClass' => $attendanceSessionsByClass,
             ]);
         }
 
@@ -87,13 +124,23 @@ class DailyActivityController extends Controller
             ->get()
             ->keyBy(fn ($a) => $a->schedule_id . ':' . $a->student_id);
 
-        // attendance per schedule (attendance_session keyed by class_subject_id)
+        // Attendance sessions for the selected class on the date. We intentionally query by
+        // classSubject.e_class_id so sessions opened for any class_subject of this class
+        // are included — this covers cases where a teacher opened presensi outside the
+        // scheduled class_subject. Key by class_subject_id for direct lookup
+        // and also prepare a grouping by e_class_id for fallback display.
         $attendanceSessions = AttendanceSession::query()
             ->whereDate('attendance_date', $date)
-            ->whereIn('class_subject_id', $schedules->pluck('class_subject_id'))
-            ->with(['records'])
+            ->whereHas('classSubject', fn($q) => $q->where('e_class_id', $classId))
+            ->with(['records', 'classSubject'])
             ->get()
             ->keyBy('class_subject_id');
+
+        // Group sessions by e_class_id and sort each group by creation time desc so
+        // fallback picks the most recently opened session for the class.
+        $attendanceSessionsByClass = $attendanceSessions->filter(fn($s) => $s->classSubject)
+            ->groupBy(fn($s) => $s->classSubject->e_class_id)
+            ->map(fn($group) => $group->sortByDesc(fn($s) => $s->created_at));
 
         return view('guru.daily-activities.create', compact(
             'classes',
@@ -103,7 +150,8 @@ class DailyActivityController extends Controller
             'schedules',
             'students',
             'existing',
-            'attendanceSessions'
+            'attendanceSessions',
+            'attendanceSessionsByClass'
         ));
     }
 
@@ -117,6 +165,7 @@ class DailyActivityController extends Controller
             'entries' => 'required|array',
             'entries.*.schedule_id' => 'required|exists:schedules,id',
             'entries.*.student_id' => 'required|exists:users,id',
+            'entries.*.attendance_session_id' => 'nullable|exists:attendance_sessions,id',
             'entries.*.score' => 'nullable|integer|min:0|max:100',
             'entries.*.notes' => 'nullable|string',
         ]);
@@ -146,6 +195,7 @@ class DailyActivityController extends Controller
                         'activity_date' => $date,
                     ],
                     [
+                        'attendance_session_id' => isset($e['attendance_session_id']) && $e['attendance_session_id'] !== '' ? (int) $e['attendance_session_id'] : null,
                         'score' => $e['score'] ?? null,
                         'notes' => $e['notes'] ?? null,
                         'created_by' => $teacherId,

@@ -36,20 +36,48 @@
         <form action="{{ route('admin.schedules.store', $class) }}" method="POST" class="p-6 space-y-6">
             @csrf
 
-            <!-- Mata Pelajaran -->
+            <!-- Jenis Jadwal -->
             <div>
+                <label for="entry_type" class="block text-sm font-semibold text-gray-900 mb-2">
+                    Jenis Jadwal <span class="text-red-500">*</span>
+                </label>
+                <select name="entry_type" id="entry_type" required
+                        class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('entry_type') border-red-500 @enderror">
+                    <option value="mapel" @selected(old('entry_type', 'mapel') === 'mapel')>Mata Pelajaran (Presensi via Mapel)</option>
+                    <option value="custom" @selected(old('entry_type') === 'custom')>Custom (Non Mapel / Kegiatan)</option>
+                </select>
+                @error('entry_type')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Mata Pelajaran -->
+            <div id="section-mapel">
                 <label for="class_subject_id" class="block text-sm font-semibold text-gray-900 mb-2">
                     Mata Pelajaran <span class="text-red-500">*</span>
                 </label>
-                <select name="class_subject_id" id="class_subject_id" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('class_subject_id') border-red-500 @enderror">
+                <select name="class_subject_id" id="class_subject_id" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('class_subject_id') border-red-500 @enderror">
                     <option value="">-- Pilih Mata Pelajaran --</option>
                     @foreach($classSubjects as $cs)
-                        <option value="{{ $cs->id }}">
+                        <option value="{{ $cs->id }}" @selected(old('class_subject_id') == $cs->id)>
                             {{ $cs->subject->name }} (Guru: {{ $cs->teacher->name }})
                         </option>
                     @endforeach
                 </select>
                 @error('class_subject_id')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Custom title -->
+            <div id="section-custom" style="display:none;">
+                <label for="custom_title" class="block text-sm font-semibold text-gray-900 mb-2">
+                    Nama Kegiatan <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="custom_title" id="custom_title" value="{{ old('custom_title') }}"
+                       placeholder="Contoh: Sholat Magrib, Apel Pagi, KBM di Sekolah"
+                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('custom_title') border-red-500 @enderror">
+                @error('custom_title')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
             </div>
@@ -141,4 +169,27 @@
     </div>
 </div>
 
+<script>
+(function () {
+    const typeEl = document.getElementById('entry_type');
+    const secMapel = document.getElementById('section-mapel');
+    const secCustom = document.getElementById('section-custom');
+
+    function sync() {
+        const t = (typeEl?.value || 'mapel');
+        if (t === 'custom') {
+            secMapel.style.display = 'none';
+            secCustom.style.display = '';
+        } else {
+            secMapel.style.display = '';
+            secCustom.style.display = 'none';
+        }
+    }
+
+    if (typeEl) {
+        typeEl.addEventListener('change', sync);
+        sync();
+    }
+})();
+</script>
 @endsection
