@@ -114,7 +114,7 @@
             <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                        <p class="font-bold text-emerald-800 text-sm"><i class="fas fa-magic mr-1.5"></i>Auto-Generate Jadwal (AI)</p>
+                        <p class="font-bold text-emerald-800 text-sm"><i class="fas fa-magic mr-1.5"></i>Auto-Generate Jadwal</p>
                         <p class="text-xs text-emerald-600 mt-0.5">Distribusi mapel yang sudah dipilih ke slot waktu secara otomatis, anti bentrok.</p>
                     </div>
                     <button type="button" @click="autoGenerate()"
@@ -123,56 +123,6 @@
                         <i class="fas fa-magic text-xs" x-show="!aiLoading"></i>
                         <i class="fas fa-spinner fa-spin text-xs" x-show="aiLoading"></i>
                         <span x-text="aiLoading ? 'Generating...' : 'Generate Otomatis'"></span>
-                    </button>
-                </div>
-            </div>
-
-            {{-- Generator JP Sekolah --}}
-            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <p class="font-bold text-blue-800 text-sm mb-1"><i class="fas fa-school mr-1.5"></i>Generator Grid JP Sekolah</p>
-                <p class="text-xs text-blue-600 mb-3">Buat slot JP kosong (JP 1, JP 2, ...) berdasarkan durasi menit. Edit nama jadwal setelah dibuat.</p>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Jam mulai JP 1</label>
-                        <input type="time" x-model="gen.school.start" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400 transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">JP Senin–Kamis</label>
-                        <input type="number" min="1" x-model.number="gen.school.totalMonThu" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400 transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">JP Jumat</label>
-                        <input type="number" min="1" x-model.number="gen.school.totalFri" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400 transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Override Jumat</label>
-                        <input type="text" x-model="gen.school.friOverrides" placeholder="1=60,7=120" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-400 transition">
-                    </div>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    <button type="button" @click="generateSchoolJpGrid(['monday','tuesday','wednesday','thursday'])"
-                        class="inline-flex items-center gap-1.5 bg-white hover:bg-blue-100 border border-blue-300 text-blue-700 font-semibold text-xs px-3 py-2 rounded-lg transition">
-                        <i class="fas fa-plus text-[10px]"></i> Generate Senin–Kamis
-                    </button>
-                    <button type="button" @click="generateSchoolJpGrid(['friday'])"
-                        class="inline-flex items-center gap-1.5 bg-white hover:bg-blue-100 border border-blue-300 text-blue-700 font-semibold text-xs px-3 py-2 rounded-lg transition">
-                        <i class="fas fa-plus text-[10px]"></i> Generate Jumat
-                    </button>
-                </div>
-            </div>
-
-            {{-- Generator Asrama --}}
-            <div class="bg-purple-50 border border-purple-200 rounded-xl p-4">
-                <p class="font-bold text-purple-800 text-sm mb-1"><i class="fas fa-building mr-1.5"></i>Generator Jadwal Asrama</p>
-                <p class="text-xs text-purple-600 mb-3">Isi template kegiatan asrama harian. Slot lintas tengah malam otomatis di-split menjadi 2 baris.</p>
-                <div class="flex flex-wrap gap-2">
-                    <button type="button" @click="generateDormTemplate('weekday')"
-                        class="inline-flex items-center gap-1.5 bg-white hover:bg-purple-100 border border-purple-300 text-purple-700 font-semibold text-xs px-3 py-2 rounded-lg transition">
-                        <i class="fas fa-plus text-[10px]"></i> Asrama Senin–Jumat
-                    </button>
-                    <button type="button" @click="generateDormTemplate('weekend')"
-                        class="inline-flex items-center gap-1.5 bg-white hover:bg-purple-100 border border-purple-300 text-purple-700 font-semibold text-xs px-3 py-2 rounded-lg transition">
-                        <i class="fas fa-plus text-[10px]"></i> Asrama Sabtu–Minggu
                     </button>
                 </div>
             </div>
@@ -537,51 +487,6 @@ function bulkScheduler() {
                 if (data.unscheduled_count > 0) alert('Sebagian mapel belum terjadwal karena bentrok. Silakan atur manual.');
             } catch { alert('Gagal generate jadwal (network/server).'); }
             finally  { this.aiLoading = false; }
-        },
-
-        generateSchoolJpGrid(days) {
-            for (const day of days) {
-                const isFri    = day === 'friday';
-                const total    = isFri ? (this.gen.school.totalFri || 7) : (this.gen.school.totalMonThu || 12);
-                const defMins  = isFri ? 35 : 40;
-                const over     = isFri ? this._parseOverrides(this.gen.school.friOverrides) : {};
-                let t = this.gen.school.start || '07:00';
-                for (let jp = 1; jp <= total; jp++) {
-                    const dur = over[jp] || defMins;
-                    const end = this._addMinutes(t, dur);
-                    this._pushCustomRow({ day, start: t, end, title: `JP ${jp}`, notes: isFri ? 'Grid JP Jumat' : 'Grid JP Senin–Kamis' });
-                    t = end;
-                }
-            }
-        },
-
-        generateDormTemplate(kind) {
-            const weekday = [
-                ['03:30','04:00','Bangun Pagi & Bersih Diri'],['04:00','04:30','Sholat Subuh'],['04:30','05:00','Hafalan Al-Qur\'an'],
-                ['05:00','05:30','Olahraga Pagi'],['05:30','06:00','Mandi & Berpakaian'],['06:00','06:15','Apel Pagi'],
-                ['06:15','06:30','Sholat Dhuha'],['06:30','06:45','Sarapan'],['06:45','07:00','Penyerahan ke Sekolah'],
-                ['07:00','15:00','KBM di Sekolah'],['15:00','15:30','Sholat Ashar'],['15:30','17:30','Kegiatan Mandiri / Mencuci'],
-                ['17:30','18:15','Sholat Maghrib'],['18:15','19:00','Mengaji'],['19:00','19:30','Sholat Isya'],
-                ['19:30','20:00','Makan Malam'],['20:00','21:00','Bimbingan Wali Asuh'],['21:00','21:30','Apel Malam'],
-                ['22:00','23:59','Jam Malam'],
-            ];
-            const weekend = [
-                ['03:30','04:00','Bangun Pagi & Bersih Diri'],['04:00','04:30','Sholat Subuh'],['04:30','05:00','Hafalan Al-Qur\'an'],
-                ['05:00','05:30','Olahraga Pagi'],['05:30','06:00','Mandi & Berpakaian'],['06:00','06:15','Apel Pagi'],
-                ['06:15','06:30','Sholat Dhuha'],['06:30','06:45','Sarapan'],['07:00','08:00','Kerja Bakti'],
-                ['08:00','12:00','Pengembangan Minat Bakat / Kunjungan Orang Tua'],['12:00','12:30','Sholat Dhuhur'],
-                ['12:30','13:00','Makan Siang'],['13:00','15:00','Istirahat'],['15:00','15:30','Sholat Ashar'],
-                ['15:30','17:30','Kegiatan Mandiri'],['17:30','18:15','Sholat Maghrib'],['18:15','19:00','Mengaji'],
-                ['19:00','19:30','Sholat Isya'],['19:30','20:00','Makan Malam'],['20:00','21:00','Kegiatan Malam'],
-                ['21:00','21:30','Apel Malam'],['22:00','23:59','Jam Malam'],
-            ];
-            const tpl  = kind === 'weekday' ? weekday : weekend;
-            const days = kind === 'weekday' ? ['monday','tuesday','wednesday','thursday','friday'] : ['saturday','sunday'];
-            const note = kind === 'weekday' ? 'Asrama (Senin–Jumat)' : 'Asrama (Sabtu–Minggu)';
-            for (const day of days) {
-                for (const [s, e, title] of tpl) this._pushCustomRow({ day, start: s, end: e, title, notes: note });
-                this._pushCustomRow({ day: this._nextDay(day), start: '00:00', end: '03:30', title: 'Jam Malam (lanjutan)', notes: note });
-            }
         },
 
         submitForm() {

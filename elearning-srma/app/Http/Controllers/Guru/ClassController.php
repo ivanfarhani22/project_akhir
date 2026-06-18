@@ -27,7 +27,14 @@ class ClassController extends Controller
             ->orderBy('e_class_id')
             ->get();
 
-        return view('guru.classes.index', compact('classSubjects'));
+        $schedules = Schedule::query()
+            ->whereIn('class_subject_id', $classSubjects->pluck('id'))
+            ->with(['eClass', 'classSubject.subject'])
+            ->orderBy('day_of_week')
+            ->orderBy('start_time')
+            ->get();
+
+        return view('guru.classes.index', compact('classSubjects', 'schedules'));
     }
 
     /**

@@ -204,15 +204,7 @@ Route::middleware(['auth', 'role:guru'])
         })->name('dashboard');
 
         // Classes list
-        Route::get('/classes', function () {
-            $classSubjects = \App\Models\ClassSubject::where('teacher_id', auth()->id())
-                ->withCount(['materials', 'assignments'])
-                ->with(['eClass' => fn ($q) => $q->with('students'), 'subject'])
-                ->orderBy('e_class_id')
-                ->get();
-
-            return view('guru.classes.index', compact('classSubjects'));
-        })->name('classes.index');
+        Route::get('/classes', [\App\Http\Controllers\Guru\ClassController::class, 'index'])->name('classes.index');
 
         // Classes show (detail)
         Route::get('/classes/{classSubject}', [\App\Http\Controllers\Guru\ClassController::class, 'show'])->name('classes.show');

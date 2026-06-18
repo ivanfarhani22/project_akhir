@@ -32,6 +32,9 @@ class DatabaseSeeder extends Seeder
         // Seed subjects based on the provided KBM list
         $this->call(CreateSubjectsFromKbmSeeder::class);
 
-        $this->command->info('✅ Database seeding completed. Users preserved; subjects seeded from KBM list.');
+        // Seed asrama (non-academic) activities as Subject entities
+        $this->call(CreateAsramaSubjectsSeeder::class);
+
+        $this->command->info('✅ Database seeding completed. Users preserved; subjects seeded from KBM list + asrama activities.');
     }
 }

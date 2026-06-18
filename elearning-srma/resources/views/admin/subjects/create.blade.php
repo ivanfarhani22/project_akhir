@@ -91,6 +91,30 @@
                         >{{ old('description') }}</textarea>
                     </div>
 
+                    <!-- Kategori -->
+                    <div>
+                        <label class="block text-xs sm:text-sm font-semibold text-gray-900 mb-2">
+                            Kategori <span class="text-red-500">*</span>
+                        </label>
+                        <select 
+                            name="category" 
+                            id="category"
+                            class="w-full px-3 sm:px-4 py-2 border-2 border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:border-red-500 transition bg-white"
+                            required
+                        >
+                            <option value="">— Pilih Kategori —</option>
+                            <option value="academic" {{ old('category') === 'academic' ? 'selected' : '' }}>
+                                <i class="fas fa-graduation-cap"></i> Akademik (Mata Pelajaran Sekolah)
+                            </option>
+                            <option value="non_academic" {{ old('category') === 'non_academic' ? 'selected' : '' }}>
+                                <i class="fas fa-building"></i> Non-Akademik (Kegiatan Asrama)
+                            </option>
+                        </select>
+                        <small class="text-gray-500 text-xs mt-2 block">
+                            Pilih <strong>Akademik</strong> untuk mata pelajaran reguler, atau <strong>Non-Akademik</strong> untuk kegiatan asrama/non-akademik
+                        </small>
+                    </div>
+
                     <!-- Buttons -->
                     <div class="flex flex-col sm:flex-row gap-3 pt-4">
                         <button 

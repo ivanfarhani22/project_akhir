@@ -19,6 +19,14 @@ class SubjectController extends Controller
                   ->orWhere('code', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");
         }
+
+        // Apply category filter
+        if ($request->filled('category')) {
+            $category = $request->category;
+            if (in_array($category, ['academic', 'non_academic'])) {
+                $query->where('category', $category);
+            }
+        }
         
         // Paginate results (15 per page)
         $subjects = $query->paginate(15);
@@ -34,24 +42,24 @@ class SubjectController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => 'required|string|unique:subjects|max:10',
+            'name'        => 'required|string|max:255',
+            'code'        => 'required|string|unique:subjects|max:10',
             'description' => 'nullable|string',
+            'category'    => 'required|in:academic,non_academic',
         ]);
 
         Subject::create($validated);
 
         \App\Models\ActivityLog::create([
-            'user_id' => auth()->id(),
-            'action' => 'create_subject',
+            'user_id'     => auth()->id(),
+            'action'      => 'create_subject',
             'description' => "Admin membuat mata pelajaran: {$request->name}",
-            'ip_address' => $request->ip(),
-            'timestamp' => now(),
+            'ip_address'  => $request->ip(),
+            'timestamp'   => now(),
         ]);
 
         return redirect()->route('admin.subjects.index')->with('success', 'Mata pelajaran berhasil dibuat!');
     }
-
     public function show(Subject $subject)
     {
         $subject->load('classes');
@@ -66,24 +74,24 @@ class SubjectController extends Controller
     public function update(Request $request, Subject $subject)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => 'required|string|unique:subjects,code,' . $subject->id . '|max:10',
+            'name'        => 'required|string|max:255',
+            'code'        => 'required|string|unique:subjects,code,'.$subject->id.'|max:10',
             'description' => 'nullable|string',
+            'category'    => 'required|in:academic,non_academic',
         ]);
 
         $subject->update($validated);
 
         \App\Models\ActivityLog::create([
-            'user_id' => auth()->id(),
-            'action' => 'update_subject',
+            'user_id'     => auth()->id(),
+            'action'      => 'update_subject',
             'description' => "Admin update mata pelajaran: {$subject->name}",
-            'ip_address' => $request->ip(),
-            'timestamp' => now(),
+            'ip_address'  => $request->ip(),
+            'timestamp'   => now(),
         ]);
 
         return redirect()->route('admin.subjects.index')->with('success', 'Mata pelajaran berhasil diperbarui!');
     }
-
     public function destroy(Request $request, Subject $subject)
     {
         $subjectName = $subject->name;
